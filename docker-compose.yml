@@ -1,0 +1,47 @@
+version: '3.8' # La mayoría usa versiones 3.x, a menudo más antiguas como 3.1 o 3.3
+
+services:
+  db:
+    image: postgres:15 # La versión de PostgreSQL también se especifica
+    container_name: odoo18-db
+    environment:
+      - POSTGRES_USER=odoo
+      - POSTGRES_PASSWORD=odoo # Contraseña directamente en el archivo
+      - POSTGRES_DB=postgres
+    volumes:
+      # El mapeo directo a una carpeta local es el método más común que encontrarás
+      - ./odoo-db-data:/var/lib/postgresql/data
+    networks:
+      - odoo-network
+    ports:
+      - "5433:5432"
+    restart: always
+  odoo:
+    image: odoo:18.0 # La versión de Odoo suele estar fija
+    container_name: odoo18_jc_1
+    depends_on:
+      - db
+    ports:
+      - "8069:8069"
+    environment:
+      - HOST=db
+      - USER=odoo
+      - PASSWORD=odoo
+    volumes:
+      - ./enterprise-addons:/mnt/enterprise-addons # Es común ver una carpeta para enterprise
+      - ./addons:/mnt/extra-addons
+      - ./odoo.conf:/etc/odoo/odoo.conf
+      - odoo-data:/var/lib/odoo
+    networks:
+      - odoo-network
+    restart: always
+
+volumes:
+  odoo-db-data:
+  odoo-data:
+
+networks:
+  odoo-network:
+    # A veces, la configuración se pasa directamente aquí en lugar de en un archivo .conf
+    # command: -- --db_host=db --db_user=odoo --db_password=myodoo --addons-path=/mnt/extra-addons,/mnt/enterprise-addons
+    
