@@ -25,6 +25,8 @@
     'assets': {
         'web.assets_backend': [
             'restrict_single_company/static/src/js/switch_company_menu.js',
+            # Es posible que necesites el XML si decides heredar la plantilla, 
+            # pero como es un patch JS, está bien así.
         ],
     },
     'installable': True,
