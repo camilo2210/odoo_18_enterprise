@@ -12,7 +12,7 @@ services:
       # El mapeo directo a una carpeta local es el método más común que encontrarás
       - ./odoo-db-data:/var/lib/postgresql/data
     networks:
-      - odoo-network
+      - network_odoo_19
     ports:
       - "5433:5433"
     restart: always
