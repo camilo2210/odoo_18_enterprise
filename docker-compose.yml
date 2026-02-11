@@ -3,7 +3,7 @@ version: '3.8' # La mayoría usa versiones 3.x, a menudo más antiguas como 3.1 
 services:
   db:
     image: postgres:15-alpine # La versión de PostgreSQL también se especifica
-    container_name: odoo18-db
+    container_name: odoo19-db
     environment:
       - POSTGRES_USER=odoo
       - POSTGRES_PASSWORD=odoo # Contraseña directamente en el archivo
@@ -14,15 +14,15 @@ services:
     networks:
       - odoo-network
     ports:
-      - "5433:5432"
+      - "5433:5433"
     restart: always
   odoo:
-    image: odoo:18.0 # La versión de Odoo suele estar fija
-    container_name: odoo18_jc_1
+    image: odoo:19.0 # La versión de Odoo suele estar fija
+    container_name: odoo18_jc_2
     depends_on:
       - db
     ports:
-      - "8069:8069"
+      - "8069:8070"
     environment:
       - HOST=db
       - USER=odoo
