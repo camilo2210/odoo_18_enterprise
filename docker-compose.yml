@@ -18,7 +18,7 @@ services:
     restart: always
   odoo:
     image: odoo:19.0 # La versión de Odoo suele estar fija
-    container_name: odoo18_jc_2
+    container_name: odoo19_jc_1
     depends_on:
       - db
     ports:
