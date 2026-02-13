@@ -14,7 +14,7 @@ services:
     networks:
       - network_odoo_19
     ports:
-      - "5433:5433"
+      - "5432:5433"
     restart: always
   odoo:
     image: odoo:19.0 # La versión de Odoo suele estar fija
