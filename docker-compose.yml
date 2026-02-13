@@ -1,34 +1,34 @@
-version: '3.8' # La mayoría usa versiones 3.x, a menudo más antiguas como 3.1 o 3.3
+version: '3.8'
 
 services:
-  db:
-    image: postgres:15-alpine # La versión de PostgreSQL también se especifica
+  db19:
+    image: postgres:15-alpine
     container_name: odoo19-db
     environment:
       - POSTGRES_USER=odoo
-      - POSTGRES_PASSWORD=odoo # Contraseña directamente en el archivo
+      - POSTGRES_PASSWORD=odoo
       - POSTGRES_DB=postgres
     volumes:
-      # El mapeo directo a una carpeta local es el método más común que encontrarás
       - ./odoo19-db-data:/var/lib/postgresql/data
     networks:
       - network_odoo_19
     ports:
-      - "5432:5433"
+      - "5433:5432" # Puerto host 5433 para evitar conflicto con v18
     restart: always
+
   odoo:
-    image: odoo:19.0 # La versión de Odoo suele estar fija
+    image: odoo:19.0
     container_name: odoo19_jc_1
     depends_on:
       - db19
     ports:
-      - "8070:8069"
+      - "8070:8069" # Puerto host 8070 para pruebas
     environment:
       - HOST=db19
       - USER=odoo
       - PASSWORD=odoo
     volumes:
-      - ./enterprise-addons:/mnt/enterprise-19 # Es común ver una carpeta para enterprise
+      - ./enterprise-addons:/mnt/enterprise-19
       - ./addons:/mnt/extra-addons
       - ./odoo.conf:/etc/odoo/odoo.conf
       - odoo19_data:/var/lib/odoo
@@ -37,12 +37,7 @@ services:
     restart: always
 
 volumes:
-  odoo19-db-data:
-  odoo19-data:
+  odoo19_data:
 
 networks:
   network_odoo_19:
-
-    # A veces, la configuración se pasa directamente aquí en lugar de en un archivo .conf
-    # command: -- --db_host=db --db_user=odoo --db_password=myodoo --addons-path=/mnt/extra-addons,/mnt/enterprise-addons
-    
