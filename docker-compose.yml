@@ -38,6 +38,7 @@ services:
 
 volumes:
   odoo19_data:
+  odoo19-db-data:
 
 networks:
   network_odoo_19:
