@@ -29,7 +29,7 @@ services:
       - ./enterprise-19.0:/mnt/enterprise-addons # Es común ver una carpeta para enterprise
       - ./addons:/mnt/extra-addons
       - ./odoo.conf:/etc/odoo/odoo.conf
-      - odoo-data:/var/lib/odoo
+      - odoo19_data:/var/lib/odoo
     networks:
       - network_odoo_19
     restart: always
