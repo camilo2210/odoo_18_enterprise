@@ -1,0 +1,12 @@
+# IDE files
+**/.idea/
+
+# Python cache files
+**/__pycache__/
+
+# Run configurations
+/.run/odoo-bin.run.xml
+launch.json
+**/CLAUDE.md
+**/.aignore
+*.mo
