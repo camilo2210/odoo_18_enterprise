@@ -10,7 +10,7 @@ services:
       - POSTGRES_DB=postgres
     volumes:
       # El mapeo directo a una carpeta local es el método más común que encontrarás
-      - ./odoo-db-data:/var/lib/postgresql/data
+      - ./odoo19-db-data:/var/lib/postgresql/data
     networks:
       - network_odoo_19
     ports:
@@ -20,16 +20,15 @@ services:
     image: odoo:19.0 # La versión de Odoo suele estar fija
     container_name: odoo19_jc_1
     depends_on:
-      - db
+      - db19
     ports:
       - "8070:8069"
     environment:
-      - HOST=db
+      - HOST=db19
       - USER=odoo
       - PASSWORD=odoo
     volumes:
-      - ./enterprise-addons:/mnt/enterprise-addons # Es común ver una carpeta para enterprise
-      - ./jorels-odoo-addons:/mnt/extra-addons
+      - ./enterprise-addons:/mnt/enterprise-19 # Es común ver una carpeta para enterprise
       - ./addons:/mnt/extra-addons
       - ./odoo.conf:/etc/odoo/odoo.conf
       - odoo-data:/var/lib/odoo
