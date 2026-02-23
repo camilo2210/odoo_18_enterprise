@@ -27,6 +27,7 @@ services:
       - HOST=db
       - USER=odoo
       - PASSWORD=odoo
+      - PROXY_MODE=True
     volumes:
       - ./enterprise-addons:/mnt/enterprise-addons # Es común ver una carpeta para enterprise
       - ./jorels-odoo-addons:/mnt/extra-addons
@@ -35,6 +36,8 @@ services:
       - odoo-data:/var/lib/odoo
     networks:
       - odoo-network
+    ports
+      - "127.0.0.1:8069:8069"
     restart: always
 
 volumes:
