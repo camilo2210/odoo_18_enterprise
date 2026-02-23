@@ -22,7 +22,7 @@ services:
     depends_on:
       - db
     ports:
-      - "8069:8069"
+      - "127.0.0.1:8069:8069"
     environment:
       - HOST=db
       - USER=odoo
@@ -36,8 +36,6 @@ services:
       - odoo-data:/var/lib/odoo
     networks:
       - odoo-network
-    ports
-      - "127.0.0.1:8069:8069"
     restart: always
 
 volumes:
