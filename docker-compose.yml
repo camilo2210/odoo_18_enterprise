@@ -20,7 +20,7 @@ services:
     depends_on:
       - db19 # Debe apuntar al nombre exacto del servicio de arriba
     ports:
-      - "8070:8069"
+      - "127.0.0.1:8070:8069"
     environment:
       - HOST=db19 # Ahora sí coincidirá
       - USER=odoo
@@ -33,8 +33,6 @@ services:
       - odoo19_data:/var/lib/odoo
     networks:
       - network_odoo_19
-    ports
-      - "127.0.0.1:8070:8069"
     restart: always
 
 volumes:
