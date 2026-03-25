@@ -12,7 +12,7 @@
                 XPath: busca el notebook y añade una nueva página al final.
                 Alternativa: usar `position="after"` sobre una página existente.
             -->
-            <xpath expr="//page[@name='sale_purchase']" position="after">
+            <xpath expr="//page[@name='sales_purchases']" position="after">
                 <page string="Compliance y DD" name="compliance_due_diligence">
 
                     <group string="Consultas y Autorizaciones">
@@ -62,3 +62,4 @@
         </field>
     </record>
 </odoo>
+
