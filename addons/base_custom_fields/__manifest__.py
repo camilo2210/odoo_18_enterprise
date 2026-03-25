@@ -1,34 +1,29 @@
 # -*- coding: utf-8 -*-
 {
-    'name': "personalized_addon",
-
-    'summary': "Short (1 phrase/line) summary of the module's purpose",
-
-    'description': """
-Long description of module's purpose
+    "name": "Base Custom Fields",
+    "summary": "Módulo base reutilizable para extender modelos con campos personalizados",
+    "description": """
+        Proporciona mixins abstractos y extensiones de modelos estándar de Odoo,
+        facilitando la adición de campos de compliance, due diligence y consultas
+        a centrales de riesgo sin modificar el núcleo del sistema.
     """,
-
-    'author': "My Company",
-    'website': "https://www.yourcompany.com",
-
-    # Categories can be used to filter modules in modules listing
-    # Check https://github.com/odoo/odoo/blob/15.0/odoo/addons/base/data/ir_module_category_data.xml
-    # for the full list
-    'category': 'Uncategorized',
-    'version': '0.1',
-
-    # any module necessary for this one to work correctly
-    'depends': ['base'],
-
-    # always loaded
-    'data': [
-        # 'security/ir.model.access.csv',
-        'views/views.xml',
-        'views/templates.xml',
+    "version": "19.0.1.0.0",
+    "category": "Technical",
+    "author": "Tu Empresa",
+    "website": "https://tuempresa.com",
+    "license": "LGPL-3",
+    "depends": [
+        "base",
+        "contacts",
+        "sale_management",
     ],
-    # only loaded in demonstration mode
-    'demo': [
-        'demo/demo.xml',
+    "data": [
+        "security/ir.model.access.csv",
+        "views/res_partner_views.xml",
     ],
+    "installable": True,
+    "auto_install": False,
+    "application": False,
 }
+
 
