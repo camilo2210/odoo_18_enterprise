@@ -25,7 +25,7 @@ class BaseDueDiligenceMixin(models.AbstractModel):
     # Campos de due diligence
     # -------------------------------------------------------------------------
 
-    due_diligence = fields.Boolean(
+    due_diligence = fields.Date(
         string="Due Diligence",
         default=False,
         help="Indica si se realizó proceso de Due Diligence para este registro.",
