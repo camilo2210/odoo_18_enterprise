@@ -430,19 +430,25 @@ class SFTPBankConfig(models.Model):
 
     def _create_bank_statement(self, filename, rows):
         """
-        Create account.bank.statement + account.bank.statement.line records.
-        Compatible with Odoo v16/17/18 (detects available fields dynamically).
+        Crea account.bank.statement + líneas individuales.
+        
+        IMPORTANTE (Odoo v17/v18): account.bank.statement.line usa _inherits
+        con account.move. El batch create() de múltiples líneas dispara errores
+        de singleton en campos computados heredados.
+        Solución: crear cada línea individualmente en un loop.
         """
+        import os
+
         today = fields.Date.today()
         stmt_name = os.path.splitext(filename)[0]
 
-        # Build statement vals — detect balance fields for backward compat
         BankStatement = self.env['account.bank.statement']
         stmt_vals = {
             'name': stmt_name,
             'date': today,
             'journal_id': self.journal_id.id,
         }
+        # Inyectar campos opcionales solo si existen (compatibilidad v16/v17/v18)
         if 'balance_start' in BankStatement._fields:
             stmt_vals['balance_start'] = 0.0
         if 'balance_end_real' in BankStatement._fields:
@@ -450,24 +456,43 @@ class SFTPBankConfig(models.Model):
 
         statement = BankStatement.create(stmt_vals)
 
-        # Determine reference field name (v16+: payment_ref / v15-: name)
         BankStatementLine = self.env['account.bank.statement.line']
         ref_field = 'payment_ref' if 'payment_ref' in BankStatementLine._fields else 'name'
 
-        # Build lines batch
-        line_vals_list = []
-        for row in rows:
-            vals = self._prepare_line_vals(statement, row, ref_field)
-            if vals:
-                line_vals_list.append(vals)
+        created_count = 0
+        row_errors = []
 
-        if not line_vals_list:
+        for idx, row in enumerate(rows, start=1):
+            vals = self._prepare_line_vals(statement, row, ref_field)
+            if not vals:
+                continue
+            try:
+                # ✅ CREATE INDIVIDUAL — nunca batch en v17/v18
+                BankStatementLine.create(vals)
+                created_count += 1
+            except Exception as exc:
+                row_errors.append(f'Fila {idx}: {exc}')
+                _logger.warning(
+                    'SFTP Importer [%s]: Error en fila %d del archivo "%s": %s',
+                    self.name, idx, filename, exc,
+                )
+
+        # Si ninguna línea fue creada, revertir el statement huérfano
+        if created_count == 0:
             statement.unlink()
+            detail = ' | '.join(row_errors) if row_errors else 'Sin detalle'
             raise UserError(
-                _('No valid statement lines could be prepared from "%s".') % filename
+                _('No se crearon líneas válidas desde "%s". Detalle: %s')
+                % (filename, detail)
             )
 
-        BankStatementLine.create(line_vals_list)
+        # Advertir si algunas filas fallaron pero continuar
+        if row_errors:
+            _logger.warning(
+                'SFTP Importer [%s]: "%s" — %d líneas creadas, %d filas con error.',
+                self.name, filename, created_count, len(row_errors),
+            )
+
         return statement
 
     def _prepare_line_vals(self, statement, row, ref_field):
