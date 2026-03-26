@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- Root menu under Accounting → Configuration -->
+    <menuitem
+        id="menu_sftp_bank_importer_root"
+        name="SFTP Bank Importer"
+        parent="account.menu_finance_configuration"
+        sequence="90"/>
+
+    <menuitem
+        id="menu_sftp_bank_config"
+        name="SFTP Configurations"
+        parent="menu_sftp_bank_importer_root"
+        action="action_sftp_bank_config"
+        sequence="10"/>
+
+    <menuitem
+        id="menu_sftp_import_log"
+        name="Import Logs"
+        parent="menu_sftp_bank_importer_root"
+        action="action_sftp_import_log"
+        sequence="20"/>
+
+</odoo>

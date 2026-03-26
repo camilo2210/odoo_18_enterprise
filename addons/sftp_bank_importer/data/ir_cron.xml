@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <record id="ir_cron_sftp_bank_statement_import" model="ir.cron">
+            <field name="name">SFTP: Import Bank Statements (CSV)</field>
+            <field name="model_id" ref="model_sftp_bank_config"/>
+            <field name="state">code</field>
+            <field name="code">model.run_all_imports()</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">days</field>
+            <field name="numbercall">-1</field>
+            <field name="doall">False</field>
+            <field name="active">True</field>
+            <field name="user_id" ref="base.user_root"/>
+        </record>
+
+    </data>
+</odoo>

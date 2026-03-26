@@ -1,0 +1,5 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sftp_bank_config_manager,sftp.bank.config manager,model_sftp_bank_config,account.group_account_manager,1,1,1,1
+access_sftp_bank_config_user,sftp.bank.config user,model_sftp_bank_config,account.group_account_user,1,0,0,0
+access_sftp_import_log_manager,sftp.import.log manager,model_sftp_import_log,account.group_account_manager,1,1,1,1
+access_sftp_import_log_user,sftp.import.log user,model_sftp_import_log,account.group_account_user,1,0,0,0

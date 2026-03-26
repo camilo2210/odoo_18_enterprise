@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+
+    <!-- ── LIST VIEW ───────────────────────────────────────────────── -->
+    <record id="view_sftp_bank_config_list" model="ir.ui.view">
+        <field name="name">sftp.bank.config.list</field>
+        <field name="model">sftp.bank.config</field>
+        <field name="arch" type="xml">
+            <list string="SFTP Configurations" decoration-muted="not active">
+                <field name="name"/>
+                <field name="sftp_host"/>
+                <field name="sftp_port"/>
+                <field name="sftp_user"/>
+                <field name="journal_id"/>
+                <field name="source_path"/>
+                <field name="log_count" string="Imports"/>
+                <field name="active" widget="boolean_toggle" optional="hide"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- ── FORM VIEW ───────────────────────────────────────────────── -->
+    <record id="view_sftp_bank_config_form" model="ir.ui.view">
+        <field name="name">sftp.bank.config.form</field>
+        <field name="model">sftp.bank.config</field>
+        <field name="arch" type="xml">
+            <form string="SFTP Bank Import Configuration">
+
+                <header>
+                    <button name="action_run_import"
+                            string="▶  Run Import Now"
+                            type="object"
+                            class="btn-primary"
+                            confirm="This will connect to the SFTP server and import any pending CSV files. Continue?"/>
+                    <button name="action_test_connection"
+                            string="🔌  Test Connection"
+                            type="object"
+                            class="btn-secondary"/>
+                </header>
+
+                <sheet>
+                    <!-- Smart Buttons -->
+                    <div class="oe_button_box" name="button_box">
+                        <button name="action_view_logs"
+                                type="object"
+                                class="oe_stat_button"
+                                icon="fa-list-alt">
+                            <field name="log_count" widget="statinfo" string="Import Logs"/>
+                        </button>
+                    </div>
+
+                    <widget name="web_ribbon"
+                            title="Archived"
+                            bg_color="text-bg-danger"
+                            invisible="active"/>
+
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name"
+                                   placeholder="e.g. Bancolombia – Main Account"
+                                   required="True"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <group string="Connection">
+                            <field name="sftp_host" placeholder="sftp.mybank.com"/>
+                            <field name="sftp_port"/>
+                            <field name="sftp_user"/>
+                            <field name="auth_method" widget="radio"/>
+                            <field name="sftp_password"
+                                   password="True"
+                                   invisible="auth_method != 'password'"/>
+                            <field name="sftp_private_key"
+                                   widget="text"
+                                   invisible="auth_method != 'key'"
+                                   placeholder="-----BEGIN OPENSSH PRIVATE KEY-----&#10;...&#10;-----END OPENSSH PRIVATE KEY-----"/>
+                            <field name="sftp_key_passphrase"
+                                   password="True"
+                                   invisible="auth_method != 'key'"
+                                   placeholder="(leave empty if key has no passphrase)"/>
+                        </group>
+
+                        <group string="Remote Paths">
+                            <field name="source_path" placeholder="/incoming"/>
+                            <field name="processed_path" placeholder="/processed"/>
+                            <field name="file_keywords"
+                                   placeholder="banco, extracto, statement"/>
+                        </group>
+                    </group>
+
+                    <group>
+                        <group string="Accounting">
+                            <field name="journal_id" options="{'no_create': True}"/>
+                            <field name="company_id" readonly="True"/>
+                        </group>
+
+                        <group string="CSV Settings">
+                            <field name="csv_separator"/>
+                            <field name="csv_encoding" placeholder="utf-8"/>
+                            <field name="csv_has_header"/>
+                            <field name="decimal_separator" widget="radio"/>
+                        </group>
+                    </group>
+
+                    <group string="Column Mapping">
+                        <group>
+                            <field name="col_date" placeholder="date"/>
+                            <field name="col_reference" placeholder="reference"/>
+                            <field name="date_format" placeholder="%d/%m/%Y"/>
+                        </group>
+                        <group>
+                            <field name="col_amount" placeholder="amount"/>
+                            <field name="col_partner" placeholder="partner (optional)"/>
+                        </group>
+                    </group>
+
+                    <!-- Import Log inline preview (last 10 entries) -->
+                    <notebook>
+                        <page string="Recent Import Logs" name="logs">
+                            <field name="log_ids"
+                                   readonly="True"
+                                   limit="10"
+                                   nolabel="1">
+                                <list decoration-success="state == 'success'"
+                                      decoration-danger="state == 'error'"
+                                      decoration-warning="state == 'skipped'">
+                                    <field name="import_date"/>
+                                    <field name="filename"/>
+                                    <field name="state" widget="badge"
+                                           decoration-success="state == 'success'"
+                                           decoration-danger="state == 'error'"
+                                           decoration-warning="state == 'skipped'"/>
+                                    <field name="lines_imported"/>
+                                    <field name="statement_id"/>
+                                    <field name="message"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+
+                </sheet>
+
+                <chatter/>
+
+            </form>
+        </field>
+    </record>
+
+    <!-- ── SEARCH VIEW ─────────────────────────────────────────────── -->
+    <record id="view_sftp_bank_config_search" model="ir.ui.view">
+        <field name="name">sftp.bank.config.search</field>
+        <field name="model">sftp.bank.config</field>
+        <field name="arch" type="xml">
+            <search string="Search Configurations">
+                <field name="name"/>
+                <field name="sftp_host"/>
+                <field name="journal_id"/>
+                <filter string="Active" name="active" domain="[('active','=',True)]"/>
+                <filter string="Archived" name="archived" domain="[('active','=',False)]"/>
+                <separator/>
+                <group expand="0" string="Group By">
+                    <filter string="Journal" name="group_journal"
+                            context="{'group_by': 'journal_id'}"/>
+                    <filter string="Company" name="group_company"
+                            context="{'group_by': 'company_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <!-- ── WINDOW ACTION ───────────────────────────────────────────── -->
+    <record id="action_sftp_bank_config" model="ir.actions.act_window">
+        <field name="name">SFTP Import Configurations</field>
+        <field name="res_model">sftp.bank.config</field>
+        <field name="view_mode">list,form</field>
+        <field name="context">{'search_default_active': 1}</field>
+        <field name="help" type="html">
+            <p class="o_view_nocontent_smiling_face">
+                Create your first SFTP configuration
+            </p>
+            <p>
+                Configure a connection to your bank's SFTP server to automatically
+                import CSV bank statements into Odoo.
+            </p>
+        </field>
+    </record>
+
+</odoo>
