@@ -17,7 +17,7 @@ services:
       - "5432:5432"
     restart: always
   odoo:
-    image: odoo:18.0 # La versión de Odoo suele estar fija
+    build: . # La versión de Odoo suele estar fija
     container_name: odoo18_jc_1
     depends_on:
       - db
