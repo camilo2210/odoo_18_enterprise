@@ -20,7 +20,7 @@ services:
     depends_on:
       - db19 # Debe apuntar al nombre exacto del servicio de arriba
     ports:
-      - "127.0.0.1:8070:8069"
+      - "8070:8069"
     environment:
       - HOST=db19 # Ahora sí coincidirá
       - USER=odoo
