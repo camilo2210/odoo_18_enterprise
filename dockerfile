@@ -2,14 +2,8 @@ FROM odoo:19.0
 
 USER root
 
-# Instalar dependencias del sistema necesarias para pgvector y compilación
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    gcc \
-    python3-dev \
-    libpq-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# Instalar librerías Python
+# gcc y python3-dev ya vienen incluidos en la imagen base de Odoo.
+# Solo instala lo que realmente falta:
 RUN pip3 install --no-cache-dir \
     paramiko \
     pgvector
