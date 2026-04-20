@@ -1,6 +1,6 @@
 services:
   db19: # Cambiamos 'db' por 'db19' para que coincida con el HOST
-    image: postgres:15-alpine
+    image: pgvector/pgvector:pg15
     container_name: odoo19-db
     environment:
       - POSTGRES_USER=odoo
