@@ -25,7 +25,7 @@ services:
       - HOST=db19 # Ahora sí coincidirá
       - USER=odoo
       - PASSWORD=odoo
-      - PROXY_MODE=True
+      - PROXY_MODE=False
     volumes:
       - ./enterprise-19.0:/mnt/enterprise-addons # Es común ver una carpeta para enterprise
       - ./addons:/mnt/extra-addons
