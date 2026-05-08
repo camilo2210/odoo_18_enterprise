@@ -2,35 +2,38 @@
 <odoo>
     <data>
 
+        <!--
+            Anchor correcto en Odoo 18: //form (elemento raiz de base.res_config_settings_view_form)
+            Siempre existe sin importar que modulos esten instalados.
+            Referencia: Cybrosys Odoo 18 Settings Guide
+        -->
         <record id="view_res_config_settings_payment_custom" model="ir.ui.view">
-            <field name="name">res.config.settings.payment.custom.amount</field>
+            <field name="name">res.config.settings.view.form.inherit.payment.custom.amount</field>
             <field name="model">res.config.settings</field>
-            <field name="inherit_id" ref="sale.res_config_settings_view_form"/>
+            <field name="priority" eval="15"/>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@id='sale_quotation_order']" position="after">
-                    <div id="payment_link_custom_amount" class="col-12 col-lg-6">
-                        <h2>Payment Link</h2>
-                        <div class="row mt16 o_settings_container">
-                            <div class="col-xs-12 col-md-6 o_setting_box">
-                                <div class="o_setting_left_pane"/>
-                                <div class="o_setting_right_pane">
-                                    <label for="payment_custom_min_amount"
-                                           string="Monto minimo pago personalizado"/>
-                                    <div class="text-muted">
-                                        Monto minimo global en COP que el cliente puede
-                                        ingresar en la pestana "Otro Monto" del payment link.
-                                        Minimo absoluto: 1,500 COP (Mercado Pago Colombia).
-                                    </div>
-                                    <div class="content-group mt8">
-                                        <div class="row">
-                                            <field name="payment_custom_min_amount"
-                                                   class="col-lg-7"/>
-                                        </div>
-                                    </div>
+                <xpath expr="//form" position="inside">
+                    <app data-string="Payment Link"
+                         string="Payment Link"
+                         name="payment_custom_amount"
+                         groups="account.group_account_manager">
+                        <block title="Monto Personalizado en Payment Link"
+                               name="payment_custom_amount_block">
+                            <setting string="Monto minimo pago personalizado (COP)"
+                                     help="Monto minimo global que el cliente puede ingresar en la pestana Otro Monto del payment link. No puede ser inferior a 1,500 COP (estandar Mercado Pago Colombia)."
+                                     id="payment_custom_min_amount_setting">
+                                <field name="payment_custom_min_amount"/>
+                                <div class="text-muted small mt-1">
+                                    Valor minimo absoluto permitido:
+                                    <strong>1,500 COP</strong>
+                                    (estandar Mercado Pago Colombia).
+                                    Se aplica globalmente a todos los clientes
+                                    con pago personalizado activo.
                                 </div>
-                            </div>
-                        </div>
-                    </div>
+                            </setting>
+                        </block>
+                    </app>
                 </xpath>
             </field>
         </record>
