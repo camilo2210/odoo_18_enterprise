@@ -29,7 +29,7 @@ class PaymentCustomTransaction(models.Model):
         string='Cliente',
         required=True,
         index=True,
-        ondelete='set null',
+        ondelete='restrict',
         readonly=True,
     )
     move_id = fields.Many2one(
