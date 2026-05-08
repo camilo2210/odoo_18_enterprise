@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!--
+            Heredamos de base.res_config_settings_view_form (siempre existe).
+            Usamos //div[hasclass('settings')] como anchor universal en Odoo 18,
+            evitando dependencias de IDs especificos de sale/crm que pueden
+            no estar presentes en todas las instalaciones.
+        -->
+        <record id="view_res_config_settings_payment_custom" model="ir.ui.view">
+            <field name="name">res.config.settings.payment.custom.amount</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('settings')]" position="inside">
+
+                    <app string="Payment Link" name="payment_custom_amount"
+                         id="payment_custom_amount_settings">
+                        <block title="Monto Personalizado en Payment Link"
+                               name="payment_custom_amount_block">
+                            <setting string="Monto minimo pago personalizado (COP)"
+                                     help="Minimo que el cliente puede ingresar en la pestana Otro Monto del payment link. No puede ser inferior a 1,500 COP (Mercado Pago Colombia)."
+                                     documentation="/documentation/17.0/applications/finance/accounting.html">
+                                <field name="payment_custom_min_amount"/>
+                                <div class="text-muted small mt-1">
+                                    Valor minimo absoluto: <strong>1,500 COP</strong>
+                                    (estandar Mercado Pago Colombia).
+                                    Se aplica a todos los clientes con pago personalizado activo.
+                                </div>
+                            </setting>
+                        </block>
+                    </app>
+
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>
