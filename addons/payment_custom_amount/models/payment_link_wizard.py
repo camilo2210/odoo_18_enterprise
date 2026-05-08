@@ -4,6 +4,8 @@ from odoo import models, fields, api
 
 _logger = logging.getLogger(__name__)
 
+MERCADO_PAGO_COLOMBIA_MIN = 1500.0
+
 
 class PaymentLinkWizard(models.TransientModel):
     _inherit = 'payment.link.wizard'
@@ -11,13 +13,11 @@ class PaymentLinkWizard(models.TransientModel):
     allow_custom_amount = fields.Boolean(
         string='Permitir monto personalizado',
         default=False,
-        help='Activa la pestaña de monto personalizado en el portal de pago.',
     )
-    custom_min_amount = fields.Monetary(
-        string='Monto mínimo personalizado',
-        currency_field='currency_id',
-        default=1500.0,
-        help='Monto mínimo aceptado cuando el cliente usa la opción de monto personalizado.',
+    custom_min_amount = fields.Float(
+        string='Monto minimo personalizado (COP)',
+        default=MERCADO_PAGO_COLOMBIA_MIN,
+        help='Se hereda de la configuracion global. Minimo absoluto: 1,500 COP.',
     )
 
     @api.model
@@ -25,6 +25,21 @@ class PaymentLinkWizard(models.TransientModel):
         res = super().default_get(fields_list)
         res_id = self.env.context.get('active_id')
         res_model = self.env.context.get('active_model')
+
+        # Leer monto minimo global
+        try:
+            global_min = float(
+                self.env['ir.config_parameter'].sudo().get_param(
+                    'payment_custom_amount.min_amount',
+                    default=str(MERCADO_PAGO_COLOMBIA_MIN),
+                )
+            )
+            res['custom_min_amount'] = max(global_min, MERCADO_PAGO_COLOMBIA_MIN)
+        except Exception as e:
+            _logger.warning('Error leyendo config global en wizard: %s', str(e))
+            res['custom_min_amount'] = MERCADO_PAGO_COLOMBIA_MIN
+
+        # Heredar allow_custom del partner de la factura/pedido
         if res_id and res_model:
             try:
                 record = self.env[res_model].browse(res_id)
@@ -32,19 +47,17 @@ class PaymentLinkWizard(models.TransientModel):
                 if partner:
                     commercial = partner.commercial_partner_id
                     res['allow_custom_amount'] = commercial.allow_custom_payment_amount
-                    res['custom_min_amount'] = commercial.custom_payment_min_amount
                     _logger.info(
-                        'PaymentLinkWizard: partner=%s allow_custom=%s min=%.2f',
+                        'PaymentLinkWizard: partner=%s allow_custom=%s',
                         commercial.name,
                         res.get('allow_custom_amount'),
-                        res.get('custom_min_amount', 0),
                     )
             except Exception as e:
                 _logger.warning('PaymentLinkWizard default_get error: %s', str(e))
         return res
 
     def _get_payment_link_url(self):
-        """Extiende la URL del payment link con parámetros de monto personalizado."""
+        """Extiende la URL con parametros de monto personalizado."""
         url = super()._get_payment_link_url()
         if self.allow_custom_amount:
             import urllib.parse
@@ -54,5 +67,5 @@ class PaymentLinkWizard(models.TransientModel):
             }
             separator = '&' if '?' in url else '?'
             url = url + separator + urllib.parse.urlencode(params)
-            _logger.info('PaymentLink URL extendida con parámetros de monto personalizado')
+            _logger.info('PaymentLink URL extendida con parametros de monto personalizado')
         return url

@@ -2,42 +2,40 @@
 <odoo>
     <data>
 
-        <!-- ── Pestaña en el formulario del contacto ─────────────────────── -->
+        <!--
+            Check "Permitir monto personalizado" movido a la seccion
+            Ventas y Compras > Ventas del formulario del contacto.
+            Se elimina la pestana separada "Pagos Personalizados".
+        -->
         <record id="view_res_partner_form_payment_custom" model="ir.ui.view">
             <field name="name">res.partner.form.payment.custom.amount</field>
             <field name="model">res.partner</field>
             <field name="inherit_id" ref="base.view_partner_form"/>
             <field name="arch" type="xml">
-                <notebook position="inside">
-                    <page string="Pagos Personalizados"
-                          name="custom_payment_page"
-                          groups="account.group_account_manager">
-                        <group string="Configuración de Monto Personalizado en Payment Link">
-                            <field name="allow_custom_payment_amount"
-                                   widget="boolean_toggle"/>
-                            <field name="custom_payment_min_amount"
-                                   invisible="not allow_custom_payment_amount"
-                                   required="allow_custom_payment_amount"/>
-                            <field name="currency_id"
-                                   invisible="not allow_custom_payment_amount"
-                                   groups="base.group_no_one"/>
-                        </group>
-                        <group string="Ayuda"
-                               invisible="not allow_custom_payment_amount">
-                            <div class="alert alert-info" role="alert">
-                                <strong>Información:</strong>
-                                Cuando este contacto reciba un <em>payment link</em>,
-                                verá una pestaña adicional para ingresar un monto
-                                personalizado. El monto mínimo respeta el estándar de
-                                <strong>Mercado Pago Colombia: COP 1,500</strong>.
-                            </div>
-                        </group>
-                    </page>
-                </notebook>
+                <!--
+                    Insertamos el campo en la pagina "Sales" (Ventas) del contacto.
+                    El ref interno de esa pagina en Odoo 18 es page_sales_purchases.
+                    Usamos el grupo "Sales" que tiene name="sales_man" como anchor.
+                -->
+                <xpath expr="//page[@name='sale_purchase']" position="inside">
+                    <group string="Payment Link" name="custom_payment_group"
+                           groups="account.group_account_manager,sales_team.group_sale_manager">
+                        <field name="allow_custom_payment_amount"
+                               widget="boolean_toggle"
+                               string="Permitir monto personalizado en Payment Link"/>
+                        <div class="text-muted small"
+                             invisible="not allow_custom_payment_amount">
+                            El cliente vera una pestana extra en el portal de pago
+                            para ingresar un monto inferior al total.
+                            El monto minimo se configura en
+                            <strong>Ajustes &gt; Ventas &gt; Payment Link</strong>.
+                        </div>
+                    </group>
+                </xpath>
             </field>
         </record>
 
-        <!-- ── Vista lista de transacciones (auditoría, inmutable) ──────── -->
+        <!-- ── Vista lista transacciones (auditoria, inmutable) ──────────── -->
         <record id="view_payment_custom_transaction_tree" model="ir.ui.view">
             <field name="name">payment.custom.transaction.tree</field>
             <field name="model">payment.custom.transaction</field>
@@ -61,12 +59,12 @@
             </field>
         </record>
 
-        <!-- ── Vista form de transacciones (auditoría, inmutable) ────────── -->
+        <!-- ── Vista form transacciones (auditoria, inmutable) ───────────── -->
         <record id="view_payment_custom_transaction_form" model="ir.ui.view">
             <field name="name">payment.custom.transaction.form</field>
             <field name="model">payment.custom.transaction</field>
             <field name="arch" type="xml">
-                <form string="Transacción de Pago Personalizado"
+                <form string="Transaccion de Pago Personalizado"
                       create="false" edit="false">
                     <header>
                         <button name="action_validate"
@@ -74,21 +72,21 @@
                                 type="object"
                                 class="btn-primary"
                                 invisible="state != 'pending'"
-                                confirm="¿Confirma que desea marcar esta transacción como validada?"
+                                confirm="Confirma que desea marcar esta transaccion como validada?"
                                 groups="account.group_account_manager"/>
                         <button name="action_reject"
                                 string="Rechazar"
                                 type="object"
                                 class="btn-danger"
                                 invisible="state != 'pending'"
-                                confirm="¿Confirma que desea rechazar esta transacción?"
+                                confirm="Confirma que desea rechazar esta transaccion?"
                                 groups="account.group_account_manager"/>
                         <field name="state" widget="statusbar"
                                statusbar_visible="pending,validated,rejected"/>
                     </header>
                     <sheet>
                         <group>
-                            <group string="Información General">
+                            <group string="Informacion General">
                                 <field name="reference"/>
                                 <field name="partner_id"/>
                                 <field name="move_id" string="Factura"/>
@@ -102,7 +100,7 @@
                                 <field name="payment_type"/>
                             </group>
                         </group>
-                        <group string="Error de Validación"
+                        <group string="Error de Validacion"
                                invisible="not validation_error">
                             <field name="validation_error" nolabel="True"/>
                         </group>
@@ -111,7 +109,7 @@
             </field>
         </record>
 
-        <!-- ── Búsqueda ──────────────────────────────────────────────────── -->
+        <!-- ── Busqueda ──────────────────────────────────────────────────── -->
         <record id="view_payment_custom_transaction_search" model="ir.ui.view">
             <field name="name">payment.custom.transaction.search</field>
             <field name="model">payment.custom.transaction</field>
@@ -133,38 +131,31 @@
                     <filter name="filter_custom"
                             string="Monto Personalizado"
                             domain="[('payment_type','=','custom')]"/>
-                    <filter name="filter_partial"
-                            string="Parciales"
-                            domain="[('payment_type','=','partial')]"/>
                     <group expand="0" string="Agrupar Por">
-                        <filter name="group_partner"
-                                string="Cliente"
+                        <filter name="group_partner" string="Cliente"
                                 context="{'group_by': 'partner_id'}"/>
-                        <filter name="group_type"
-                                string="Tipo"
+                        <filter name="group_type" string="Tipo"
                                 context="{'group_by': 'payment_type'}"/>
-                        <filter name="group_state"
-                                string="Estado"
+                        <filter name="group_state" string="Estado"
                                 context="{'group_by': 'state'}"/>
-                        <filter name="group_date"
-                                string="Fecha"
+                        <filter name="group_date" string="Fecha"
                                 context="{'group_by': 'create_date:month'}"/>
                     </group>
                 </search>
             </field>
         </record>
 
-        <!-- ── Acción de ventana ─────────────────────────────────────────── -->
+        <!-- ── Accion de ventana ─────────────────────────────────────────── -->
         <record id="action_payment_custom_transaction" model="ir.actions.act_window">
             <field name="name">Transacciones Monto Personalizado</field>
             <field name="res_model">payment.custom.transaction</field>
             <field name="view_mode">list,form</field>
             <field name="help" type="html">
                 <p class="o_view_nocontent_smiling_face">
-                    Sin transacciones de pago personalizado aún.
+                    Sin transacciones de pago personalizado aun.
                 </p>
                 <p>
-                    Las transacciones aparecen aquí cuando un cliente usa la pestaña
+                    Las transacciones aparecen aqui cuando un cliente usa la pestana
                     de <strong>Monto Personalizado</strong> en el portal de pago.
                 </p>
             </field>
