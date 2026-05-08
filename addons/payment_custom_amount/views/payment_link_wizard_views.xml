@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_payment_link_wizard_custom_amount" model="ir.ui.view">
+            <field name="name">payment.link.wizard.form.custom.amount</field>
+            <field name="model">payment.link.wizard</field>
+            <field name="inherit_id" ref="payment.payment_link_wizard_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//footer" position="before">
+                    <group string="Opciones de Monto Personalizado"
+                           name="custom_amount_section">
+                        <field name="allow_custom_amount"
+                               widget="boolean_toggle"/>
+                        <field name="custom_min_amount"
+                               invisible="not allow_custom_amount"
+                               required="allow_custom_amount"
+                               string="Monto mínimo (COP)"/>
+                    </group>
+                    <div class="alert alert-warning" role="alert"
+                         invisible="not allow_custom_amount">
+                        <i class="fa fa-exclamation-triangle me-1"/>
+                        El cliente podrá ingresar cualquier monto entre el
+                        <strong>mínimo configurado</strong> y el total de la factura.
+                        El mínimo absoluto de Mercado Pago Colombia es
+                        <strong>COP 1,500</strong>.
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ── Pestaña en el formulario del contacto ─────────────────────── -->
+        <record id="view_res_partner_form_payment_custom" model="ir.ui.view">
+            <field name="name">res.partner.form.payment.custom.amount</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="arch" type="xml">
+                <notebook position="inside">
+                    <page string="Pagos Personalizados"
+                          name="custom_payment_page"
+                          groups="account.group_account_manager">
+                        <group string="Configuración de Monto Personalizado en Payment Link">
+                            <field name="allow_custom_payment_amount"
+                                   widget="boolean_toggle"/>
+                            <field name="custom_payment_min_amount"
+                                   invisible="not allow_custom_payment_amount"
+                                   required="allow_custom_payment_amount"/>
+                            <field name="currency_id"
+                                   invisible="not allow_custom_payment_amount"
+                                   groups="base.group_no_one"/>
+                        </group>
+                        <group string="Ayuda"
+                               invisible="not allow_custom_payment_amount">
+                            <div class="alert alert-info" role="alert">
+                                <strong>Información:</strong>
+                                Cuando este contacto reciba un <em>payment link</em>,
+                                verá una pestaña adicional para ingresar un monto
+                                personalizado. El monto mínimo respeta el estándar de
+                                <strong>Mercado Pago Colombia: COP 1,500</strong>.
+                            </div>
+                        </group>
+                    </page>
+                </notebook>
+            </field>
+        </record>
+
+        <!-- ── Vista lista de transacciones (auditoría, inmutable) ──────── -->
+        <record id="view_payment_custom_transaction_tree" model="ir.ui.view">
+            <field name="name">payment.custom.transaction.tree</field>
+            <field name="model">payment.custom.transaction</field>
+            <field name="arch" type="xml">
+                <list string="Transacciones con Monto Personalizado"
+                      create="false" edit="false" delete="false">
+                    <field name="create_date" string="Fecha"/>
+                    <field name="reference"/>
+                    <field name="partner_id"/>
+                    <field name="move_id" string="Factura"/>
+                    <field name="payment_type"/>
+                    <field name="invoice_total"/>
+                    <field name="requested_amount"/>
+                    <field name="provider_code" string="Proveedor"/>
+                    <field name="state" widget="badge"
+                           decoration-success="state == 'validated'"
+                           decoration-warning="state == 'pending'"
+                           decoration-danger="state == 'rejected'"/>
+                    <field name="currency_id" column_invisible="True"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- ── Vista form de transacciones (auditoría, inmutable) ────────── -->
+        <record id="view_payment_custom_transaction_form" model="ir.ui.view">
+            <field name="name">payment.custom.transaction.form</field>
+            <field name="model">payment.custom.transaction</field>
+            <field name="arch" type="xml">
+                <form string="Transacción de Pago Personalizado"
+                      create="false" edit="false">
+                    <header>
+                        <button name="action_validate"
+                                string="Validar"
+                                type="object"
+                                class="btn-primary"
+                                invisible="state != 'pending'"
+                                confirm="¿Confirma que desea marcar esta transacción como validada?"
+                                groups="account.group_account_manager"/>
+                        <button name="action_reject"
+                                string="Rechazar"
+                                type="object"
+                                class="btn-danger"
+                                invisible="state != 'pending'"
+                                confirm="¿Confirma que desea rechazar esta transacción?"
+                                groups="account.group_account_manager"/>
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="pending,validated,rejected"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="Información General">
+                                <field name="reference"/>
+                                <field name="partner_id"/>
+                                <field name="move_id" string="Factura"/>
+                                <field name="provider_code" string="Proveedor de Pago"/>
+                                <field name="create_date" string="Fecha de Solicitud"/>
+                            </group>
+                            <group string="Montos">
+                                <field name="currency_id" invisible="True"/>
+                                <field name="invoice_total"/>
+                                <field name="requested_amount"/>
+                                <field name="payment_type"/>
+                            </group>
+                        </group>
+                        <group string="Error de Validación"
+                               invisible="not validation_error">
+                            <field name="validation_error" nolabel="True"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- ── Búsqueda ──────────────────────────────────────────────────── -->
+        <record id="view_payment_custom_transaction_search" model="ir.ui.view">
+            <field name="name">payment.custom.transaction.search</field>
+            <field name="model">payment.custom.transaction</field>
+            <field name="arch" type="xml">
+                <search string="Buscar Transacciones">
+                    <field name="reference"/>
+                    <field name="partner_id"/>
+                    <field name="move_id"/>
+                    <filter name="filter_pending"
+                            string="Pendientes"
+                            domain="[('state','=','pending')]"/>
+                    <filter name="filter_validated"
+                            string="Validadas"
+                            domain="[('state','=','validated')]"/>
+                    <filter name="filter_rejected"
+                            string="Rechazadas"
+                            domain="[('state','=','rejected')]"/>
+                    <separator/>
+                    <filter name="filter_custom"
+                            string="Monto Personalizado"
+                            domain="[('payment_type','=','custom')]"/>
+                    <filter name="filter_partial"
+                            string="Parciales"
+                            domain="[('payment_type','=','partial')]"/>
+                    <group expand="0" string="Agrupar Por">
+                        <filter name="group_partner"
+                                string="Cliente"
+                                context="{'group_by': 'partner_id'}"/>
+                        <filter name="group_type"
+                                string="Tipo"
+                                context="{'group_by': 'payment_type'}"/>
+                        <filter name="group_state"
+                                string="Estado"
+                                context="{'group_by': 'state'}"/>
+                        <filter name="group_date"
+                                string="Fecha"
+                                context="{'group_by': 'create_date:month'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- ── Acción de ventana ─────────────────────────────────────────── -->
+        <record id="action_payment_custom_transaction" model="ir.actions.act_window">
+            <field name="name">Transacciones Monto Personalizado</field>
+            <field name="res_model">payment.custom.transaction</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Sin transacciones de pago personalizado aún.
+                </p>
+                <p>
+                    Las transacciones aparecen aquí cuando un cliente usa la pestaña
+                    de <strong>Monto Personalizado</strong> en el portal de pago.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_payment_custom_transaction"
+                  name="Pagos Monto Personalizado"
+                  parent="account.menu_finance_receivables"
+                  action="action_payment_custom_transaction"
+                  sequence="99"
+                  groups="account.group_account_manager"/>
+
+    </data>
+</odoo>
