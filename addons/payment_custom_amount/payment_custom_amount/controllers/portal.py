@@ -38,12 +38,8 @@ class PaymentCustomAmountPortal(PaymentPortal):
         Inyecta allow_custom_amount y custom_min_amount en la respuesta
         del template para que el QWeb los tenga disponibles.
         """
-        # Llamar al metodo original para obtener la respuesta/valores base
         response = super().payment_pay(*args, **kwargs)
-
         try:
-            # La respuesta puede ser un Response de werkzeug con qcontext
-            # o un dict de valores (segun la version de Odoo)
             if hasattr(response, 'qcontext'):
                 self._inject_custom_amount_vars(response.qcontext, kwargs)
             elif isinstance(response, dict):
@@ -53,7 +49,6 @@ class PaymentCustomAmountPortal(PaymentPortal):
                 'Error inyectando variables de monto personalizado en payment_pay: %s',
                 str(e),
             )
-
         return response
 
     def _inject_custom_amount_vars(self, values, kwargs):
@@ -64,13 +59,10 @@ class PaymentCustomAmountPortal(PaymentPortal):
         allow_custom = False
         min_amount = _get_global_min_amount(request.env)
 
-        # Intentar resolver el partner desde distintas fuentes
-        partner_id = (
-            kwargs.get('partner_id')
-            or values.get('partner_id')
-        )
+        # Fuente 1: partner_id directo en kwargs o values
+        partner_id = kwargs.get('partner_id') or values.get('partner_id')
 
-        # Intentar desde invoice_id (flujo correo de factura)
+        # Fuente 2: invoice_id (flujo correo de factura)
         invoice_id = kwargs.get('invoice_id') or values.get('invoice_id')
         if not partner_id and invoice_id:
             try:
@@ -78,9 +70,11 @@ class PaymentCustomAmountPortal(PaymentPortal):
                 if invoice.exists():
                     partner_id = invoice.partner_id.id
             except Exception as e:
-                _logger.warning('No se pudo resolver partner desde invoice_id: %s', str(e))
+                _logger.warning(
+                    'No se pudo resolver partner desde invoice_id: %s', str(e)
+                )
 
-        # Intentar desde access_token buscando la transaccion/factura relacionada
+        # Fuente 3: access_token (busqueda inversa en account.move)
         if not partner_id:
             access_token = kwargs.get('access_token', '')
             if access_token:
@@ -106,13 +100,15 @@ class PaymentCustomAmountPortal(PaymentPortal):
                     commercial.name, allow_custom, min_amount,
                 )
             except Exception as e:
-                _logger.warning('Error resolviendo partner %s: %s', partner_id, str(e))
+                _logger.warning(
+                    'Error resolviendo partner %s: %s', partner_id, str(e)
+                )
 
         # Inyectar en el contexto del template
         values['allow_custom_amount'] = allow_custom
         values['custom_min_amount'] = min_amount
 
-        # Leer allow_custom desde parametros de URL (viene del payment link manual)
+        # Sobrescribir si el payment link manual trae allow_custom=1 en la URL
         if not allow_custom:
             url_allow = kwargs.get('allow_custom', '0')
             if str(url_allow) == '1':
@@ -204,8 +200,10 @@ class PaymentCustomAmountPortal(PaymentPortal):
                 'requested_amount': float(requested_amount),
                 'payment_type': payment_type,
                 'provider_code': provider_code or '',
-                'currency_id': int(currency_id) if currency_id
-                               else request.env.company.currency_id.id,
+                'currency_id': (
+                    int(currency_id) if currency_id
+                    else request.env.company.currency_id.id
+                ),
                 'state': 'pending',
             }
             tx_record = request.env['payment.custom.transaction'].sudo().create(values)
@@ -219,3 +217,42 @@ class PaymentCustomAmountPortal(PaymentPortal):
                 'Error al crear registro de transaccion personalizada: %s', str(e)
             )
             return {'success': False, 'message': str(e)}
+
+    @http.route('/my/invoices/<int:invoice_id>', type='http', auth='public', website=True)
+    def portal_invoice_page(self, invoice_id, **kwargs):
+        """
+        Override del portal de facturas para inyectar variables de monto
+        personalizado en el contexto antes de renderizar.
+        La importacion del padre se hace aqui dentro para no romper
+        la carga del modulo si account_payment no esta instalado.
+        """
+        try:
+            from odoo.addons.account_payment.controllers.portal import PortalAccount
+            response = PortalAccount.portal_invoice_page(self, invoice_id, **kwargs)
+        except (ImportError, AttributeError):
+            # Fallback: intentar via super() si la herencia MRO lo resuelve
+            response = super().portal_invoice_page(invoice_id, **kwargs)
+
+        try:
+            if hasattr(response, 'qcontext'):
+                invoice = request.env['account.move'].sudo().browse(invoice_id)
+                if invoice.exists():
+                    partner = invoice.partner_id.commercial_partner_id
+                    min_amount = _get_global_min_amount(request.env)
+                    response.qcontext['allow_custom_amount'] = (
+                        partner.allow_custom_payment_amount
+                    )
+                    response.qcontext['custom_min_amount'] = min_amount
+                    _logger.info(
+                        'Portal factura %s: allow_custom=%s min=%.2f',
+                        invoice.name,
+                        partner.allow_custom_payment_amount,
+                        min_amount,
+                    )
+        except Exception as e:
+            _logger.exception(
+                'Error inyectando vars en portal_invoice_page id=%s: %s',
+                invoice_id, str(e),
+            )
+
+        return response
