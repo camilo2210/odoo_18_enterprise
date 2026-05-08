@@ -12,8 +12,8 @@ class ResPartner(models.Model):
         string='Permitir monto personalizado en Payment Link',
         default=False,
         help=(
-            'Si esta activo, el cliente vera una pestana adicional en el portal '
-            'de pago para ingresar un monto inferior al total de la factura. '
-            'El monto minimo se configura globalmente en Ajustes > Ventas.'
+            'Si esta activo, el cliente vera una pestana extra en el portal de pago '
+            'para ingresar un monto inferior al total. '
+            'El monto minimo global se configura en Ajustes > Payment Link.'
         ),
     )
