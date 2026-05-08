@@ -2,39 +2,157 @@
 <odoo>
     <data>
 
-        <!--
-            Heredamos de base.res_config_settings_view_form (siempre existe).
-            Usamos //div[hasclass('settings')] como anchor universal en Odoo 18,
-            evitando dependencias de IDs especificos de sale/crm que pueden
-            no estar presentes en todas las instalaciones.
-        -->
-        <record id="view_res_config_settings_payment_custom" model="ir.ui.view">
-            <field name="name">res.config.settings.payment.custom.amount</field>
-            <field name="model">res.config.settings</field>
-            <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+        <record id="view_res_partner_form_payment_custom_base" model="ir.ui.view">
+            <field name="name">res.partner.form.payment.custom.amount.base</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="priority">99</field>
             <field name="arch" type="xml">
-                <xpath expr="//div[hasclass('settings')]" position="inside">
-
-                    <app string="Payment Link" name="payment_custom_amount"
-                         id="payment_custom_amount_settings">
-                        <block title="Monto Personalizado en Payment Link"
-                               name="payment_custom_amount_block">
-                            <setting string="Monto minimo pago personalizado (COP)"
-                                     help="Minimo que el cliente puede ingresar en la pestana Otro Monto del payment link. No puede ser inferior a 1,500 COP (Mercado Pago Colombia)."
-                                     documentation="/documentation/17.0/applications/finance/accounting.html">
-                                <field name="payment_custom_min_amount"/>
-                                <div class="text-muted small mt-1">
-                                    Valor minimo absoluto: <strong>1,500 COP</strong>
-                                    (estandar Mercado Pago Colombia).
-                                    Se aplica a todos los clientes con pago personalizado activo.
-                                </div>
-                            </setting>
-                        </block>
-                    </app>
-
-                </xpath>
+                <notebook position="inside">
+                    <page string="Payment Link"
+                          name="custom_payment_link_page"
+                          groups="account.group_account_manager,sales_team.group_sale_manager">
+                        <group string="Configuracion de monto personalizado">
+                            <field name="allow_custom_payment_amount"
+                                   widget="boolean_toggle"
+                                   string="Permitir monto personalizado en Payment Link"/>
+                            <div class="text-muted small"
+                                 invisible="not allow_custom_payment_amount">
+                                El cliente vera una pestana extra en el portal de pago
+                                para ingresar un monto inferior al total.
+                                El monto minimo global se configura en
+                                Ajustes &gt; Payment Link.
+                            </div>
+                        </group>
+                    </page>
+                </notebook>
             </field>
         </record>
+
+        <record id="view_payment_custom_transaction_tree" model="ir.ui.view">
+            <field name="name">payment.custom.transaction.tree</field>
+            <field name="model">payment.custom.transaction</field>
+            <field name="arch" type="xml">
+                <list string="Transacciones con Monto Personalizado"
+                      create="false" edit="false" delete="false">
+                    <field name="create_date" string="Fecha"/>
+                    <field name="reference"/>
+                    <field name="partner_id"/>
+                    <field name="move_id" string="Factura"/>
+                    <field name="payment_type"/>
+                    <field name="invoice_total"/>
+                    <field name="requested_amount"/>
+                    <field name="provider_code" string="Proveedor"/>
+                    <field name="state" widget="badge"
+                           decoration-success="state == 'validated'"
+                           decoration-warning="state == 'pending'"
+                           decoration-danger="state == 'rejected'"/>
+                    <field name="currency_id" column_invisible="True"/>
+                </list>
+            </field>
+        </record>
+
+        <record id="view_payment_custom_transaction_form" model="ir.ui.view">
+            <field name="name">payment.custom.transaction.form</field>
+            <field name="model">payment.custom.transaction</field>
+            <field name="arch" type="xml">
+                <form string="Transaccion de Pago Personalizado"
+                      create="false" edit="false">
+                    <header>
+                        <button name="action_validate"
+                                string="Validar"
+                                type="object"
+                                class="btn-primary"
+                                invisible="state != 'pending'"
+                                confirm="Confirma que desea marcar esta transaccion como validada?"
+                                groups="account.group_account_manager"/>
+                        <button name="action_reject"
+                                string="Rechazar"
+                                type="object"
+                                class="btn-danger"
+                                invisible="state != 'pending'"
+                                confirm="Confirma que desea rechazar esta transaccion?"
+                                groups="account.group_account_manager"/>
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="pending,validated,rejected"/>
+                    </header>
+                    <sheet>
+                        <group>
+                            <group string="Informacion General">
+                                <field name="reference"/>
+                                <field name="partner_id"/>
+                                <field name="move_id" string="Factura"/>
+                                <field name="provider_code" string="Proveedor de Pago"/>
+                                <field name="create_date" string="Fecha de Solicitud"/>
+                            </group>
+                            <group string="Montos">
+                                <field name="currency_id" invisible="True"/>
+                                <field name="invoice_total"/>
+                                <field name="requested_amount"/>
+                                <field name="payment_type"/>
+                            </group>
+                        </group>
+                        <group string="Error de Validacion"
+                               invisible="not validation_error">
+                            <field name="validation_error" nolabel="True"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="view_payment_custom_transaction_search" model="ir.ui.view">
+            <field name="name">payment.custom.transaction.search</field>
+            <field name="model">payment.custom.transaction</field>
+            <field name="arch" type="xml">
+                <search string="Buscar Transacciones">
+                    <field name="reference"/>
+                    <field name="partner_id"/>
+                    <field name="move_id"/>
+                    <filter name="filter_pending" string="Pendientes"
+                            domain="[('state','=','pending')]"/>
+                    <filter name="filter_validated" string="Validadas"
+                            domain="[('state','=','validated')]"/>
+                    <filter name="filter_rejected" string="Rechazadas"
+                            domain="[('state','=','rejected')]"/>
+                    <separator/>
+                    <filter name="filter_custom" string="Monto Personalizado"
+                            domain="[('payment_type','=','custom')]"/>
+                    <group expand="0" string="Agrupar Por">
+                        <filter name="group_partner" string="Cliente"
+                                context="{'group_by': 'partner_id'}"/>
+                        <filter name="group_type" string="Tipo"
+                                context="{'group_by': 'payment_type'}"/>
+                        <filter name="group_state" string="Estado"
+                                context="{'group_by': 'state'}"/>
+                        <filter name="group_date" string="Fecha"
+                                context="{'group_by': 'create_date:month'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <record id="action_payment_custom_transaction" model="ir.actions.act_window">
+            <field name="name">Transacciones Monto Personalizado</field>
+            <field name="res_model">payment.custom.transaction</field>
+            <field name="view_mode">list,form</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Sin transacciones de pago personalizado aun.
+                </p>
+                <p>
+                    Aparecen aqui cuando un cliente usa la pestana
+                    <strong>Monto Personalizado</strong> en el portal de pago.
+                </p>
+            </field>
+        </record>
+
+        <menuitem id="menu_payment_custom_transaction"
+                  name="Pagos Monto Personalizado"
+                  parent="account.menu_finance_receivables"
+                  action="action_payment_custom_transaction"
+                  sequence="99"
+                  groups="account.group_account_manager"/>
 
     </data>
 </odoo>

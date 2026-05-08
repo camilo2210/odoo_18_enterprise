@@ -1,17 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
-
-        <!--
-            Anchor correcto en Odoo 18: //form (elemento raiz de base.res_config_settings_view_form)
-            Siempre existe sin importar que modulos esten instalados.
-            Referencia: Cybrosys Odoo 18 Settings Guide
-        -->
         <record id="view_res_config_settings_payment_custom" model="ir.ui.view">
             <field name="name">res.config.settings.view.form.inherit.payment.custom.amount</field>
             <field name="model">res.config.settings</field>
-            <field name="priority" eval="15"/>
             <field name="inherit_id" ref="base.res_config_settings_view_form"/>
+            <field name="priority" eval="15"/>
             <field name="arch" type="xml">
                 <xpath expr="//form" position="inside">
                     <app data-string="Payment Link"
@@ -21,22 +15,14 @@
                         <block title="Monto Personalizado en Payment Link"
                                name="payment_custom_amount_block">
                             <setting string="Monto minimo pago personalizado (COP)"
-                                     help="Monto minimo global que el cliente puede ingresar en la pestana Otro Monto del payment link. No puede ser inferior a 1,500 COP (estandar Mercado Pago Colombia)."
+                                     help="Monto minimo global para la pestana Otro Monto. Minimo absoluto: 1,500 COP (Mercado Pago Colombia)."
                                      id="payment_custom_min_amount_setting">
                                 <field name="payment_custom_min_amount"/>
-                                <div class="text-muted small mt-1">
-                                    Valor minimo absoluto permitido:
-                                    <strong>1,500 COP</strong>
-                                    (estandar Mercado Pago Colombia).
-                                    Se aplica globalmente a todos los clientes
-                                    con pago personalizado activo.
-                                </div>
                             </setting>
                         </block>
                     </app>
                 </xpath>
             </field>
         </record>
-
     </data>
 </odoo>
