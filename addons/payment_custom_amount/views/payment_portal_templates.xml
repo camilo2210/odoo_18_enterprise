@@ -153,4 +153,51 @@
                                                t-att-min="custom_min_amount"
                                                t-att-max="amount"
                                                t-att-data-min="custom_min_amount"
-                                               
+                                               t-att-data-max="amount"
+                                               aria-label="Monto personalizado"/>
+                                        <span class="input-group-text">
+                                            <t t-esc="currency.name"/>
+                                        </span>
+                                    </div>
+                                    <div id="custom_amount_feedback" class="invalid-feedback d-none"></div>
+                                    <p class="text-muted small mb-0">
+                                        Mínimo: <strong><t t-esc="custom_min_amount"/></strong>
+                                        <t t-esc="currency.name"/> —
+                                        Máximo: <strong><t t-esc="amount"/></strong>
+                                        <t t-esc="currency.name"/>
+                                    </p>
+                                </div>
+                            </div>
+
+                        </div><!-- /.tab-content -->
+                    </div><!-- /.o_payment_amount_tabs -->
+
+                    <input type="hidden" id="payment_selected_amount"
+                           name="payment_selected_amount"
+                           t-att-value="amount"/>
+                    <input type="hidden" id="payment_selected_type"
+                           name="payment_selected_type"
+                           value="full"/>
+
+                </t>
+            </xpath>
+
+        </template>
+
+        <!-- Confirmación -->
+        <template id="payment_confirmation_custom_amount"
+                  inherit_id="payment.confirm"
+                  name="Custom Amount Confirmation">
+            <xpath expr="." position="inside">
+                <t t-if="payment_type_label">
+                    <div class="alert alert-info mt-2" role="alert">
+                        <i class="fa fa-info-circle me-1"/>
+                        Tipo de pago aplicado:
+                        <strong><t t-esc="payment_type_label"/></strong>
+                    </div>
+                </t>
+            </xpath>
+        </template>
+
+    </data>
+</odoo>
