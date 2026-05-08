@@ -219,3 +219,41 @@ class PaymentCustomAmountPortal(PaymentPortal):
                 'Error al crear registro de transaccion personalizada: %s', str(e)
             )
             return {'success': False, 'message': str(e)}
+    
+    @http.route('/my/invoices/<int:invoice_id>', type='http', auth='public', website=True)
+    def portal_invoice_page(self, invoice_id, **kwargs):
+        """
+        Override del portal de facturas para inyectar variables de monto
+        personalizado en el contexto de la pagina antes de renderizarla.
+        """
+        # Llamar al controlador padre de account_payment
+        from odoo.addons.account_payment.controllers.portal import (
+            PortalAccount as BasePortalAccount
+        )
+        response = super(PaymentCustomAmountPortal, self).portal_invoice_page(
+            invoice_id, **kwargs
+        )
+
+        try:
+            if hasattr(response, 'qcontext'):
+                invoice = request.env['account.move'].sudo().browse(invoice_id)
+                if invoice.exists():
+                    partner = invoice.partner_id.commercial_partner_id
+                    min_amount = _get_global_min_amount(request.env)
+                    response.qcontext['allow_custom_amount'] = (
+                        partner.allow_custom_payment_amount
+                    )
+                    response.qcontext['custom_min_amount'] = min_amount
+                    _logger.info(
+                        'Portal factura %s: allow_custom=%s min=%.2f',
+                        invoice.name,
+                        partner.allow_custom_payment_amount,
+                        min_amount,
+                    )
+        except Exception as e:
+            _logger.exception(
+                'Error inyectando vars en portal_invoice_page id=%s: %s',
+                invoice_id, str(e),
+            )
+
+        return response

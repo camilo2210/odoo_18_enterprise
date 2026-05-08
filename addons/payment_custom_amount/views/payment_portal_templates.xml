@@ -2,217 +2,189 @@
 <odoo>
     <data>
 
+        <!--
+            TEMPLATE 1: hereda el modal de pago del portal de facturas
+            (/my/invoices/ID) — es el flujo que usa el botón "Pagar ahora"
+            y el link directo de la factura.
+            El template base es account_payment.portal_invoice_payment_wizard
+            o account.portal_invoice_page según la version.
+            Usamos ambos para cubrir los dos flujos.
+        -->
+
+        <!-- Flujo 1: modal dentro de /my/invoices/ID (botón Pagar ahora) -->
+        <template id="portal_invoice_payment_custom_tabs"
+                  inherit_id="account_payment.portal_invoice_payment_wizard"
+                  name="Custom Amount Tabs - Invoice Portal">
+            <xpath expr="//div[hasclass('o_payment_form')]" position="before">
+                <t t-call="payment_custom_amount.payment_custom_amount_tabs_content"/>
+            </xpath>
+        </template>
+
+        <!-- Flujo 2: payment link directo (/payment/pay) -->
         <template id="payment_pay_custom_amount_tabs"
                   inherit_id="payment.pay"
-                  name="Custom Amount Tabs">
-
-            <!--
-                FIX 1: xpath corregido.
-                El template real payment.pay tiene <div class="mt-4"> antes del
-                t-call="payment.form". NO existe o_payment_form ni o_payment_form.
-                Usamos el div.mt-4 que SI existe en el XML real del template.
-            -->
-            <xpath expr="//div[hasclass('mt-4')]" position="before">
-                <t t-if="allow_custom_amount">
-
-                    <div class="o_payment_amount_tabs mb-4"
-                         id="payment_amount_selector">
-
-                        <ul class="nav nav-tabs"
-                            id="paymentAmountTabs"
-                            role="tablist">
-
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link active"
-                                        id="tab-full-btn"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#tab-full"
-                                        type="button"
-                                        role="tab"
-                                        aria-controls="tab-full"
-                                        aria-selected="true"
-                                        data-payment-type="full"
-                                        data-amount-value="">
-                                    <i class="fa fa-check-circle me-1 text-success"/>
-                                    Pago Total
-                                </button>
-                            </li>
-
-                            <!--
-                                FIX 2: operadores > escapados como &gt;
-                                y t-att- reemplazado por t-attf- para atributos dinamicos
-                            -->
-                            <t t-if="payment_partial_amount
-                                     and payment_partial_amount &gt; 0
-                                     and payment_partial_amount != amount">
-                                <li class="nav-item" role="presentation">
-                                    <button class="nav-link"
-                                            id="tab-partial-btn"
-                                            data-bs-toggle="tab"
-                                            data-bs-target="#tab-partial"
-                                            type="button"
-                                            role="tab"
-                                            aria-controls="tab-partial"
-                                            aria-selected="false"
-                                            data-payment-type="partial"
-                                            t-attf-data-amount-value="#{payment_partial_amount}">
-                                        <i class="fa fa-adjust me-1 text-warning"/>
-                                        Pago Parcial
-                                    </button>
-                                </li>
-                            </t>
-
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link"
-                                        id="tab-custom-btn"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#tab-custom"
-                                        type="button"
-                                        role="tab"
-                                        aria-controls="tab-custom"
-                                        aria-selected="false"
-                                        data-payment-type="custom"
-                                        data-amount-value="0">
-                                    <i class="fa fa-pencil me-1 text-primary"/>
-                                    Otro Monto
-                                </button>
-                            </li>
-
-                        </ul>
-
-                        <div class="tab-content border border-top-0 rounded-bottom p-3 bg-white"
-                             id="paymentAmountTabsContent">
-
-                            <div class="tab-pane fade show active"
-                                 id="tab-full"
-                                 role="tabpanel"
-                                 aria-labelledby="tab-full-btn">
-                                <div class="d-flex align-items-center justify-content-between py-2">
-                                    <div>
-                                        <p class="mb-1 fw-semibold">Monto total a pagar</p>
-                                        <p class="text-muted small mb-0">
-                                            Cancela el saldo completo de la factura.
-                                        </p>
-                                    </div>
-                                    <div class="text-end">
-                                        <span class="fs-4 fw-bold text-success o_payment_full_amount">
-                                            <t t-esc="amount"/>
-                                        </span>
-                                        <span class="ms-1 text-muted small">
-                                            <t t-esc="currency.name"/>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <t t-if="payment_partial_amount
-                                     and payment_partial_amount &gt; 0
-                                     and payment_partial_amount != amount">
-                                <div class="tab-pane fade"
-                                     id="tab-partial"
-                                     role="tabpanel"
-                                     aria-labelledby="tab-partial-btn">
-                                    <div class="d-flex align-items-center justify-content-between py-2">
-                                        <div>
-                                            <p class="mb-1 fw-semibold">Monto parcial pactado</p>
-                                            <p class="text-muted small mb-0">
-                                                Paga solo la cuota o el abono acordado.
-                                            </p>
-                                        </div>
-                                        <div class="text-end">
-                                            <span class="fs-4 fw-bold text-warning">
-                                                <t t-esc="payment_partial_amount"/>
-                                            </span>
-                                            <span class="ms-1 text-muted small">
-                                                <t t-esc="currency.name"/>
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </t>
-
-                            <div class="tab-pane fade"
-                                 id="tab-custom"
-                                 role="tabpanel"
-                                 aria-labelledby="tab-custom-btn">
-                                <div class="py-2">
-                                    <p class="mb-2 fw-semibold">
-                                        Ingresa el monto que deseas pagar
-                                    </p>
-                                    <div class="input-group input-group-lg mb-2">
-                                        <span class="input-group-text">
-                                            <t t-esc="currency.symbol or currency.name"/>
-                                        </span>
-                                        <!--
-                                            FIX 3: t-att-min/max/data-* reemplazados
-                                            por t-attf- con sintaxis #{} para evitar
-                                            el XMLSyntaxError de lxml en el parser
-                                        -->
-                                        <input type="number"
-                                               id="custom_payment_amount_input"
-                                               class="form-control o_custom_amount_input"
-                                               placeholder="0.00"
-                                               step="0.01"
-                                               t-attf-min="#{custom_min_amount}"
-                                               t-attf-max="#{amount}"
-                                               t-attf-data-min="#{custom_min_amount}"
-                                               t-attf-data-max="#{amount}"
-                                               aria-label="Monto personalizado"
-                                        />
-                                        <span class="input-group-text">
-                                            <t t-esc="currency.name"/>
-                                        </span>
-                                    </div>
-                                    <div id="custom_amount_feedback"
-                                         class="invalid-feedback d-none">
-                                    </div>
-                                    <p class="text-muted small mb-0">
-                                        Minimo:
-                                        <strong><t t-esc="custom_min_amount"/></strong>
-                                        <t t-esc="currency.name"/>
-                                        - Maximo:
-                                        <strong><t t-esc="amount"/></strong>
-                                        <t t-esc="currency.name"/>
-                                    </p>
-                                </div>
-                            </div>
-
-                        </div>
-                    </div>
-
-                    <input type="hidden"
-                           id="payment_selected_amount"
-                           name="payment_selected_amount"
-                           t-attf-value="#{amount}"
-                    />
-                    <input type="hidden"
-                           id="payment_selected_type"
-                           name="payment_selected_type"
-                           value="full"
-                    />
-
-                </t>
+                  name="Custom Amount Tabs - Payment Pay">
+            <xpath expr="//div[hasclass('o_payment_form')]" position="before">
+                <t t-call="payment_custom_amount.payment_custom_amount_tabs_content"/>
             </xpath>
-
         </template>
 
         <!--
-            FIX 4: el template payment.confirm no tiene
-            div.o_payment_confirmation_status en Odoo 18.
-            Usamos expr="." position="inside" como fallback seguro.
+            TEMPLATE COMPARTIDO: contenido real de las pestañas.
+            Se reutiliza en ambos flujos.
         -->
-        <template id="payment_confirmation_custom_amount"
-                  inherit_id="payment.confirm"
-                  name="Custom Amount Confirmation">
-            <xpath expr="." position="inside">
-                <t t-if="payment_type_label">
-                    <div class="alert alert-info mt-2" role="alert">
-                        <i class="fa fa-info-circle me-1"/>
-                        Tipo de pago aplicado:
-                        <strong><t t-esc="payment_type_label"/></strong>
+        <template id="payment_custom_amount_tabs_content"
+                  name="Custom Amount Tabs Content">
+
+            <t t-if="allow_custom_amount">
+                <div class="o_payment_amount_tabs mb-4"
+                     id="payment_amount_selector">
+
+                    <ul class="nav nav-tabs"
+                        id="paymentAmountTabs"
+                        role="tablist">
+
+                        <!-- Pestaña Total -->
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active"
+                                    id="tab-full-btn"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#tab-full"
+                                    type="button"
+                                    role="tab"
+                                    aria-selected="true"
+                                    data-payment-type="full">
+                                <i class="fa fa-check-circle me-1 text-success"/>
+                                Pago Total
+                            </button>
+                        </li>
+
+                        <!-- Pestaña Parcial (condicional) -->
+                        <t t-if="payment_partial_amount
+                                 and payment_partial_amount > 0
+                                 and payment_partial_amount != amount">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link"
+                                        id="tab-partial-btn"
+                                        data-bs-toggle="tab"
+                                        data-bs-target="#tab-partial"
+                                        type="button"
+                                        role="tab"
+                                        aria-selected="false"
+                                        data-payment-type="partial"
+                                        t-att-data-amount-value="payment_partial_amount">
+                                    <i class="fa fa-adjust me-1 text-warning"/>
+                                    Pago Parcial
+                                </button>
+                            </li>
+                        </t>
+
+                        <!-- Pestaña Otro Monto -->
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link"
+                                    id="tab-custom-btn"
+                                    data-bs-toggle="tab"
+                                    data-bs-target="#tab-custom"
+                                    type="button"
+                                    role="tab"
+                                    aria-selected="false"
+                                    data-payment-type="custom">
+                                <i class="fa fa-pencil me-1 text-primary"/>
+                                Otro Monto
+                            </button>
+                        </li>
+
+                    </ul>
+
+                    <div class="tab-content border border-top-0 rounded-bottom p-3 bg-white"
+                         id="paymentAmountTabsContent">
+
+                        <!-- Contenido: Total -->
+                        <div class="tab-pane fade show active"
+                             id="tab-full" role="tabpanel">
+                            <div class="d-flex align-items-center justify-content-between py-2">
+                                <div>
+                                    <p class="mb-1 fw-semibold">Monto total a pagar</p>
+                                    <p class="text-muted small mb-0">
+                                        Cancela el saldo completo de la factura.
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="fs-4 fw-bold text-success o_payment_full_amount">
+                                        <t t-esc="amount"/>
+                                    </span>
+                                    <span class="ms-1 text-muted small">
+                                        <t t-esc="currency.name if currency else ''"/>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Contenido: Parcial -->
+                        <t t-if="payment_partial_amount
+                                 and payment_partial_amount > 0
+                                 and payment_partial_amount != amount">
+                            <div class="tab-pane fade"
+                                 id="tab-partial" role="tabpanel">
+                                <div class="d-flex align-items-center justify-content-between py-2">
+                                    <div>
+                                        <p class="mb-1 fw-semibold">Monto parcial pactado</p>
+                                    </div>
+                                    <div class="text-end">
+                                        <span class="fs-4 fw-bold text-warning">
+                                            <t t-esc="payment_partial_amount"/>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </t>
+
+                        <!-- Contenido: Personalizado -->
+                        <div class="tab-pane fade"
+                             id="tab-custom" role="tabpanel">
+                            <div class="py-2">
+                                <p class="mb-2 fw-semibold">
+                                    Ingresa el monto que deseas pagar
+                                </p>
+                                <div class="input-group input-group-lg mb-2">
+                                    <span class="input-group-text">
+                                        <t t-esc="currency.symbol if currency else '$'"/>
+                                    </span>
+                                    <input type="number"
+                                           id="custom_payment_amount_input"
+                                           class="form-control o_custom_amount_input"
+                                           placeholder="0.00"
+                                           step="0.01"
+                                           t-att-min="custom_min_amount"
+                                           t-att-max="amount"
+                                           t-att-data-min="custom_min_amount"
+                                           t-att-data-max="amount"
+                                           aria-label="Monto personalizado"/>
+                                    <span class="input-group-text">
+                                        <t t-esc="currency.name if currency else 'COP'"/>
+                                    </span>
+                                </div>
+                                <div id="custom_amount_feedback"
+                                     class="invalid-feedback d-none"/>
+                                <p class="text-muted small mb-0">
+                                    Mínimo: <strong><t t-esc="custom_min_amount"/></strong>
+                                    — Máximo: <strong><t t-esc="amount"/></strong>
+                                </p>
+                            </div>
+                        </div>
+
                     </div>
-                </t>
-            </xpath>
+                </div>
+
+                <!-- Campos ocultos para comunicar la selección al form nativo -->
+                <input type="hidden" id="payment_selected_amount"
+                       name="payment_selected_amount"
+                       t-att-value="amount"/>
+                <input type="hidden" id="payment_selected_type"
+                       name="payment_selected_type"
+                       value="full"/>
+
+            </t>
         </template>
 
     </data>
