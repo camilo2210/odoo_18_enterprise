@@ -17,7 +17,7 @@
                     El ref interno de esa pagina en Odoo 18 es page_sales_purchases.
                     Usamos el grupo "Sales" que tiene name="sales_man" como anchor.
                 -->
-                <xpath expr="//page[@name='sales_purchase']" position="inside">
+                <xpath expr="//page[@name='sales_purchases']" position="inside">
                     <group string="Payment Link" name="custom_payment_group"
                            groups="account.group_account_manager,sales_team.group_sale_manager">
                         <field name="allow_custom_payment_amount"
