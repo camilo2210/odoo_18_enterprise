@@ -3,188 +3,274 @@
     <data>
 
         <!--
-            TEMPLATE 1: hereda el modal de pago del portal de facturas
-            (/my/invoices/ID) — es el flujo que usa el botón "Pagar ahora"
-            y el link directo de la factura.
-            El template base es account_payment.portal_invoice_payment_wizard
-            o account.portal_invoice_page según la version.
-            Usamos ambos para cubrir los dos flujos.
+        ═══════════════════════════════════════════════════════════════════
+        TEMPLATE BASE: contenido de la pestaña "Otro Monto"
+        Declarado como template independiente para ser llamado con t-call
+        desde múltiples puntos de herencia.
+        ═══════════════════════════════════════════════════════════════════
         -->
-
-        <!-- Flujo 1: modal dentro de /my/invoices/ID (botón Pagar ahora) -->
-        <template id="portal_invoice_payment_custom_tabs"
-                  inherit_id="account_payment.portal_invoice_payment_wizard"
-                  name="Custom Amount Tabs - Invoice Portal">
-            <xpath expr="//div[hasclass('o_payment_form')]" position="before">
-                <t t-call="payment_custom_amount.payment_custom_amount_tabs_content"/>
-            </xpath>
+        <template id="payment_custom_amount_tab_button"
+                  name="Custom Amount - Tab Button">
+            <!--
+            Botón de pestaña "Otro Monto".
+            Se inserta en el grupo de botones #o_payment_tabs.
+            Solo visible si allow_custom_amount está en el contexto.
+            -->
+            <t t-if="allow_custom_amount">
+                <button class="btn btn-outline-primary o_btn_payment_tab"
+                        id="o_payment_custom_tab"
+                        data-bs-toggle="pill"
+                        data-bs-target="#o_payment_custom"
+                        type="button"
+                        role="tab"
+                        aria-controls="o_payment_custom"
+                        aria-selected="false">
+                    <strong>Otro Monto</strong><br/>
+                    <span class="text-muted small">Ingresa el valor</span>
+                </button>
+            </t>
         </template>
 
-        <!-- Flujo 2: payment link directo (/payment/pay) -->
-        <template id="payment_pay_custom_amount_tabs"
-                  inherit_id="payment.pay"
-                  name="Custom Amount Tabs - Payment Pay">
-            <xpath expr="//div[hasclass('o_payment_form')]" position="before">
-                <t t-call="payment_custom_amount.payment_custom_amount_tabs_content"/>
-            </xpath>
+        <template id="payment_custom_amount_tab_pane"
+                  name="Custom Amount - Tab Pane">
+            <!--
+            Contenido del panel "Otro Monto".
+            Se inserta dentro del .tab-content del modal de pago.
+            -->
+            <t t-if="allow_custom_amount">
+                <div class="tab-pane my-3"
+                     id="o_payment_custom"
+                     role="tabpanel"
+                     aria-labelledby="o_payment_custom_tab"
+                     tabindex="0">
+
+                    <div class="mb-3">
+                        <label for="custom_payment_amount_input"
+                               class="form-label fw-semibold">
+                            Ingresa el monto que deseas pagar
+                        </label>
+                        <div class="input-group">
+                            <span class="input-group-text">
+                                <t t-out="currency.symbol or currency.name"/>
+                            </span>
+                            <input type="number"
+                                   id="custom_payment_amount_input"
+                                   class="form-control o_custom_amount_input"
+                                   placeholder="0.00"
+                                   step="0.01"
+                                   t-att-min="custom_min_amount"
+                                   t-att-max="amount_due"
+                                   t-att-data-min="custom_min_amount"
+                                   t-att-data-max="amount_due"
+                                   t-att-data-invoice-id="invoice.id"
+                                   aria-label="Monto personalizado"/>
+                            <span class="input-group-text">
+                                <t t-out="currency.name"/>
+                            </span>
+                        </div>
+                        <div id="custom_amount_feedback"
+                             class="invalid-feedback">
+                        </div>
+                        <div class="form-text text-muted mt-1">
+                            Mínimo:
+                            <strong>
+                                <t t-out="custom_min_amount"
+                                   t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                            </strong>
+                            — Máximo:
+                            <strong>
+                                <t t-out="amount_due"
+                                   t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                            </strong>
+                        </div>
+                    </div>
+
+                    <!-- El formulario de pago nativo: Odoo maneja el submit -->
+                    <t t-call="account_payment.form">
+                        <t t-set="amount" t-value="amount_due"/>
+                    </t>
+
+                    <!-- Campo oculto para comunicar el monto personalizado al JS -->
+                    <input type="hidden"
+                           id="payment_custom_selected_amount"
+                           name="payment_custom_selected_amount"
+                           value="0"/>
+
+                </div>
+            </t>
         </template>
 
         <!--
-            TEMPLATE COMPARTIDO: contenido real de las pestañas.
-            Se reutiliza en ambos flujos.
+        ═══════════════════════════════════════════════════════════════════
+        HERENCIA 1: Caso con pestañas nativas (Installment + Full Amount)
+        → Se agrega el botón "Otro Monto" al grupo de tabs existente
+        → Se agrega el pane al tab-content existente
+        xmlid correcto en Odoo 18: account_payment.portal_invoice_payment
+        ═══════════════════════════════════════════════════════════════════
         -->
-        <template id="payment_custom_amount_tabs_content"
-                  name="Custom Amount Tabs Content">
+        <template id="portal_invoice_payment_custom_tabs"
+                  inherit_id="account_payment.portal_invoice_payment"
+                  name="Custom Amount - Tabs en modal de factura">
 
-            <t t-if="allow_custom_amount">
-                <div class="o_payment_amount_tabs mb-4"
-                     id="payment_amount_selector">
+            <!-- Agregar botón al grupo de pestañas existente (Installment/Full) -->
+            <xpath expr="//div[@id='o_payment_tabs']" position="inside">
+                <t t-call="payment_custom_amount.payment_custom_amount_tab_button"/>
+            </xpath>
 
-                    <ul class="nav nav-tabs"
-                        id="paymentAmountTabs"
-                        role="tablist">
+            <!-- Agregar pane al contenedor de contenido existente -->
+            <xpath expr="//div[@id='o_payment_tabcontent']" position="inside">
+                <t t-call="payment_custom_amount.payment_custom_amount_tab_pane"/>
+            </xpath>
 
-                        <!-- Pestaña Total -->
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active"
-                                    id="tab-full-btn"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#tab-full"
-                                    type="button"
-                                    role="tab"
-                                    aria-selected="true"
-                                    data-payment-type="full">
-                                <i class="fa fa-check-circle me-1 text-success"/>
-                                Pago Total
-                            </button>
-                        </li>
+        </template>
 
-                        <!-- Pestaña Parcial (condicional) -->
-                        <t t-if="payment_partial_amount
-                                 and payment_partial_amount > 0
-                                 and payment_partial_amount != amount">
-                            <li class="nav-item" role="presentation">
-                                <button class="nav-link"
-                                        id="tab-partial-btn"
-                                        data-bs-toggle="tab"
-                                        data-bs-target="#tab-partial"
-                                        type="button"
-                                        role="tab"
-                                        aria-selected="false"
-                                        data-payment-type="partial"
-                                        t-att-data-amount-value="payment_partial_amount">
-                                    <i class="fa fa-adjust me-1 text-warning"/>
-                                    Pago Parcial
-                                </button>
-                            </li>
-                        </t>
+        <!--
+        ═══════════════════════════════════════════════════════════════════
+        HERENCIA 2: Caso SIN pestañas (solo Full Amount, sin cuotas)
+        → El bloque t-else no tiene tabs; se crea un nuevo grupo de tabs
+          antes del formulario de pago nativo.
+        ═══════════════════════════════════════════════════════════════════
+        -->
+        <template id="portal_invoice_payment_custom_no_tabs"
+                  inherit_id="account_payment.portal_invoice_payment"
+                  name="Custom Amount - Sin cuotas (solo total)">
 
-                        <!-- Pestaña Otro Monto -->
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link"
-                                    id="tab-custom-btn"
-                                    data-bs-toggle="tab"
-                                    data-bs-target="#tab-custom"
-                                    type="button"
-                                    role="tab"
-                                    aria-selected="false"
-                                    data-payment-type="custom">
-                                <i class="fa fa-pencil me-1 text-primary"/>
-                                Otro Monto
-                            </button>
-                        </li>
+            <!--
+            Cuando no hay installments, el template usa el bloque t-else
+            que contiene directamente un t-call="account_payment.form".
+            Insertamos nuestras pestañas ANTES de ese t-call.
+            Usamos el div de resumen de monto como ancla segura.
+            -->
+            <xpath expr="//t[@t-else='']/t[@t-call='account_payment.form']"
+                   position="before">
+                <t t-if="allow_custom_amount">
 
-                    </ul>
+                    <!-- Grupo de pestañas: Total vs Otro Monto -->
+                    <div class="btn-group w-100 mb-3"
+                         id="o_payment_custom_tabs_simple"
+                         role="tablist">
 
-                    <div class="tab-content border border-top-0 rounded-bottom p-3 bg-white"
-                         id="paymentAmountTabsContent">
+                        <button class="btn btn-outline-primary o_btn_payment_tab active"
+                                id="o_payment_full_simple_tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#o_payment_full_simple"
+                                type="button"
+                                role="tab"
+                                aria-controls="o_payment_full_simple"
+                                aria-selected="true">
+                            <strong>Total</strong><br/>
+                            <t t-out="amount_due"
+                               t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                        </button>
 
-                        <!-- Contenido: Total -->
-                        <div class="tab-pane fade show active"
-                             id="tab-full" role="tabpanel">
-                            <div class="d-flex align-items-center justify-content-between py-2">
-                                <div>
-                                    <p class="mb-1 fw-semibold">Monto total a pagar</p>
-                                    <p class="text-muted small mb-0">
-                                        Cancela el saldo completo de la factura.
-                                    </p>
-                                </div>
-                                <div class="text-end">
-                                    <span class="fs-4 fw-bold text-success o_payment_full_amount">
-                                        <t t-esc="amount"/>
-                                    </span>
-                                    <span class="ms-1 text-muted small">
-                                        <t t-esc="currency.name if currency else ''"/>
-                                    </span>
-                                </div>
-                            </div>
+                        <button class="btn btn-outline-primary o_btn_payment_tab"
+                                id="o_payment_custom_simple_tab"
+                                data-bs-toggle="pill"
+                                data-bs-target="#o_payment_custom_simple"
+                                type="button"
+                                role="tab"
+                                aria-controls="o_payment_custom_simple"
+                                aria-selected="false">
+                            <strong>Otro Monto</strong><br/>
+                            <span class="text-muted small">Ingresa el valor</span>
+                        </button>
+
+                    </div>
+
+                    <div class="tab-content" id="o_payment_custom_tabcontent_simple">
+
+                        <!-- Pane: Total (activo por defecto) -->
+                        <div class="tab-pane show active my-3"
+                             id="o_payment_full_simple"
+                             role="tabpanel"
+                             tabindex="0">
+                            <!-- El t-call original del padre se renderiza aquí vía JS;
+                                 el form nativo queda fuera de los panes para que siempre
+                                 esté presente y Odoo pueda hacer el submit. -->
                         </div>
 
-                        <!-- Contenido: Parcial -->
-                        <t t-if="payment_partial_amount
-                                 and payment_partial_amount > 0
-                                 and payment_partial_amount != amount">
-                            <div class="tab-pane fade"
-                                 id="tab-partial" role="tabpanel">
-                                <div class="d-flex align-items-center justify-content-between py-2">
-                                    <div>
-                                        <p class="mb-1 fw-semibold">Monto parcial pactado</p>
-                                    </div>
-                                    <div class="text-end">
-                                        <span class="fs-4 fw-bold text-warning">
-                                            <t t-esc="payment_partial_amount"/>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                        </t>
-
-                        <!-- Contenido: Personalizado -->
-                        <div class="tab-pane fade"
-                             id="tab-custom" role="tabpanel">
-                            <div class="py-2">
-                                <p class="mb-2 fw-semibold">
+                        <!-- Pane: Otro Monto -->
+                        <div class="tab-pane my-3"
+                             id="o_payment_custom_simple"
+                             role="tabpanel"
+                             tabindex="0">
+                            <div class="mb-3">
+                                <label for="custom_payment_amount_input_simple"
+                                       class="form-label fw-semibold">
                                     Ingresa el monto que deseas pagar
-                                </p>
-                                <div class="input-group input-group-lg mb-2">
+                                </label>
+                                <div class="input-group">
                                     <span class="input-group-text">
-                                        <t t-esc="currency.symbol if currency else '$'"/>
+                                        <t t-out="currency.symbol or currency.name"/>
                                     </span>
                                     <input type="number"
-                                           id="custom_payment_amount_input"
+                                           id="custom_payment_amount_input_simple"
                                            class="form-control o_custom_amount_input"
                                            placeholder="0.00"
                                            step="0.01"
                                            t-att-min="custom_min_amount"
-                                           t-att-max="amount"
+                                           t-att-max="amount_due"
                                            t-att-data-min="custom_min_amount"
-                                           t-att-data-max="amount"
+                                           t-att-data-max="amount_due"
+                                           t-att-data-invoice-id="invoice.id"
                                            aria-label="Monto personalizado"/>
                                     <span class="input-group-text">
-                                        <t t-esc="currency.name if currency else 'COP'"/>
+                                        <t t-out="currency.name"/>
                                     </span>
                                 </div>
-                                <div id="custom_amount_feedback"
-                                     class="invalid-feedback d-none"/>
-                                <p class="text-muted small mb-0">
-                                    Mínimo: <strong><t t-esc="custom_min_amount"/></strong>
-                                    — Máximo: <strong><t t-esc="amount"/></strong>
-                                </p>
+                                <div id="custom_amount_feedback_simple"
+                                     class="invalid-feedback"></div>
+                                <div class="form-text text-muted mt-1">
+                                    Mínimo:
+                                    <strong>
+                                        <t t-out="custom_min_amount"
+                                           t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                    </strong>
+                                    — Máximo:
+                                    <strong>
+                                        <t t-out="amount_due"
+                                           t-options="{'widget': 'monetary', 'display_currency': currency}"/>
+                                    </strong>
+                                </div>
                             </div>
                         </div>
 
-                    </div>
-                </div>
+                    </div><!-- /.tab-content -->
 
-                <!-- Campos ocultos para comunicar la selección al form nativo -->
-                <input type="hidden" id="payment_selected_amount"
-                       name="payment_selected_amount"
-                       t-att-value="amount"/>
-                <input type="hidden" id="payment_selected_type"
-                       name="payment_selected_type"
-                       value="full"/>
+                    <input type="hidden"
+                           id="payment_custom_selected_amount"
+                           name="payment_custom_selected_amount"
+                           value="0"/>
 
-            </t>
+                </t><!-- /t-if allow_custom_amount -->
+            </xpath>
+
+        </template>
+
+        <!--
+        ═══════════════════════════════════════════════════════════════════
+        HERENCIA 3: Inyectar variables en portal_invoice_page
+        → Agrega allow_custom_amount y custom_min_amount al contexto
+          de la página de factura del portal (heredado de account)
+        ═══════════════════════════════════════════════════════════════════
+        -->
+        <template id="portal_invoice_page_custom_amount_ctx"
+                  inherit_id="account_payment.portal_invoice_page_inherit_payment"
+                  name="Custom Amount - Contexto en página de factura">
+
+            <!--
+            Inyectar las variables de contexto justo antes del t-call
+            que llama al modal de pago, para que estén disponibles
+            cuando portal_invoice_payment se renderiza.
+            -->
+            <xpath expr="//t[@t-call='account_payment.portal_invoice_payment']"
+                   position="before">
+                <t t-set="allow_custom_amount"
+                   t-value="invoice.allow_custom_payment_amount"/>
+                <t t-set="custom_min_amount"
+                   t-value="invoice.custom_payment_min_amount"/>
+            </xpath>
+
         </template>
 
     </data>
