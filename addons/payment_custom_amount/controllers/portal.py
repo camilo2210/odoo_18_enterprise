@@ -3,6 +3,7 @@ import logging
 from odoo import http, _
 from odoo.http import request
 from odoo.addons.payment.controllers.portal import PaymentPortal
+from odoo.addons.payment import utils as payment_utils
 
 _logger = logging.getLogger(__name__)
 
@@ -10,7 +11,6 @@ MERCADO_PAGO_COLOMBIA_MIN = 1500.0
 
 
 def _get_global_min_amount(env):
-    """Lee el monto mínimo global desde ir.config_parameter."""
     try:
         value = float(
             env['ir.config_parameter'].sudo().get_param(
@@ -25,101 +25,87 @@ def _get_global_min_amount(env):
 
 
 class PaymentCustomAmountPortal(PaymentPortal):
-    """
-    Hereda PaymentPortal para interceptar payment_pay e inyectar
-    allow_custom_amount y custom_min_amount al template.
-    El flujo /my/invoices/<id> se maneja exclusivamente desde el XML
-    mediante t-set — no se necesita override del controlador.
-    """
 
-    @http.route()
-    def payment_pay(self, *args, **kwargs):
+    # ── Override del endpoint que crea la payment.transaction ────────────────
+    @http.route(
+        '/invoice/transaction/<int:invoice_id>',
+        type='json',
+        auth='public',
+    )
+    def invoice_transaction(self, invoice_id, access_token, **kwargs):
         """
-        Override del controlador principal de pago.
-        Cubre el flujo de payment link directo (no desde /my/invoices).
+        Override del endpoint nativo de account_payment.
+        Intercepta el monto personalizado guardado en sesión y lo aplica
+        ANTES de que se cree la payment.transaction.
         """
-        response = super().payment_pay(*args, **kwargs)
-        try:
-            if hasattr(response, 'qcontext'):
-                self._inject_custom_amount_vars(response.qcontext, kwargs)
-            elif isinstance(response, dict):
-                self._inject_custom_amount_vars(response, kwargs)
-        except Exception as e:
-            _logger.exception(
-                'Error inyectando variables en payment_pay: %s', str(e)
-            )
-        return response
+        # Recuperar monto personalizado de la sesión
+        custom_amount = request.session.pop('custom_payment_amount', None)
 
-    def _inject_custom_amount_vars(self, values, kwargs):
-        """
-        Resuelve el partner e inyecta allow_custom_amount y custom_min_amount
-        en el dict del template QWeb.
-        """
-        allow_custom = False
-        min_amount = _get_global_min_amount(request.env)
-
-        # Fuente 1: partner_id directo en kwargs o values
-        partner_id = kwargs.get('partner_id') or values.get('partner_id')
-
-        # Fuente 2: invoice_id (flujo correo de factura)
-        invoice_id = kwargs.get('invoice_id') or values.get('invoice_id')
-        if not partner_id and invoice_id:
+        if custom_amount:
             try:
-                invoice = request.env['account.move'].sudo().browse(int(invoice_id))
-                if invoice.exists():
-                    partner_id = invoice.partner_id.id
-            except Exception as e:
-                _logger.warning(
-                    'No se pudo resolver partner desde invoice_id: %s', str(e)
-                )
+                custom_amount = float(custom_amount)
+                min_amount = _get_global_min_amount(request.env)
 
-        # Fuente 3: access_token
-        if not partner_id:
-            access_token = kwargs.get('access_token', '')
-            if access_token:
-                try:
-                    invoice = request.env['account.move'].sudo().search(
-                        [('access_token', '=', access_token)], limit=1
-                    )
-                    if invoice:
-                        partner_id = invoice.partner_id.id
-                except Exception as e:
+                # Validar rango
+                invoice = request.env['account.move'].sudo().browse(invoice_id)
+                max_amount = invoice.amount_residual if invoice.exists() else 0
+
+                if custom_amount < min_amount:
                     _logger.warning(
-                        'No se pudo resolver partner desde access_token: %s', str(e)
+                        'Monto personalizado %.2f menor al mínimo %.2f, usando total',
+                        custom_amount, min_amount,
                     )
+                    custom_amount = None
+                elif max_amount > 0 and custom_amount > max_amount:
+                    _logger.warning(
+                        'Monto personalizado %.2f mayor al saldo %.2f, usando total',
+                        custom_amount, max_amount,
+                    )
+                    custom_amount = None
+                else:
+                    _logger.info(
+                        'Aplicando monto personalizado %.2f para factura %s',
+                        custom_amount, invoice_id,
+                    )
+                    # Inyectar el monto en kwargs para que el super() lo use
+                    kwargs['amount'] = custom_amount
 
-        # Resolver allow_custom desde el partner encontrado
-        if partner_id:
-            try:
-                partner = request.env['res.partner'].sudo().browse(int(partner_id))
-                commercial = partner.commercial_partner_id
-                allow_custom = commercial.allow_custom_payment_amount
-                _logger.info(
-                    'payment_pay: partner=%s allow_custom=%s min=%.2f',
-                    commercial.name, allow_custom, min_amount,
-                )
-            except Exception as e:
-                _logger.warning(
-                    'Error resolviendo partner %s: %s', partner_id, str(e)
-                )
+            except (TypeError, ValueError) as e:
+                _logger.warning('Monto personalizado inválido en sesión: %s', str(e))
+                custom_amount = None
 
-        values['allow_custom_amount'] = allow_custom
-        values['custom_min_amount'] = min_amount
+        # Llamar al controlador nativo con el monto (modificado o no)
+        from odoo.addons.account_payment.controllers.portal import PortalAccount
+        portal = PortalAccount()
+        return portal.invoice_transaction(invoice_id, access_token, **kwargs)
 
-        # Sobrescribir si el payment link manual trae allow_custom=1 en URL
-        if not allow_custom:
-            url_allow = kwargs.get('allow_custom', '0')
-            if str(url_allow) == '1':
-                values['allow_custom_amount'] = True
-                url_min = kwargs.get('min_amount')
-                if url_min:
-                    try:
-                        values['custom_min_amount'] = max(
-                            float(url_min), MERCADO_PAGO_COLOMBIA_MIN
-                        )
-                    except (TypeError, ValueError):
-                        pass
+    # ── Guardar monto en sesión desde JS ─────────────────────────────────────
+    @http.route(
+        '/payment/custom/save_session_amount',
+        type='json',
+        auth='public',
+        methods=['POST'],
+        csrf=False,
+    )
+    def save_session_amount(self, amount, **kwargs):
+        """Guarda el monto personalizado en sesión antes del submit."""
+        try:
+            amount = float(amount)
+            min_amount = _get_global_min_amount(request.env)
+            if amount >= min_amount:
+                request.session['custom_payment_amount'] = amount
+                _logger.info('Monto personalizado %.2f guardado en sesión', amount)
+                return {'success': True, 'amount': amount}
+            else:
+                return {
+                    'success': False,
+                    'message': 'Monto inferior al mínimo permitido (%.2f)' % min_amount,
+                }
+        except (TypeError, ValueError) as e:
+            _logger.warning('Error guardando monto en sesión: %s', str(e))
+            return {'success': False, 'message': str(e)}
 
+    # ── Validación AJAX ───────────────────────────────────────────────────────
     @http.route(
         '/payment/custom/validate_amount',
         type='json',
@@ -128,7 +114,6 @@ class PaymentCustomAmountPortal(PaymentPortal):
         csrf=False,
     )
     def validate_custom_amount(self, amount, invoice_id=None, **kwargs):
-        """Valida el monto personalizado vía AJAX."""
         try:
             amount = float(amount)
         except (TypeError, ValueError):
@@ -141,15 +126,14 @@ class PaymentCustomAmountPortal(PaymentPortal):
                 'valid': False,
                 'message': _(
                     'El monto mínimo permitido es %.2f COP '
-                    '(estándar Mercado Pago Colombia).',
-                    min_amount,
+                    '(estándar Mercado Pago Colombia).', min_amount,
                 ),
             }
 
         if invoice_id:
             try:
                 invoice = request.env['account.move'].sudo().browse(int(invoice_id))
-                if invoice.exists() and invoice.move_type in ('out_invoice', 'out_refund'):
+                if invoice.exists():
                     max_amount = invoice.amount_residual
                     if amount > max_amount:
                         return {
@@ -160,12 +144,11 @@ class PaymentCustomAmountPortal(PaymentPortal):
                             ),
                         }
             except Exception as e:
-                _logger.warning(
-                    'Error al validar monto contra factura %s: %s', invoice_id, str(e)
-                )
+                _logger.warning('Error validando contra factura %s: %s', invoice_id, str(e))
 
         return {'valid': True, 'message': _('Monto válido.'), 'amount': amount}
 
+    # ── Registro de auditoría ─────────────────────────────────────────────────
     @http.route(
         '/payment/custom/record_transaction',
         type='json',
@@ -174,18 +157,11 @@ class PaymentCustomAmountPortal(PaymentPortal):
         csrf=False,
     )
     def record_custom_transaction(
-        self,
-        reference,
-        partner_id,
-        invoice_id=None,
-        invoice_total=0.0,
-        requested_amount=0.0,
-        payment_type='custom',
-        provider_code='',
-        currency_id=None,
-        **kwargs
+        self, reference, partner_id,
+        invoice_id=None, invoice_total=0.0,
+        requested_amount=0.0, payment_type='custom',
+        provider_code='', currency_id=None, **kwargs
     ):
-        """Crea registro de auditoría para transacciones con monto personalizado."""
         try:
             seq = request.env['ir.sequence'].sudo().next_by_code(
                 'payment.custom.transaction'
@@ -204,14 +180,9 @@ class PaymentCustomAmountPortal(PaymentPortal):
                 ),
                 'state': 'pending',
             }
-            tx_record = request.env['payment.custom.transaction'].sudo().create(values)
-            _logger.info(
-                'Registro creado: id=%s ref=%s amount=%.2f',
-                tx_record.id, tx_record.reference, tx_record.requested_amount,
-            )
-            return {'success': True, 'record_id': tx_record.id}
+            tx = request.env['payment.custom.transaction'].sudo().create(values)
+            _logger.info('Auditoría creada: id=%s ref=%s', tx.id, tx.reference)
+            return {'success': True, 'record_id': tx.id}
         except Exception as e:
-            _logger.exception(
-                'Error al crear registro de transacción personalizada: %s', str(e)
-            )
+            _logger.exception('Error creando registro de auditoría: %s', str(e))
             return {'success': False, 'message': str(e)}
