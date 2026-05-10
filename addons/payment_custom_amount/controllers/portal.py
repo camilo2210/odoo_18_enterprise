@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# -*- coding: utf-8 -*-
 import logging
 from odoo import http, _
 from odoo.http import request
@@ -28,7 +27,6 @@ class PaymentCustomAmountPortal(PaymentPortal):
 
     @http.route()
     def payment_pay(self, *args, **kwargs):
-        """Override para inyectar variables de monto personalizado al template."""
         response = super().payment_pay(*args, **kwargs)
         try:
             qcontext = getattr(response, 'qcontext', None)
@@ -65,58 +63,6 @@ class PaymentCustomAmountPortal(PaymentPortal):
         values['allow_custom_amount'] = allow_custom
         values['custom_min_amount'] = min_amount
 
-    # ── OVERRIDE CORRECTO del endpoint que crea payment.transaction ──────────
-
-    @http.route(
-        ['/invoice/transaction/<int:invoice_id>'],
-        type='json',
-        auth='public',
-    )
-    def invoice_transaction(self, invoice_id, access_token, **kwargs):
-        """
-        Override del endpoint /invoice/transaction/<id>.
-        Intercepta el monto personalizado de la sesión y lo pasa
-        como 'amount' antes de crear la payment.transaction.
-
-        En Odoo 18 este endpoint está en PaymentPortal y delega
-        a _create_transaction internamente.
-        """
-        # Recuperar monto personalizado guardado en sesión por el JS
-        custom_amount = request.session.pop('custom_payment_amount', None)
-
-        if custom_amount is not None:
-            try:
-                custom_amount = float(custom_amount)
-                min_amount = _get_global_min_amount(request.env)
-
-                invoice = request.env['account.move'].sudo().browse(invoice_id)
-                max_amount = invoice.amount_residual if invoice.exists() else 0
-
-                if custom_amount < min_amount:
-                    _logger.warning(
-                        'Monto personalizado %.2f < mínimo %.2f — usando total',
-                        custom_amount, min_amount,
-                    )
-                elif max_amount > 0 and custom_amount > max_amount:
-                    _logger.warning(
-                        'Monto personalizado %.2f > saldo %.2f — usando total',
-                        custom_amount, max_amount,
-                    )
-                else:
-                    kwargs['amount'] = custom_amount
-                    _logger.info(
-                        'Monto personalizado %.2f aplicado a factura %s',
-                        custom_amount, invoice_id,
-                    )
-
-            except (TypeError, ValueError) as e:
-                _logger.warning('Monto personalizado inválido en sesión: %s', str(e))
-
-        # Delegar al método nativo via super() — él llama _create_transaction
-        return super().invoice_transaction(invoice_id, access_token, **kwargs)
-
-    # ── Guardar monto en sesión desde el JS ───────────────────────────────────
-
     @http.route(
         '/payment/custom/save_session_amount',
         type='json',
@@ -140,8 +86,6 @@ class PaymentCustomAmountPortal(PaymentPortal):
             _logger.warning('Error guardando monto en sesión: %s', str(e))
             return {'success': False, 'message': str(e)}
 
-    # ── Validación AJAX ───────────────────────────────────────────────────────
-
     @http.route(
         '/payment/custom/validate_amount',
         type='json',
@@ -157,25 +101,17 @@ class PaymentCustomAmountPortal(PaymentPortal):
 
         min_amount = _get_global_min_amount(request.env)
         if amount < min_amount:
-            return {
-                'valid': False,
-                'message': _('Monto mínimo: %.2f COP.', min_amount),
-            }
+            return {'valid': False, 'message': _('Monto mínimo: %.2f COP.', min_amount)}
 
         if invoice_id:
             try:
                 inv = request.env['account.move'].sudo().browse(int(invoice_id))
                 if inv.exists() and amount > inv.amount_residual:
-                    return {
-                        'valid': False,
-                        'message': _('Supera el saldo (%.2f).', inv.amount_residual),
-                    }
+                    return {'valid': False, 'message': _('Supera el saldo (%.2f).', inv.amount_residual)}
             except Exception as e:
                 _logger.warning('Error validando factura: %s', str(e))
 
         return {'valid': True, 'message': _('Monto válido.'), 'amount': amount}
-
-    # ── Auditoría ─────────────────────────────────────────────────────────────
 
     @http.route(
         '/payment/custom/record_transaction',
