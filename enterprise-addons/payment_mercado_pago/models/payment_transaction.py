@@ -73,9 +73,9 @@ class PaymentTransaction(models.Model):
         return {
             'auto_return': 'all',
             'back_urls': {
-                'success': return_url,
-                'pending': return_url,
-                'failure': return_url,
+                'success': 'https://pruebasodoo18jcc.dpdns.org/payment/mercado_pago/return',
+                'pending': 'https://pruebasodoo18jcc.dpdns.org/payment/mercado_pago/return',
+                'failure': 'https://pruebasodoo18jcc.dpdns.org/payment/mercado_pago/return',
             },
             'external_reference': self.reference,
             'items': [{
