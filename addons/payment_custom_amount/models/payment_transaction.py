@@ -1,87 +1,76 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import models
+from odoo import models, api, fields
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
 
 MERCADO_PAGO_COLOMBIA_MIN = 1500.0
 
-
-def _pop_custom_amount(env):
-    """
-    Lee y elimina el monto personalizado de la sesión HTTP.
-    Retorna float o None si no hay sesión / no hay valor.
-    """
+def _pop_custom_amount():
+    """ Lee y extrae el monto de la sesión HTTP """
     try:
         if request and hasattr(request, 'session'):
-            value = request.session.pop('custom_payment_amount', None)
-            if value is not None:
-                return float(value)
-    except RuntimeError:
-        pass
-    except (TypeError, ValueError) as e:
-        _logger.warning('Monto personalizado inválido en sesión: %s', str(e))
-    return None
-
-
-def _get_global_min(env):
-    try:
-        val = float(
-            env['ir.config_parameter'].sudo().get_param(
-                'payment_custom_amount.min_amount',
-                default=str(MERCADO_PAGO_COLOMBIA_MIN),
-            )
-        )
-        return max(val, MERCADO_PAGO_COLOMBIA_MIN)
+            return request.session.pop('custom_payment_amount', None)
     except Exception:
-        return MERCADO_PAGO_COLOMBIA_MIN
-
+        pass
+    return None
 
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
     @api.model_create_multi
     def create(self, vals_list):
+        """ 
+        Paso 1: Al crear la transacción, si hay un monto en sesión, 
+        lo forzamos en el campo 'amount'.
+        """
+        custom_amount = _pop_custom_amount()
         for vals in vals_list:
-            # Si la transacción viene de una factura y hay un monto personalizado en el contexto 
-            # o en los parámetros de la solicitud, lo respetamos.
-            if vals.get('move_id') and self._context.get('custom_payment_amount'):
-                vals['amount'] = float(self._context.get('custom_payment_amount'))
+            if custom_amount and vals.get('move_id'):
+                vals['amount'] = float(custom_amount)
+                _logger.info("TX Create: Aplicando monto personalizado %.2f desde sesión", vals['amount'])
+        
+        # Si sacamos el monto de la sesión, lo volvemos a poner temporalmente 
+        # para que el método de Mercado Pago también lo vea si es necesario.
+        if custom_amount:
+            request.session['custom_payment_amount'] = custom_amount
+            
         return super().create(vals_list)
 
     def _mercado_pago_prepare_preference_request_payload(self):
         """
-        Override del método que construye el JSON enviado a Mercado Pago.
-        Es el punto más seguro para aplicar el monto personalizado porque:
-        - Se ejecuta justo antes de llamar a la API de MP
-        - unit_price = self.amount se lee DESPUÉS de nuestro cambio
-        - No depende del caché del ORM ni de llamadas previas
+        Paso 2: Garantía final para Mercado Pago.
+        Si por alguna razón Odoo recalculó el total, aquí lo volvemos a forzar
+        directamente en la base de datos antes de generar el JSON.
         """
-        custom_amount = _pop_custom_amount(self.env)
+        res = super()._mercado_pago_prepare_preference_request_payload()
+        
+        # Recuperamos y limpiamos definitivamente la sesión
+        custom_amount = _pop_custom_amount()
+        
+        if custom_amount:
+            custom_amount = float(custom_amount)
+            # Actualización directa por SQL para evitar re-cálculos del ORM
+            self.env.cr.execute(
+                "UPDATE payment_transaction SET amount = %s WHERE id = %s",
+                (custom_amount, self.id)
+            )
+            # Invalidamos caché para que self.amount devuelva el nuevo valor
+            self.invalidate_recordset(['amount'])
+            
+            _logger.info("TX %s: Payload MP forzado a %.2f", self.reference, custom_amount)
+            
+            # Actualizamos el payload que ya se generó en el super()
+            if 'items' in res and len(res['items']) > 0:
+                res['items'][0]['unit_price'] = custom_amount
+                # Si el addon envía varios items, es mejor colapsarlos a uno solo con el monto personalizado
+                if len(res['items']) > 1:
+                    res['items'] = [{
+                        'title': f"Pago parcial factura {self.reference}",
+                        'quantity': 1,
+                        'unit_price': custom_amount,
+                        'currency_id': self.currency_id.name,
+                    }]
 
-        if custom_amount is not None:
-            min_amount = _get_global_min(self.env)
-            original  = self.amount
-
-            if custom_amount >= min_amount and custom_amount <= original:
-                _logger.info(
-                    'TX %s | MP payload: aplicando monto personalizado %.2f '
-                    '(original: %.2f)',
-                    self.reference, custom_amount, original,
-                )
-                # Modificar directamente en memoria el campo amount
-                # para que unit_price = self.amount tome el valor correcto
-                self.env.cr.execute(
-                    'UPDATE payment_transaction SET amount = %s WHERE id = %s',
-                    (custom_amount, self.id)
-                )
-                self.invalidate_recordset(['amount'])
-            else:
-                _logger.warning(
-                    'TX %s | MP payload: monto personalizado %.2f fuera de '
-                    'rango [%.2f, %.2f] — ignorado, se usará monto original',
-                    self.reference, custom_amount, min_amount, original,
-                )
-
-        return super()._mercado_pago_prepare_preference_request_payload()
+        return res

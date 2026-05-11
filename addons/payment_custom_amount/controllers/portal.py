@@ -2,13 +2,11 @@
 import logging
 from odoo import http, _
 from odoo.http import request
-from odoo.addons.payment import utils as payment_utils
 from odoo.addons.account_payment.controllers.portal import PortalAccount
 
 _logger = logging.getLogger(__name__)
 
 MERCADO_PAGO_COLOMBIA_MIN = 1500.0
-
 
 def _get_global_min_amount(env):
     try:
@@ -23,60 +21,35 @@ def _get_global_min_amount(env):
         _logger.warning('Error leyendo monto mínimo global: %s', str(e))
         return MERCADO_PAGO_COLOMBIA_MIN
 
-
 class PaymentCustomAmountPortal(PortalAccount):
 
     @http.route()
     def invoice_transaction(self, invoice_id, access_token, **kwargs):
-        # ... tu lógica de validación actual ...
+        """
+        Override de /invoice/transaction/<id> para interceptar el monto
+        personalizado. Se guarda en sesión para que payment.transaction lo procese.
+        """
         custom_amount = kwargs.get('custom_payment_amount')
         custom_type = kwargs.get('custom_payment_type')
 
-        if custom_amount and custom_type == 'custom':
-            # Forzamos el monto que Odoo espera leer en el parámetro 'amount'
-            kwargs['amount'] = float(custom_amount)
-            
-            # CRÍTICO: Odoo v18 valida el token de acceso. 
-            # Asegúrate de que no se esté recalculando el total en el super().
-            _logger.info("Inyectando monto personalizado: %s", kwargs['amount'])
+        if custom_type == 'custom' and custom_amount:
+            try:
+                amount_float = float(custom_amount)
+                min_amt = _get_global_min_amount(request.env)
+                
+                # Validación de seguridad en servidor
+                if amount_float >= min_amt:
+                    # PASO CLAVE: Guardar en sesión para el modelo payment.transaction
+                    request.session['custom_payment_amount'] = amount_float
+                    # Forzamos el monto en kwargs para el flujo estándar de Odoo
+                    kwargs['amount'] = amount_float
+                    _logger.info("Monto personalizado %.2f inyectado en sesión", amount_float)
+                else:
+                    _logger.warning("Monto %.2f por debajo del mínimo %.2f", amount_float, min_amt)
+            except (ValueError, TypeError):
+                _logger.error("Monto personalizado inválido recibido: %s", custom_amount)
 
         return super().invoice_transaction(invoice_id, access_token, **kwargs)
-
-
-class PaymentCustomAmountValidation(http.Controller):
-
-    @http.route(
-        '/payment/custom/validate_amount',
-        type='json',
-        auth='public',
-        methods=['POST'],
-        csrf=False,
-    )
-    def validate_custom_amount(self, amount, invoice_id=None, **kwargs):
-        try:
-            amount = float(amount)
-        except (TypeError, ValueError):
-            return {'valid': False, 'message': _('El monto ingresado no es válido.')}
-
-        min_amount = _get_global_min_amount(request.env)
-        if amount < min_amount:
-            return {
-                'valid': False,
-                'message': _('El monto mínimo permitido es %.2f COP.', min_amount),
-            }
-
-        if invoice_id:
-            try:
-                inv = request.env['account.move'].sudo().browse(int(invoice_id))
-                if inv.exists() and amount > inv.amount_residual:
-                    return {
-                        'valid': False,
-                        'message': _('Supera el saldo pendiente (%.2f).', inv.amount_residual),
-                    }
-            except Exception as e:
-                _logger.warning('Error validando factura: %s', str(e))
-
-        return {'valid': True, 'message': _('Monto válido.'), 'amount': amount}
 
     @http.route(
         '/payment/custom/record_transaction',
@@ -91,10 +64,9 @@ class PaymentCustomAmountValidation(http.Controller):
         requested_amount=0.0, payment_type='custom',
         provider_code='', currency_id=None, **kwargs
     ):
+        """ Ruta de auditoría para registrar el intento de pago personalizado """
         try:
-            seq = request.env['ir.sequence'].sudo().next_by_code(
-                'payment.custom.transaction'
-            )
+            seq = request.env['ir.sequence'].sudo().next_by_code('payment.custom.transaction')
             tx = request.env['payment.custom.transaction'].sudo().create({
                 'reference': reference or ('CUSTOM-%s' % seq),
                 'partner_id': int(partner_id) if partner_id else False,
@@ -103,14 +75,10 @@ class PaymentCustomAmountValidation(http.Controller):
                 'requested_amount': float(requested_amount),
                 'payment_type': payment_type,
                 'provider_code': provider_code or '',
-                'currency_id': (
-                    int(currency_id) if currency_id
-                    else request.env.company.currency_id.id
-                ),
+                'currency_id': int(currency_id) if currency_id else request.env.company.currency_id.id,
                 'state': 'pending',
             })
-            _logger.info('Auditoría: id=%s ref=%s', tx.id, tx.reference)
             return {'success': True, 'record_id': tx.id}
         except Exception as e:
-            _logger.exception('Error en auditoría: %s', str(e))
-            return {'success': False, 'message': str(e)}
+            _logger.error("Error en auditoría: %s", str(e))
+            return {'success': False, 'error': str(e)}
