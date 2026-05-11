@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<odoo>
+
+    <template
+        id="portal_invoice_custom_amount"
+        inherit_id="account.portal_invoice_page"
+    >
+
+        <xpath expr="//div[contains(@class, 'o_portal_payment')]" position="inside">
+
+            <t t-if="invoice.partner_id.allow_custom_portal_amount and invoice.amount_residual > 0">
+
+                <form
+                    t-att-action="'/my/invoices/%s/custom_pay' % invoice.id"
+                    method="post"
+                    class="mb-3"
+                >
+
+                    <input
+                        type="hidden"
+                        name="csrf_token"
+                        t-att-value="request.csrf_token()"
+                    />
+
+                    <div class="card mt-3 mb-3">
+
+                        <div class="card-body">
+
+                            <h5 class="mb-3">
+                                Custom Payment Amount
+                            </h5>
+
+                            <div class="mb-3">
+
+                                <label class="form-label">
+                                    Amount to pay
+                                </label>
+
+                                <input
+                                    type="number"
+                                    name="custom_amount"
+                                    step="0.01"
+                                    min="1"
+                                    t-att-max="invoice.amount_residual"
+                                    t-att-value="invoice.amount_residual"
+                                    class="form-control"
+                                    required="required"
+                                />
+
+                                <small class="text-muted">
+                                    Remaining balance:
+                                    <t t-esc="invoice.amount_residual"/>
+                                </small>
+
+                            </div>
+
+                            <button
+                                type="submit"
+                                class="btn btn-primary"
+                            >
+                                Continue to Payment
+                            </button>
+
+                        </div>
+
+                    </div>
+
+                </form>
+
+            </t>
+
+        </xpath>
+
+    </template>
+
+</odoo>
