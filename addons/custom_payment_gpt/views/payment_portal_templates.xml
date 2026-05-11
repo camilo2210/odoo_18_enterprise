@@ -4,7 +4,8 @@
     <template id="portal_invoice_page_inherit_custom" inherit_id="account.portal_invoice_page">
         <xpath expr="//div[@id='invoice_content']" position="inside">
             <!-- USAMOS .sudo() para que el usuario público pueda leer el check del partner -->
-            <t t-set="allow_partial_pay" t-value="invoice.partner_id.sudo().x_allow_partial_payment if invoice.partner_id else False"/>
+            <t t-set="allow_partial_pay" 
+               t-value="invoice.partner_id.sudo().x_allow_partial_payment if invoice.partner_id else False"/>
         </xpath>
     </template>
 
