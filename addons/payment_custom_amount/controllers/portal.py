@@ -1,106 +1,32 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo import http, _
+from odoo import http
 from odoo.http import request
+from odoo.addons.account_payment.controllers.portal import PortalAccount
 
 _logger = logging.getLogger(__name__)
 
-MERCADO_PAGO_COLOMBIA_MIN = 1500.0
+_logger.info(">>> PAYMENT_PAY recibido: amount=%s, access_token=%s", amount, access_token)
 
-def _get_global_min_amount(env):
-    try:
-        value = float(
-            env['ir.config_parameter'].sudo().get_param(
-                'payment_custom_amount.min_amount',
-                default=str(MERCADO_PAGO_COLOMBIA_MIN),
-            )
-        )
-        return max(value, MERCADO_PAGO_COLOMBIA_MIN)
-    except Exception as e:
-        _logger.warning('Error leyendo monto mínimo global: %s', str(e))
-        return MERCADO_PAGO_COLOMBIA_MIN
+class PaymentCustomAmountPortal(PortalAccount):
 
+    @http.route()
+    def invoice_transaction(self, invoice_id, access_token, **kwargs):
+        # 1. Extraer valores del formulario
+        custom_amount = kwargs.get('custom_payment_amount')
+        custom_type = kwargs.get('custom_payment_type')
 
-class PaymentCustomAmountPortal(http.Controller):
-    """
-    Controller propio del módulo.
-    NO hereda PortalAccount para no interferir con la ruta
-    /invoice/transaction/ ni romper la validación CSRF nativa de Odoo.
-    El monto personalizado lo inyecta window.fetch (JS) directamente
-    en el body antes de que salga la petición al servidor.
-    """
-
-    @http.route(
-        '/payment/custom/record_transaction',
-        type='json',
-        auth='public',
-        methods=['POST'],
-        csrf=False,
-    )
-    def record_custom_transaction(
-        self, reference, partner_id,
-        invoice_id=None, invoice_total=0.0,
-        requested_amount=0.0, payment_type='custom',
-        provider_code='', currency_id=None, **kwargs
-    ):
-        """ Ruta de auditoría para registrar el intento de pago personalizado """
-        try:
-            seq = request.env['ir.sequence'].sudo().next_by_code('payment.custom.transaction')
-            tx = request.env['payment.custom.transaction'].sudo().create({
-                'reference': reference or ('CUSTOM-%s' % seq),
-                'partner_id': int(partner_id) if partner_id else False,
-                'move_id': int(invoice_id) if invoice_id else False,
-                'invoice_total': float(invoice_total),
-                'requested_amount': float(requested_amount),
-                'payment_type': payment_type,
-                'provider_code': provider_code or '',
-                'currency_id': int(currency_id) if currency_id else request.env.company.currency_id.id,
-                'state': 'pending',
-            })
-            return {'success': True, 'record_id': tx.id}
-        except Exception as e:
-            _logger.error("Error en auditoría: %s", str(e))
-            return {'success': False, 'error': str(e)}
-
-
-class PaymentCustomAmountValidation(http.Controller):
-    """
-    Endpoint AJAX para validar el monto personalizado en tiempo real
-    desde el portal, antes de que el cliente confirme el pago.
-    """
-
-    @http.route(
-        '/payment/custom/validate_amount',
-        type='json',
-        auth='public',
-        methods=['POST'],
-        csrf=False,
-    )
-    def validate_custom_amount(self, amount, invoice_id=None, **kwargs):
-        try:
-            amount = float(amount)
-        except (TypeError, ValueError):
-            return {'valid': False, 'message': _('El monto ingresado no es válido.')}
-
-        min_amount = _get_global_min_amount(request.env)
-        if amount < min_amount:
-            return {
-                'valid': False,
-                'message': _('El monto mínimo permitido es %.2f COP.', min_amount),
-            }
-
-        if invoice_id:
+        if custom_type == 'custom' and custom_amount:
             try:
-                inv = request.env['account.move'].sudo().browse(int(invoice_id))
-                if inv.exists() and amount > inv.amount_residual:
-                    return {
-                        'valid': False,
-                        'message': _(
-                            'Supera el saldo pendiente (%.2f).',
-                            inv.amount_residual,
-                        ),
-                    }
-            except Exception as e:
-                _logger.warning('Error validando contra factura: %s', str(e))
+                amount_float = float(custom_amount)
+                # GUARDAR EN SESIÓN: Esto es vital para que el modelo lo vea
+                request.session['custom_payment_amount'] = amount_float
+                
+                # FORZAR EN KWARGS: Odoo busca la llave 'amount'
+                kwargs['amount'] = amount_float
+                
+                _logger.info(">>> [PORTAL] Inyectando monto personalizado en sesión: %.2f", amount_float)
+            except (ValueError, TypeError):
+                _logger.error(">>> [PORTAL] Error al convertir monto: %s", custom_amount)
 
-        return {'valid': True, 'message': _('Monto válido.'), 'amount': amount}
+        return super().invoice_transaction(invoice_id, access_token, **kwargs)
