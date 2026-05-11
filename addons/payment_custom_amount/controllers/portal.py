@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
-from odoo.addons.account_payment.controllers.payment import InvoicePaymentController
+from odoo.addons.account_payment.controllers.payment import PaymentPortal
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
