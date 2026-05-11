@@ -1,10 +1,10 @@
-from odoo import fields, models
-
+from odoo import models, fields
 
 class ResPartner(models.Model):
-    _inherit = "res.partner"
+    _inherit = 'res.partner'
 
-    allow_custom_portal_amount = fields.Boolean(
-        string="Allow Custom Portal Payment Amount",
-        help="Allow this customer to enter a custom amount when paying invoices from the portal."
+    # Campo para habilitar el comportamiento solicitado
+    x_allow_partial_portal_payment = fields.Boolean(
+        string="Permitir Abonos en Portal",
+        help="Si está marcado, el cliente podrá ingresar montos parciales al pagar facturas desde el portal."
     )

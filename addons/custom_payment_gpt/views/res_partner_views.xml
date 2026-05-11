@@ -1,24 +1,12 @@
-<?xml version="1.0" encoding="UTF-8"?>
-
 <odoo>
-
-    <record id="view_partner_form_custom_portal_payment" model="ir.ui.view">
-        <field name="name">res.partner.form.custom.portal.payment</field>
+    <record id="view_partner_form_inherit_partial_payment" model="ir.ui.view">
+        <field name="name">res.partner.form.inherit.partial.payment</field>
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="base.view_partner_form"/>
         <field name="arch" type="xml">
-
-            <xpath expr="//page[@name='sales_purchases']" position="inside">
-
-                <group string="Portal Payments">
-
-                    <field name="allow_custom_portal_amount"/>
-
-                </group>
-
+            <xpath expr="//page[@name='sales_purchases']//group[@name='misc']" position="inside">
+                <field name="x_allow_partial_portal_payment"/>
             </xpath>
-
         </field>
     </record>
-
 </odoo>

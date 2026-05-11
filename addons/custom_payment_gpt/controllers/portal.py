@@ -1,53 +1,35 @@
-from odoo import http
+from odoo import http, _
 from odoo.http import request
+from odoo.addons.website_payment.controllers.portal import WebsitePaymentPortal
 
+class CustomWebsitePaymentPortal(WebsitePaymentPortal):
 
-class PortalCustomPaymentController(http.Controller):
+    @http.route()
+    def payment_transaction(self, amount=None, invoice_id=None, **kwargs):
+        """
+        Sobreescribimos la ruta que genera la transacción para aplicar 
+        las validaciones de abono libre y mínimos de Mercado Pago.
+        """
+        if invoice_id and amount:
+            invoice = request.env['account.move'].browse(int(invoice_id))
+            partner = invoice.partner_id
 
-    @http.route(
-        ["/my/invoices/<int:invoice_id>/custom_pay"],
-        type="http",
-        auth="public",
-        website=True,
-        csrf=True,
-    )
-    def portal_custom_pay(self, invoice_id, custom_amount=None, **kwargs):
+            # 1. Verificar si el cliente tiene permitido el abono parcial
+            if partner.x_allow_partial_portal_payment:
+                try:
+                    custom_amount = float(amount)
+                except ValueError:
+                    return {'error': _("Monto inválido.")}
 
-        invoice = request.env["account.move"].sudo().browse(invoice_id)
+                # 2. Validación de Mínimo para Mercado Pago (1,500 COP)
+                if invoice.currency_id.name == 'COP' and custom_amount < 1500:
+                    return {'error': _("El abono mínimo permitido es de 1,500 COP.")}
 
-        if not invoice.exists():
-            return request.not_found()
+                # 3. Validación de Máximo (No pagar más de lo que debe)
+                if custom_amount > invoice.amount_residual:
+                    return {'error': _("El monto no puede ser superior al saldo pendiente.")}
+                
+                # Pasamos el monto validado al flujo estándar
+                kwargs['amount'] = custom_amount
 
-        if invoice.move_type != "out_invoice":
-            return request.redirect("/my")
-
-        if invoice.state != "posted":
-            return request.redirect(invoice.get_portal_url())
-
-        if invoice.payment_state == "paid":
-            return request.redirect(invoice.get_portal_url())
-
-        try:
-            amount = float(custom_amount or 0)
-        except Exception:
-            amount = 0
-
-        if amount <= 0:
-            return request.redirect(invoice.get_portal_url())
-
-        if amount > invoice.amount_residual:
-            amount = invoice.amount_residual
-
-        request.session["custom_payment_amount"] = amount
-
-        return request.redirect(
-            "/payment/pay"
-            "?reference=%s"
-            "&amount=%s"
-            "&invoice_id=%s"
-            % (
-                invoice.name,
-                amount,
-                invoice.id,
-            )
-        )
+        return super().payment_transaction(amount=amount, invoice_id=invoice_id, **kwargs)

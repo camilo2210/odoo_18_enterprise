@@ -1,0 +1,24 @@
+<template id="portal_invoice_payment_custom_amount" inherit_id="website_payment.portal_invoice_payment">
+    <xpath expr="//input[@name='amount']" position="replace">
+        <t t-if="invoice.partner_id.x_allow_partial_portal_payment">
+            <!-- Si el cliente tiene permiso, el input es editable -->
+            <div class="input-group mb-3">
+                <span class="input-group-text">$</span>
+                <input type="number" 
+                       name="amount" 
+                       t-att-value="amount or invoice.amount_residual" 
+                       class="form-control" 
+                       step="0.01"
+                       t-att-min="1500 if invoice.currency_id.name == 'COP' else 1"
+                       t-att-max="invoice.amount_residual"
+                       required="required"/>
+            </div>
+            <small class="text-muted">Abono libre (Mínimo 1,500 COP)</small>
+        </t>
+        <t t-else="">
+            <!-- Comportamiento estándar: Solo lectura -->
+            <input type="hidden" name="amount" t-att-value="invoice.amount_residual"/>
+            <span t-esc="invoice.amount_residual" t-options="{'widget': 'monetary', 'display_currency': invoice.currency_id}"/>
+        </t>
+    </xpath>
+</template>
