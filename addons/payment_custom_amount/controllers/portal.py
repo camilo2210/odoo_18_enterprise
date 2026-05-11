@@ -6,7 +6,7 @@ from odoo.http import request
 _logger = logging.getLogger(__name__)
 
 
-class PaymentCustomAmountPortal(InvoicePaymentController):
+class PaymentCustomAmountPortal(PaymentPortal):
 
     def invoice_transaction(self, invoice_id, access_token, **kwargs):
         _logger.info(
