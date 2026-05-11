@@ -41,6 +41,15 @@ def _get_global_min(env):
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
+    @api.model_create_multi
+    def create(self, vals_list):
+        for vals in vals_list:
+            # Si la transacción viene de una factura y hay un monto personalizado en el contexto 
+            # o en los parámetros de la solicitud, lo respetamos.
+            if vals.get('move_id') and self._context.get('custom_payment_amount'):
+                vals['amount'] = float(self._context.get('custom_payment_amount'))
+        return super().create(vals_list)
+
     def _mercado_pago_prepare_preference_request_payload(self):
         """
         Override del método que construye el JSON enviado a Mercado Pago.

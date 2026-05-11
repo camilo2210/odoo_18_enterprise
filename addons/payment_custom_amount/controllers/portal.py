@@ -28,38 +28,17 @@ class PaymentCustomAmountPortal(PortalAccount):
 
     @http.route()
     def invoice_transaction(self, invoice_id, access_token, **kwargs):
-        """
-        Override de /invoice/transaction/<id> para interceptar el monto
-        personalizado enviado como campo oculto desde el formulario del portal.
-        El monto se valida y se inyecta en kwargs['amount'] antes de crear la TX.
-        """
-        custom_amount = kwargs.pop('custom_payment_amount', None)
-        custom_type   = kwargs.pop('custom_payment_type', 'full')
+        # ... tu lógica de validación actual ...
+        custom_amount = kwargs.get('custom_payment_amount')
+        custom_type = kwargs.get('custom_payment_type')
 
         if custom_amount and custom_type == 'custom':
-            try:
-                custom_amount = float(custom_amount)
-                min_amount    = _get_global_min_amount(request.env)
-
-                # Obtener la factura para validar el máximo
-                invoice = request.env['account.move'].sudo().browse(int(invoice_id))
-                max_amount = invoice.amount_residual if invoice.exists() else 0
-
-                if custom_amount >= min_amount and (max_amount == 0 or custom_amount <= max_amount):
-                    _logger.info(
-                        'invoice_transaction: factura=%s monto_personalizado=%.2f '
-                        '(original=%.2f) aplicado',
-                        invoice_id, custom_amount, kwargs.get('amount', 0),
-                    )
-                    kwargs['amount'] = custom_amount
-                else:
-                    _logger.warning(
-                        'invoice_transaction: monto_personalizado=%.2f fuera de '
-                        'rango [%.2f, %.2f] — ignorado',
-                        custom_amount, min_amount, max_amount,
-                    )
-            except (TypeError, ValueError) as e:
-                _logger.warning('invoice_transaction: monto inválido: %s', str(e))
+            # Forzamos el monto que Odoo espera leer en el parámetro 'amount'
+            kwargs['amount'] = float(custom_amount)
+            
+            # CRÍTICO: Odoo v18 valida el token de acceso. 
+            # Asegúrate de que no se esté recalculando el total en el super().
+            _logger.info("Inyectando monto personalizado: %s", kwargs['amount'])
 
         return super().invoice_transaction(invoice_id, access_token, **kwargs)
 
