@@ -10,7 +10,7 @@
 
     <!-- 2. Modificación del componente de pago para incluir pestañas (Nav-Tabs) -->
     <template id="portal_invoice_payment_tabs" inherit_id="account_payment.portal_invoice_payment">
-        <xpath expr="//div[hasclass('o_payment_form')]" position="inside">
+        <xpath expr="//div[@id='payment_method_selection']" position="before">
             <t t-if="allow_partial_pay">
                 <!-- Estructura de Pestañas Estándar Bootstrap 5 para v18 -->
                 <ul class="nav nav-tabs mb-3" id="payment_type_tab" role="tablist">
