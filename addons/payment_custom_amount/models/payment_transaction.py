@@ -1,4 +1,3 @@
-cat > /home/ubuntu/carpeta_odoo/addons/payment_custom_amount/models/payment_transaction.py << 'PYEOF'
 # -*- coding: utf-8 -*-
 import logging
 from odoo import models
@@ -77,5 +76,3 @@ class PaymentTransaction(models.Model):
                 )
 
         return super()._mercado_pago_prepare_preference_request_payload()
-PYEOF
-echo "✅ payment_transaction.py actualizado"
