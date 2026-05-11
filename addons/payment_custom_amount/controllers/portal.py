@@ -8,7 +8,7 @@ _logger = logging.getLogger(__name__)
 
 class PaymentCustomAmountPortal(PortalAccount):
 
-    _logger.info(">>> PAYMENT_PAY recibido: amount=%s, access_token=%s", amount, access_token)
+_logger.info(">>> PAYMENT_PAY recibido: amount=%s, access_token=%s", amount, access_token)
 
     @http.route()
     def invoice_transaction(self, invoice_id, access_token, **kwargs):
