@@ -1,54 +1,81 @@
-    # models/payment_transaction.py
+cat > /home/ubuntu/carpeta_odoo/addons/payment_custom_amount/models/payment_transaction.py << 'PYEOF'
 # -*- coding: utf-8 -*-
 import logging
-from odoo import models, api
+from odoo import models
 from odoo.http import request
 
 _logger = logging.getLogger(__name__)
+
+MERCADO_PAGO_COLOMBIA_MIN = 1500.0
+
+
+def _pop_custom_amount(env):
+    """
+    Lee y elimina el monto personalizado de la sesión HTTP.
+    Retorna float o None si no hay sesión / no hay valor.
+    """
+    try:
+        if request and hasattr(request, 'session'):
+            value = request.session.pop('custom_payment_amount', None)
+            if value is not None:
+                return float(value)
+    except RuntimeError:
+        pass
+    except (TypeError, ValueError) as e:
+        _logger.warning('Monto personalizado inválido en sesión: %s', str(e))
+    return None
+
+
+def _get_global_min(env):
+    try:
+        val = float(
+            env['ir.config_parameter'].sudo().get_param(
+                'payment_custom_amount.min_amount',
+                default=str(MERCADO_PAGO_COLOMBIA_MIN),
+            )
+        )
+        return max(val, MERCADO_PAGO_COLOMBIA_MIN)
+    except Exception:
+        return MERCADO_PAGO_COLOMBIA_MIN
 
 
 class PaymentTransaction(models.Model):
     _inherit = 'payment.transaction'
 
-    def _get_processing_values(self):
+    def _mercado_pago_prepare_preference_request_payload(self):
         """
-        Override del método que construye los valores enviados al proveedor.
-        Es el ÚNICO punto seguro para modificar el amount antes de que
-        Mercado Pago / ePayco reciban el JSON — ocurre después de que
-        el controlador ya validó el HMAC del token.
+        Override del método que construye el JSON enviado a Mercado Pago.
+        Es el punto más seguro para aplicar el monto personalizado porque:
+        - Se ejecuta justo antes de llamar a la API de MP
+        - unit_price = self.amount se lee DESPUÉS de nuestro cambio
+        - No depende del caché del ORM ni de llamadas previas
         """
-        # Recuperar monto personalizado de la sesión
-        custom_amount = None
-        try:
-            if request and hasattr(request, 'session'):
-                custom_amount = request.session.pop('custom_payment_amount', None)
-        except RuntimeError:
-            # Fuera de contexto HTTP (cron, test, etc.)
-            pass
+        custom_amount = _pop_custom_amount(self.env)
 
         if custom_amount is not None:
-            try:
-                custom_amount = float(custom_amount)
-                min_amount = float(
-                    self.env['ir.config_parameter'].sudo().get_param(
-                        'payment_custom_amount.min_amount', default='1500.0'
-                    )
+            min_amount = _get_global_min(self.env)
+            original  = self.amount
+
+            if custom_amount >= min_amount and custom_amount <= original:
+                _logger.info(
+                    'TX %s | MP payload: aplicando monto personalizado %.2f '
+                    '(original: %.2f)',
+                    self.reference, custom_amount, original,
                 )
-                min_amount = max(min_amount, 1500.0)
+                # Modificar directamente en memoria el campo amount
+                # para que unit_price = self.amount tome el valor correcto
+                self.env.cr.execute(
+                    'UPDATE payment_transaction SET amount = %s WHERE id = %s',
+                    (custom_amount, self.id)
+                )
+                self.invalidate_recordset(['amount'])
+            else:
+                _logger.warning(
+                    'TX %s | MP payload: monto personalizado %.2f fuera de '
+                    'rango [%.2f, %.2f] — ignorado, se usará monto original',
+                    self.reference, custom_amount, min_amount, original,
+                )
 
-                if custom_amount >= min_amount and custom_amount <= self.amount:
-                    _logger.info(
-                        'TX %s: aplicando monto personalizado %.2f (original: %.2f)',
-                        self.reference, custom_amount, self.amount,
-                    )
-                    # Modificar el amount en el recordset antes de procesar
-                    self.sudo().write({'amount': custom_amount})
-                else:
-                    _logger.warning(
-                        'TX %s: monto personalizado %.2f fuera de rango [%.2f, %.2f] — ignorado',
-                        self.reference, custom_amount, min_amount, self.amount,
-                    )
-            except (TypeError, ValueError) as e:
-                _logger.warning('TX %s: monto personalizado inválido: %s', self.reference, str(e))
-
-        return super()._get_processing_values()
+        return super()._mercado_pago_prepare_preference_request_payload()
+PYEOF
+echo "✅ payment_transaction.py actualizado"
