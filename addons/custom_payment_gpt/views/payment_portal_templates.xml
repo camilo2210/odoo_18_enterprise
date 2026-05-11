@@ -4,7 +4,7 @@
     <template id="portal_invoice_page_inherit_custom" inherit_id="account.portal_invoice_page">
         <xpath expr="//div[@id='invoice_content']" position="inside">
             <!-- Cargamos la preferencia del contacto en una variable de ambiente de la vista -->
-            <t t-set="allow_partial_pay" t-value="invoice.partner_id.x_allow_partial_payment"/>
+            <t t-set="allow_partial_pay" t-value="getattr(invoice.partner_id, 'x_allow_partial_payment', False)"/>
         </xpath>
     </template>
 
