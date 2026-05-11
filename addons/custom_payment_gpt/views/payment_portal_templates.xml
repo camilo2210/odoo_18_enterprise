@@ -1,16 +1,23 @@
-<!-- Inyección de variables en la página del portal (Heredando de account) -->
-<template id="portal_invoice_page_custom_amount_ctx" inherit_id="account.portal_invoice_page">
-    <!-- Usamos el contenedor principal de la factura en Odoo 18 -->
-    <xpath expr="//div[@id='portal_invoice_content']" position="before">
-        <t t-set="allow_custom_amount" t-value="invoice.allow_custom_payment_amount"/>
-        <t t-set="custom_min_amount" t-value="invoice.custom_payment_min_amount"/>
-    </xpath>
-</template>
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <!-- 1. Inyección de variables (Heredando de account) -->
+        <template id="portal_invoice_page_custom_amount_ctx" inherit_id="account.portal_invoice_page" name="Custom Amount Context">
+            <xpath expr="//div[@id='portal_invoice_content']" position="before">
+                <t t-set="allow_custom_amount" t-value="invoice.allow_custom_payment_amount"/>
+                <t t-set="custom_min_amount" t-value="invoice.custom_payment_min_amount"/>
+            </xpath>
+        </template>
 
-<!-- Modificación del modal de pago (Heredando de account_payment) -->
-<template id="portal_invoice_payment_custom_amount" inherit_id="account_payment.portal_invoice_payment">
-    <!-- En v18, el modal suele usar 'o_payment_tabs' para installments -->
-    <xpath expr="//div[hasclass('o_payment_portal_content')]" position="inside">
-        <!-- Aquí va la lógica de tus pestañas que ya funciona -->
-    </xpath>
-</template>
+        <!-- 2. Modificación del modal de pago (Heredando de account_payment) -->
+        <template id="portal_invoice_payment_custom_amount" inherit_id="account_payment.portal_invoice_payment" name="Custom Amount Tab Logic">
+            <!-- Localizamos el contenedor de contenido del portal de pagos -->
+            <xpath expr="//div[hasclass('o_payment_portal_content')]" position="inside">
+                <!-- Tu lógica de pestañas aquí -->
+                <t t-if="allow_custom_amount">
+                    <!-- Contenido funcional de las pestañas -->
+                </t>
+            </xpath>
+        </template>
+    </data>
+</odoo>
