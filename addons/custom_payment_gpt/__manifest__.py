@@ -14,6 +14,11 @@
         'views/res_partner_views.xml',
         'views/payment_portal_templates.xml',
     ],
+    'assets': {
+        'web.assets_frontend': [
+            'custom_payment_gpt/static/src/js/portal_payment_custom.js',
+        ],
+    },
     'installable': True,
     'application': False,
     'license': 'LGPL-3',

@@ -1,23 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
-        <!-- 1. Inyección de variables (Heredando de account) -->
-        <template id="portal_invoice_page_custom_amount_ctx" inherit_id="account.portal_invoice_page" name="Custom Amount Context">
-            <xpath expr="//div[@id='portal_invoice_content']" position="before">
-                <t t-set="allow_custom_amount" t-value="invoice.allow_custom_payment_amount"/>
-                <t t-set="custom_min_amount" t-value="invoice.custom_payment_min_amount"/>
-            </xpath>
-        </template>
+    <!-- 1. Aseguramos que el contexto de la factura se pase correctamente -->
+    <template id="portal_invoice_page_inherit_custom" inherit_id="account.portal_invoice_page">
+        <xpath expr="//div[hasclass('o_portal_invoice_content')]" position="before">
+            <!-- Cargamos la preferencia del contacto en una variable de ambiente de la vista -->
+            <t t-set="allow_partial_pay" t-value="invoice.partner_id.x_allow_partial_payment"/>
+        </xpath>
+    </template>
 
-        <!-- 2. Modificación del modal de pago (Heredando de account_payment) -->
-        <template id="portal_invoice_payment_custom_amount" inherit_id="account_payment.portal_invoice_payment" name="Custom Amount Tab Logic">
-            <!-- Localizamos el contenedor de contenido del portal de pagos -->
-            <xpath expr="//div[hasclass('o_payment_portal_content')]" position="inside">
-                <!-- Tu lógica de pestañas aquí -->
-                <t t-if="allow_custom_amount">
-                    <!-- Contenido funcional de las pestañas -->
-                </t>
-            </xpath>
-        </template>
-    </data>
+    <!-- 2. Modificación del componente de pago para incluir pestañas (Nav-Tabs) -->
+    <template id="portal_invoice_payment_tabs" inherit_id="account_payment.portal_invoice_payment">
+        <xpath expr="//div[hasclass('o_payment_portal_content')]" position="before">
+            <t t-if="allow_partial_pay">
+                <!-- Estructura de Pestañas Estándar Bootstrap 5 para v18 -->
+                <ul class="nav nav-tabs mb-3" id="payment_type_tab" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link active" id="total-tab" data-bs-toggle="tab" data-bs-target="#pay_total" type="button" role="tab">Pago Total</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link" id="partial-tab" data-bs-toggle="tab" data-bs-target="#pay_partial" type="button" role="tab">Otro Monto (Abono)</button>
+                    </li>
+                </ul>
+
+                <div class="tab-content" id="payment_type_tab_content">
+                    <!-- Pestaña Pago Total -->
+                    <div class="tab-pane fade show active" id="pay_total" role="tabpanel">
+                        <p class="alert alert-info">Se procesará el pago por el total de: <span t-field="invoice.amount_residual" t-options='{"widget": "monetary", "display_currency": invoice.currency_id}'/></p>
+                    </div>
+                    
+                    <!-- Pestaña Abono Parcial -->
+                    <div class="tab-pane fade" id="pay_partial" role="tabpanel">
+                        <div class="mb-3 mt-2">
+                            <label for="custom_amount_input" class="form-label font-weight-bold">Monto del abono:</label>
+                            <div class="input-group">
+                                <span class="input-group-text" t-esc="invoice.currency_id.symbol"/>
+                                <input type="number" 
+                                       name="custom_amount" 
+                                       id="custom_amount_input" 
+                                       class="form-control" 
+                                       t-att-value="invoice.amount_residual"
+                                       step="0.01"
+                                       t-att-max="invoice.amount_residual"/>
+                            </div>
+                            <div class="form-text text-muted small">Ingrese un monto inferior o igual al saldo pendiente.</div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+    </template>
 </odoo>
