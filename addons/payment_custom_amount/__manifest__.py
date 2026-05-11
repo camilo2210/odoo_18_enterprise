@@ -23,8 +23,9 @@
     ],
     'assets': {
         'web.assets_frontend': [
-            'payment_custom_amount/static/src/css/payment_custom_amount.css',
             'payment_custom_amount/static/src/js/payment_custom_amount.js',
+            'payment_custom_amount/static/src/css/payment_custom_amount.css',
+            'payment_custom_amount/static/src/js/payment_custom_amount_ui.js',
         ],
         'web.assets_backend': [
             'payment_custom_amount/static/src/css/payment_custom_amount_backend.css',
