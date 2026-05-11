@@ -7,34 +7,33 @@
         inherit_id="account.portal_invoice_page"
     >
 
-        <xpath expr="//div[contains(@class, 'o_portal_payment')]" position="inside">
+        <xpath expr="//div[@id='total']" position="before">
 
             <t t-if="invoice.partner_id.allow_custom_portal_amount and invoice.amount_residual > 0">
 
-                <form
-                    t-att-action="'/my/invoices/%s/custom_pay' % invoice.id"
-                    method="post"
-                    class="mb-3"
-                >
+                <div class="card mb-3">
 
-                    <input
-                        type="hidden"
-                        name="csrf_token"
-                        t-att-value="request.csrf_token()"
-                    />
+                    <div class="card-body">
 
-                    <div class="card mt-3 mb-3">
+                        <form
+                            t-att-action="'/my/invoices/%s/custom_pay' % invoice.id"
+                            method="post"
+                        >
 
-                        <div class="card-body">
+                            <input
+                                type="hidden"
+                                name="csrf_token"
+                                t-att-value="request.csrf_token()"
+                            />
 
                             <h5 class="mb-3">
-                                Custom Payment Amount
+                                Pago personalizado
                             </h5>
 
                             <div class="mb-3">
 
                                 <label class="form-label">
-                                    Amount to pay
+                                    Monto a pagar
                                 </label>
 
                                 <input
@@ -48,25 +47,20 @@
                                     required="required"
                                 />
 
-                                <small class="text-muted">
-                                    Remaining balance:
-                                    <t t-esc="invoice.amount_residual"/>
-                                </small>
-
                             </div>
 
                             <button
                                 type="submit"
                                 class="btn btn-primary"
                             >
-                                Continue to Payment
+                                Continuar al pago
                             </button>
 
-                        </div>
+                        </form>
 
                     </div>
 
-                </form>
+                </div>
 
             </t>
 
