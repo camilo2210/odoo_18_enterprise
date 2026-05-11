@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<odoo>
-    <data noupdate="0">
-        <!-- Se reutilizan grupos de contabilidad: no se requieren grupos propios -->
-    </data>
-</odoo>
