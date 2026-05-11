@@ -2,7 +2,7 @@
 <odoo>
     <!-- 1. Aseguramos que el contexto de la factura se pase correctamente -->
     <template id="portal_invoice_page_inherit_custom" inherit_id="account.portal_invoice_page">
-        <xpath expr="//div[hasclass('o_portal_invoice_content')]" position="before">
+        <xpath expr="//div[@id='invoice_content']" position="inside">
             <!-- Cargamos la preferencia del contacto en una variable de ambiente de la vista -->
             <t t-set="allow_partial_pay" t-value="invoice.partner_id.x_allow_partial_payment"/>
         </xpath>
