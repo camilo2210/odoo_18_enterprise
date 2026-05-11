@@ -1,32 +1,35 @@
 from odoo import http, _
 from odoo.http import request
-# CORRECCIÓN V18: Cambiamos WebsitePaymentPortal por WebsitePayment
-from odoo.addons.website_payment.controllers.portal import WebsitePayment
+# CORRECCIÓN PARA V18: La clase correcta es PaymentPortal
+from odoo.addons.website_payment.controllers.portal import PaymentPortal
 
-class CustomWebsitePayment(WebsitePayment): # Heredamos de la clase correcta
+class CustomPaymentPortal(PaymentPortal):
 
     @http.route()
     def payment_transaction(self, amount=None, invoice_id=None, **kwargs):
+        """ 
+        Extensión para permitir abonos parciales validados.
         """
-        Lógica para validar el abono parcial personalizado.
-        """
-        if invoice_id and amount:
+        if invoice_id:
+            # Buscamos la factura con sudo para evitar errores de acceso en el portal
             invoice = request.env['account.move'].sudo().browse(int(invoice_id))
-            partner = invoice.partner_id
-
-            if partner.x_allow_partial_portal_payment:
+            
+            if amount:
                 try:
+                    # Convertimos el monto ingresado a flotante
                     custom_amount = float(amount)
                 except ValueError:
-                    return {'error': _("Monto inválido.")}
+                    return {'error': _("El monto ingresado no es válido.")}
 
-                # Validación del mínimo de Mercado Pago (1,500 COP)
-                if invoice.currency_id.name == 'COP' and custom_amount < 1500:
-                    return {'error': _("El abono mínimo permitido es de 1,500 COP.")}
-
+                # VALIDACIÓN 1: No exceder el saldo residual de la factura
                 if custom_amount > invoice.amount_residual:
-                    return {'error': _("El monto no puede ser superior al saldo pendiente.")}
-                
+                    return {'error': _("El monto no puede ser superior al saldo pendiente (%s).") % invoice.amount_residual}
+
+                # VALIDACIÓN 2: Monto mínimo (Ejemplo: 1,500 COP para Mercado Pago)
+                if invoice.currency_id.name == 'COP' and custom_amount < 1500:
+                    return {'error': _("El monto mínimo para procesar el pago es de 1,500 COP.")}
+
+                # Sobrescribimos el monto para la transacción
                 kwargs['amount'] = custom_amount
 
         return super().payment_transaction(amount=amount, invoice_id=invoice_id, **kwargs)
