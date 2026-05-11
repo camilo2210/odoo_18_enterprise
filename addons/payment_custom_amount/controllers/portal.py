@@ -2,7 +2,8 @@
 import logging
 from odoo import http, _
 from odoo.http import request
-from odoo.addons.payment.controllers.portal import PaymentPortal
+from odoo.addons.payment import utils as payment_utils
+from odoo.addons.account_payment.controllers.portal import PortalAccount
 
 _logger = logging.getLogger(__name__)
 
@@ -23,68 +24,47 @@ def _get_global_min_amount(env):
         return MERCADO_PAGO_COLOMBIA_MIN
 
 
-class PaymentCustomAmountPortal(PaymentPortal):
+class PaymentCustomAmountPortal(PortalAccount):
 
     @http.route()
-    def payment_pay(self, *args, **kwargs):
-        response = super().payment_pay(*args, **kwargs)
-        try:
-            qcontext = getattr(response, 'qcontext', None)
-            if isinstance(qcontext, dict):
-                self._inject_custom_amount_vars(qcontext, kwargs)
-        except Exception as e:
-            _logger.exception('Error inyectando vars en payment_pay: %s', str(e))
-        return response
+    def invoice_transaction(self, invoice_id, access_token, **kwargs):
+        """
+        Override de /invoice/transaction/<id> para interceptar el monto
+        personalizado enviado como campo oculto desde el formulario del portal.
+        El monto se valida y se inyecta en kwargs['amount'] antes de crear la TX.
+        """
+        custom_amount = kwargs.pop('custom_payment_amount', None)
+        custom_type   = kwargs.pop('custom_payment_type', 'full')
 
-    def _inject_custom_amount_vars(self, values, kwargs):
-        allow_custom = False
-        min_amount = _get_global_min_amount(request.env)
-        partner_id = kwargs.get('partner_id') or values.get('partner_id')
-
-        if not partner_id:
-            access_token = kwargs.get('access_token', '')
-            if access_token:
-                try:
-                    invoice = request.env['account.move'].sudo().search(
-                        [('access_token', '=', access_token)], limit=1
-                    )
-                    if invoice:
-                        partner_id = invoice.partner_id.id
-                except Exception as e:
-                    _logger.warning('Error resolviendo partner: %s', str(e))
-
-        if partner_id:
+        if custom_amount and custom_type == 'custom':
             try:
-                partner = request.env['res.partner'].sudo().browse(int(partner_id))
-                allow_custom = partner.commercial_partner_id.allow_custom_payment_amount
-            except Exception as e:
-                _logger.warning('Error leyendo partner %s: %s', partner_id, str(e))
+                custom_amount = float(custom_amount)
+                min_amount    = _get_global_min_amount(request.env)
 
-        values['allow_custom_amount'] = allow_custom
-        values['custom_min_amount'] = min_amount
+                # Obtener la factura para validar el máximo
+                invoice = request.env['account.move'].sudo().browse(int(invoice_id))
+                max_amount = invoice.amount_residual if invoice.exists() else 0
 
-    @http.route(
-        '/payment/custom/save_session_amount',
-        type='json',
-        auth='public',
-        methods=['POST'],
-        csrf=False,
-    )
-    def save_session_amount(self, amount, **kwargs):
-        try:
-            amount = float(amount)
-            min_amount = _get_global_min_amount(request.env)
-            if amount >= min_amount:
-                request.session['custom_payment_amount'] = amount
-                _logger.info('Monto %.2f guardado en sesión', amount)
-                return {'success': True, 'amount': amount}
-            return {
-                'success': False,
-                'message': 'Monto inferior al mínimo (%.2f COP)' % min_amount,
-            }
-        except (TypeError, ValueError) as e:
-            _logger.warning('Error guardando monto en sesión: %s', str(e))
-            return {'success': False, 'message': str(e)}
+                if custom_amount >= min_amount and (max_amount == 0 or custom_amount <= max_amount):
+                    _logger.info(
+                        'invoice_transaction: factura=%s monto_personalizado=%.2f '
+                        '(original=%.2f) aplicado',
+                        invoice_id, custom_amount, kwargs.get('amount', 0),
+                    )
+                    kwargs['amount'] = custom_amount
+                else:
+                    _logger.warning(
+                        'invoice_transaction: monto_personalizado=%.2f fuera de '
+                        'rango [%.2f, %.2f] — ignorado',
+                        custom_amount, min_amount, max_amount,
+                    )
+            except (TypeError, ValueError) as e:
+                _logger.warning('invoice_transaction: monto inválido: %s', str(e))
+
+        return super().invoice_transaction(invoice_id, access_token, **kwargs)
+
+
+class PaymentCustomAmountValidation(http.Controller):
 
     @http.route(
         '/payment/custom/validate_amount',
@@ -97,17 +77,23 @@ class PaymentCustomAmountPortal(PaymentPortal):
         try:
             amount = float(amount)
         except (TypeError, ValueError):
-            return {'valid': False, 'message': _('Monto no válido.')}
+            return {'valid': False, 'message': _('El monto ingresado no es válido.')}
 
         min_amount = _get_global_min_amount(request.env)
         if amount < min_amount:
-            return {'valid': False, 'message': _('Monto mínimo: %.2f COP.', min_amount)}
+            return {
+                'valid': False,
+                'message': _('El monto mínimo permitido es %.2f COP.', min_amount),
+            }
 
         if invoice_id:
             try:
                 inv = request.env['account.move'].sudo().browse(int(invoice_id))
                 if inv.exists() and amount > inv.amount_residual:
-                    return {'valid': False, 'message': _('Supera el saldo (%.2f).', inv.amount_residual)}
+                    return {
+                        'valid': False,
+                        'message': _('Supera el saldo pendiente (%.2f).', inv.amount_residual),
+                    }
             except Exception as e:
                 _logger.warning('Error validando factura: %s', str(e))
 
