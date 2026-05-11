@@ -6,9 +6,9 @@ from odoo.addons.account_payment.controllers.portal import PortalAccount
 
 _logger = logging.getLogger(__name__)
 
-_logger.info(">>> PAYMENT_PAY recibido: amount=%s, access_token=%s", amount, access_token)
-
 class PaymentCustomAmountPortal(PortalAccount):
+
+    _logger.info(">>> PAYMENT_PAY recibido: amount=%s, access_token=%s", amount, access_token)
 
     @http.route()
     def invoice_transaction(self, invoice_id, access_token, **kwargs):
