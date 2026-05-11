@@ -1,18 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!-- 1. Aseguramos que el contexto de la factura se pase correctamente -->
+    <!-- 1. Herencia de la página de la factura para establecer la variable de control -->
     <template id="portal_invoice_page_inherit_custom" inherit_id="account.portal_invoice_page">
         <xpath expr="//div[@id='invoice_content']" position="inside">
-            <!-- Cargamos la preferencia del contacto en una variable de ambiente de la vista -->
-            <t t-set="allow_partial_pay" t-value="getattr(invoice.partner_id, 'x_allow_partial_payment', False)"/>
+            <!-- USAMOS .sudo() para que el usuario público pueda leer el check del partner -->
+            <t t-set="allow_partial_pay" t-value="invoice.partner_id.sudo().x_allow_partial_payment if invoice.partner_id else False"/>
         </xpath>
     </template>
 
-    <!-- 2. Modificación del componente de pago para incluir pestañas (Nav-Tabs) -->
+    <!-- 2. Modificación del componente de pago con restricción funcional -->
     <template id="portal_invoice_payment_tabs" inherit_id="account_payment.portal_invoice_payment">
         <xpath expr="//div[@id='o_payment_tabs']" position="inside">
+            <!-- Solo si el permiso está activo en el contacto se muestran las pestañas de selección -->
             <t t-if="allow_partial_pay">
-                <!-- Estructura de Pestañas Estándar Bootstrap 5 para v18 -->
                 <ul class="nav nav-tabs mb-3" id="payment_type_tab" role="tablist">
                     <li class="nav-item" role="presentation">
                         <button class="nav-link active" id="total-tab" data-bs-toggle="tab" data-bs-target="#pay_total" type="button" role="tab">Pago Total</button>
@@ -25,13 +25,16 @@
                 <div class="tab-content" id="payment_type_tab_content">
                     <!-- Pestaña Pago Total -->
                     <div class="tab-pane fade show active" id="pay_total" role="tabpanel">
-                        <p class="alert alert-info">Se procesará el pago por el total de: <span t-field="invoice.amount_residual" t-options='{"widget": "monetary", "display_currency": invoice.currency_id}'/></p>
+                        <p class="alert alert-info py-2">
+                            Se procesará el pago por el total de: 
+                            <strong t-field="invoice.amount_residual" t-options='{"widget": "monetary", "display_currency": invoice.currency_id}'/>
+                        </p>
                     </div>
                     
                     <!-- Pestaña Abono Parcial -->
                     <div class="tab-pane fade" id="pay_partial" role="tabpanel">
                         <div class="mb-3 mt-2">
-                            <label for="custom_amount_input" class="form-label font-weight-bold">Monto del abono:</label>
+                            <label for="custom_amount_input" class="form-label fw-bold">Monto del abono:</label>
                             <div class="input-group">
                                 <span class="input-group-text" t-esc="invoice.currency_id.symbol"/>
                                 <input type="number" 
@@ -47,6 +50,7 @@
                     </div>
                 </div>
             </t>
+            <!-- Si allow_partial_pay es False, el componente seguirá su flujo estándar de pago total -->
         </xpath>
     </template>
 </odoo>
