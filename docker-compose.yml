@@ -2,7 +2,7 @@ version: '3.8' # La mayoría usa versiones 3.x, a menudo más antiguas como 3.1 
 
 services:
   db:
-    image: postgres:16 # La versión de PostgreSQL también se especifica
+    image: postgres:15 # La versión de PostgreSQL también se especifica
     container_name: odoo18-db
     environment:
       - POSTGRES_USER=odoo
