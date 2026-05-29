@@ -29,6 +29,33 @@
             </field>
         </record>
 
+        <record id="view_res_partner_form_payment_custom_base" model="ir.ui.view">
+            <field name="name">res.partner.form.payment.custom.amount.base</field>
+            <field name="model">res.partner</field>
+            <!-- Heredar de sale para poder insertar dentro de sales_purchases -->
+            <field name="inherit_id" ref="sale.res_partner_view_buttons"/>
+            <field name="priority">99</field>
+            <field name="arch" type="xml">
+                <!-- Insertar dentro de la pestaña Sales & Purchases, sección de Ventas -->
+                <xpath expr="//page[@name='sales_purchases']//group[@name='sale']"
+                       position="after">
+                    <group string="Payment Link"
+                           groups="account.group_account_manager,sales_team.group_sale_manager">
+                        <field name="allow_custom_payment_amount"
+                               widget="boolean_toggle"
+                               string="Permitir monto personalizado en Payment Link"/>
+                        <div class="text-muted small"
+                             invisible="not allow_custom_payment_amount">
+                            El cliente verá una pestaña extra en el portal de pago
+                            para ingresar un monto inferior al total.
+                            El monto mínimo global se configura en
+                            Ajustes &gt; Contabilidad &gt; Pagos del cliente.
+                        </div>
+                    </group>
+                </xpath>
+            </field>
+        </record>        
+
         <record id="view_payment_custom_transaction_tree" model="ir.ui.view">
             <field name="name">payment.custom.transaction.tree</field>
             <field name="model">payment.custom.transaction</field>
