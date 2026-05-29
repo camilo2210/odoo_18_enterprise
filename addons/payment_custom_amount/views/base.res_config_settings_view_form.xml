@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_res_config_settings_payment_custom" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.payment.custom.amount</field>
+            <field name="model">res.config.settings</field>
+            <!-- Heredar de account, NO de base -->
+            <field name="inherit_id" ref="account.res_config_settings_view_form"/>
+            <field name="priority" eval="15"/>
+            <field name="arch" type="xml">
+                <!-- Apuntar al bloque "Customer Payments" existente en v18 -->
+                <xpath expr="//block[@id='pay_invoice_online_setting_container']"
+                       position="inside">
+                    <setting string="Monto mínimo pago personalizado (COP)"
+                             help="Monto mínimo global para la pestaña Otro Monto. Mínimo absoluto: 1,500 COP (Mercado Pago Colombia)."
+                             id="payment_custom_min_amount_setting"
+                             groups="account.group_account_manager">
+                        <field name="payment_custom_min_amount"/>
+                    </setting>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>
