@@ -17,7 +17,7 @@
         'security/payment_custom_amount_groups.xml',
         'data/payment_custom_amount_data.xml',
         'views/res_partner_views.xml',
-        'views/res_config_settings_views.xml',
+        'views/res_config_settings_view_form.xml',
         'views/payment_link_wizard_views.xml',
         'views/payment_portal_templates.xml',
     ],
