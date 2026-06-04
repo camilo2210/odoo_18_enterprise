@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_extended_field_creator_manager,extended.field.creator.manager,model_extended_field_creator,extended_field_creator.group_field_creator_manager,1,1,1,1
+access_extended_field_creator_user,extended.field.creator.user,model_extended_field_creator,extended_field_creator.group_field_creator_user,1,0,0,0

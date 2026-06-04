@@ -1,0 +1,5 @@
+id,name,country_id:id,is_vat,sequence
+ssn,Social Security Number,base.us,FALSE,1
+ein,Employer Identification Number,base.us,TRUE,2
+fid,Foreign ID,base.us,FALSE,3
+pass_us,Passport,base.us,FALSE,4

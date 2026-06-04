@@ -1,0 +1,58 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+    <record id="view_move_form_inh" model="ir.ui.view">
+        <field name="name">account.move.form.inh</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <field name="invoice_incoterm_id" position="after">
+                <field name="pgm_fiscal_registry"/>
+                <field name="pgm_consecutive_number"/>
+            </field>
+            <field name="ref" position="after">
+                <field name="pgm_payment_proposal"/>
+            </field>
+            <group>
+                <div class="border-top mt-3 mb-3"/>
+                <xpath expr="//field[@name='amount_residual']" position="after">
+                    <field name="amount_untaxed_signed" class="mt-5"/>
+                    <field name="amount_tax_signed"/>
+                    <field name="amount_total_signed"/>
+                    <field name="amount_residual_signed"/>
+                </xpath>
+            </group>
+        </field>
+    </record>
+
+    <record id="view_invoice_tree_inh" model="ir.ui.view">
+        <field name="name">account.move.view.tree.inh</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_date']" position="before">
+                <field name="pgm_identification_number"/>
+            </xpath>
+            <field name="status_in_payment" position="before">
+                <field name="journal_id" optional="hide"/>
+                <field name="pgm_payment_proposal"/>
+            </field>
+            <field name="status_in_payment" position="after">
+                <field name="preferred_payment_method_line_id" column_invisible="context.get('default_move_type') != 'in_invoice'"/>
+            </field>
+        </field>
+    </record>
+
+    <record id="view_move_tree_inh_latam_docs" model="ir.ui.view">
+        <field name="name">account.move.tree.inh.latam.docs</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_tree"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='ref']" position="before">
+                <field name="l10n_latam_document_type_id" optional="show"/>
+                <field name="l10n_latam_document_number" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

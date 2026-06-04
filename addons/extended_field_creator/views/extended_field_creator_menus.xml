@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ============================================================ -->
+        <!-- Window Action                                                -->
+        <!-- ============================================================ -->
+        <record id="action_extended_field_creator" model="ir.actions.act_window">
+            <field name="name">Field Creator</field>
+            <field name="res_model">extended.field.creator</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="extended_field_creator_view_search"/>
+            <field name="context">{'search_default_filter_draft': 1}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create your first custom field
+                </p>
+                <p>
+                    Use this tool to add new fields to any Odoo model
+                    without writing code. Simply pick a name, a type,
+                    and the target model — then click <strong>Confirm</strong>.
+                </p>
+            </field>
+        </record>
+
+        <record id="action_extended_field_creator_done" model="ir.actions.act_window">
+            <field name="name">Created Fields</field>
+            <field name="res_model">extended.field.creator</field>
+            <field name="view_mode">list,form</field>
+            <field name="search_view_id" ref="extended_field_creator_view_search"/>
+            <field name="domain">[('state', '=', 'done')]</field>
+            <field name="context">{}</field>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    No fields created yet
+                </p>
+                <p>
+                    Fields that have been confirmed and created will appear here.
+                </p>
+            </field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Top-Level Menu (Application)                                 -->
+        <!-- ============================================================ -->
+        <menuitem id="menu_extended_field_creator_root"
+                  name="Extended Fields"
+                  web_icon="extended_field_creator,static/description/icon.png"
+                  groups="extended_field_creator.group_field_creator_user"
+                  sequence="300"/>
+
+        <!-- Second Level -->
+        <menuitem id="menu_extended_field_creator_main"
+                  name="Field Management"
+                  parent="menu_extended_field_creator_root"
+                  sequence="10"/>
+
+        <!-- Third Level — Actions -->
+        <menuitem id="menu_extended_field_creator_list"
+                  name="Field Creator"
+                  parent="menu_extended_field_creator_main"
+                  action="action_extended_field_creator"
+                  sequence="10"/>
+
+        <menuitem id="menu_extended_field_creator_done"
+                  name="Created Fields"
+                  parent="menu_extended_field_creator_main"
+                  action="action_extended_field_creator_done"
+                  sequence="20"/>
+
+    </data>
+</odoo>

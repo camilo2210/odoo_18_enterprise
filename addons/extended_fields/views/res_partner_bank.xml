@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_partner_bank_form_inh_account" model="ir.ui.view">
+        <field name="name">res.partner.bank.form.inh</field>
+        <field name="model">res.partner.bank</field>
+        <field name="inherit_id" ref="account.view_partner_bank_form_inherit_account"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('gap-2')]" position="after">
+                <field name="pgm_iban"/>
+                <field name="account_type"/>
+                <field name="is_intermediario"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

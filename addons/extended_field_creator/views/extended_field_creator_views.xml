@@ -1,0 +1,195 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- ============================================================ -->
+        <!-- SEARCH VIEW                                                  -->
+        <!-- ============================================================ -->
+        <record id="extended_field_creator_view_search" model="ir.ui.view">
+            <field name="name">extended.field.creator.search</field>
+            <field name="model">extended.field.creator</field>
+            <field name="arch" type="xml">
+                <search string="Search Fields">
+                    <field name="name" string="Field Label"
+                           filter_domain="['|', ('name', 'ilike', self), ('technical_name', 'ilike', self)]"/>
+                    <field name="model_id" string="Target Model"/>
+                    <field name="field_type"/>
+                    <separator/>
+                    <filter name="filter_draft" string="Draft"
+                            domain="[('state', '=', 'draft')]"/>
+                    <filter name="filter_done" string="Created"
+                            domain="[('state', '=', 'done')]"/>
+                    <filter name="filter_removed" string="Removed"
+                            domain="[('state', '=', 'removed')]"/>
+                    <separator/>
+                    <filter name="filter_archived" string="Archived"
+                            domain="[('active', '=', False)]"/>
+                    <separator/>
+                    <group expand="0" string="Group By">
+                        <filter name="groupby_model" string="Target Model"
+                                context="{'group_by': 'model_id'}"/>
+                        <filter name="groupby_state" string="Status"
+                                context="{'group_by': 'state'}"/>
+                        <filter name="groupby_field_type" string="Field Type"
+                                context="{'group_by': 'field_type'}"/>
+                        <filter name="groupby_company" string="Company"
+                                context="{'group_by': 'company_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- LIST VIEW                                                    -->
+        <!-- ============================================================ -->
+        <record id="extended_field_creator_view_list" model="ir.ui.view">
+            <field name="name">extended.field.creator.list</field>
+            <field name="model">extended.field.creator</field>
+            <field name="arch" type="xml">
+                <list string="Field Creator"
+                      decoration-success="state == 'done'"
+                      decoration-muted="state == 'removed'"
+                      decoration-info="state == 'draft'"
+                      sample="1"
+                      multi_edit="1">
+                    <field name="name"/>
+                    <field name="technical_name"/>
+                    <field name="field_type"/>
+                    <field name="model_id"/>
+                    <field name="model_name" column_invisible="True"/>
+                    <field name="required_field" optional="hide"/>
+                    <field name="state" widget="badge"
+                           decoration-success="state == 'done'"
+                           decoration-info="state == 'draft'"
+                           decoration-danger="state == 'removed'"/>
+                    <field name="company_id" optional="hide"
+                           groups="base.group_multi_company"/>
+                    <field name="create_date" optional="show"/>
+                </list>
+            </field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- FORM VIEW                                                    -->
+        <!-- ============================================================ -->
+        <record id="extended_field_creator_view_form" model="ir.ui.view">
+            <field name="name">extended.field.creator.form</field>
+            <field name="model">extended.field.creator</field>
+            <field name="arch" type="xml">
+                <form string="Field Creator">
+                    <header>
+                        <button name="action_confirm"
+                                type="object"
+                                string="✓ Confirm &amp; Create Field"
+                                class="oe_highlight"
+                                confirm="This will create the field on the target model. Continue?"
+                                invisible="state != 'draft'"
+                                groups="extended_field_creator.group_field_creator_manager"/>
+                        <button name="action_remove_field"
+                                type="object"
+                                string="✗ Remove Field"
+                                class="btn-danger"
+                                confirm="This will permanently remove the field and its data from the target model. This action cannot be undone. Continue?"
+                                invisible="state != 'done'"
+                                groups="extended_field_creator.group_field_creator_manager"/>
+                        <button name="action_reset_to_draft"
+                                type="object"
+                                string="↻ Reset to Draft"
+                                invisible="state != 'removed'"
+                                groups="extended_field_creator.group_field_creator_manager"/>
+                        <field name="state" widget="statusbar"
+                               statusbar_visible="draft,done"/>
+                    </header>
+                    <sheet>
+                        <!-- Archive Ribbon -->
+                        <widget name="web_ribbon" title="Archived"
+                                bg_color="text-bg-danger"
+                                invisible="active"/>
+
+                        <!-- Title -->
+                        <div class="oe_title mb-3">
+                            <label for="name"/>
+                            <h1>
+                                <field name="name"
+                                       placeholder="e.g. Customer Score"
+                                       readonly="state != 'draft'"/>
+                            </h1>
+                            <h3 class="text-muted">
+                                <field name="technical_name" class="text-muted"/>
+                            </h3>
+                        </div>
+
+                        <!-- Main Configuration -->
+                        <group>
+                            <group string="Field Configuration" name="field_config">
+                                <field name="field_type"
+                                       readonly="state != 'draft'"/>
+                                <field name="model_id"
+                                       readonly="state != 'draft'"
+                                       options="{'no_create': True, 'no_create_edit': True}"/>
+                                <field name="model_name" invisible="1"/>
+                                <field name="relation_model_id"
+                                       readonly="state != 'draft'"
+                                       invisible="field_type != 'many2one'"
+                                       required="field_type == 'many2one'"
+                                       options="{'no_create': True, 'no_create_edit': True}"/>
+                            </group>
+                            <group string="Options" name="field_options">
+                                <field name="required_field"
+                                       widget="boolean_toggle"
+                                       readonly="state != 'draft'"/>
+                                <field name="copied_field"
+                                       widget="boolean_toggle"
+                                       readonly="state != 'draft'"/>
+                                <field name="active"
+                                       widget="boolean_toggle"
+                                       invisible="1"/>
+                                <field name="company_id"
+                                       groups="base.group_multi_company"
+                                       readonly="state != 'draft'"/>
+                            </group>
+                        </group>
+
+                        <!-- Selection Options (visible only for Selection type) -->
+                        <group invisible="field_type != 'selection'"
+                               string="Selection Options" name="selection_config">
+                            <field name="selection_options"
+                                   nolabel="1"
+                                   readonly="state != 'draft'"
+                                   placeholder="Enter one option per line in key:Label format&#10;&#10;Example:&#10;draft:Draft&#10;confirmed:Confirmed&#10;done:Done"/>
+                        </group>
+
+                        <notebook>
+                            <!-- Help & Description Tab -->
+                            <page string="Help &amp; Description" name="page_help">
+                                <group>
+                                    <field name="help_text"
+                                           placeholder="Tooltip text shown to the user on hover..."
+                                           readonly="state != 'draft'"/>
+                                </group>
+                                <group>
+                                    <field name="notes"
+                                           placeholder="Internal notes about this field..."
+                                           readonly="state != 'draft'"/>
+                                </group>
+                            </page>
+
+                            <!-- Technical Info Tab (read-only) -->
+                            <page string="Technical Details" name="page_technical"
+                                  invisible="state == 'draft'">
+                                <group string="Created Artefacts">
+                                    <field name="created_field_id"
+                                           readonly="1"/>
+                                    <field name="created_view_id"
+                                           readonly="1"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                    <chatter/>
+                </form>
+            </field>
+        </record>
+
+    </data>
+</odoo>

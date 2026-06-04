@@ -1,0 +1,31 @@
+{
+    'name': "Modulo para agregar campos en distintos modelos",
+    'author': 'PROGSUM',
+    'website': 'https://www.progsum.com',
+    'support': 'info@progsum.com',
+    'maintainer': 'PROGSUM',
+    'category': 'Technical Settings',
+    'version': "18.0.0.6",
+    "license": "OPL-1",
+    'depends': [
+        'base_address_extended','base', 'account', 'helpdesk', 'purchase', 'product', 'sale_project', 'account_asset', 'account_loans', 'stock', 'purchase_requisition', 'l10n_latam_base'
+    ],
+    'data': [
+        'security/ir.model.access.csv',
+        "data/l10n_latam.identification.type.csv",
+        'views/res_bank_views.xml',
+        'views/res_partner_bank.xml',
+        'views/res_partner.xml',
+        'views/account_account.xml',
+        'views/account_move_line_views.xml',
+        'views/product_template.xml',
+        'views/account_payment_views.xml',
+        'views/purchase_order_views.xml',
+        'views/purchase_requisition_views.xml',
+        'views/account_move_views.xml',
+        'views/res_company.xml',
+    ],
+    'installable': True,
+    'application': False,
+    'auto_install': False,
+}

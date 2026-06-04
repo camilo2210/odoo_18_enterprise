@@ -1,0 +1,25 @@
+<odoo>
+  <data>
+
+    <record id="view_account_form_plan_reporte" model="ir.ui.view">
+      <field name="name">account.account.form.plan.reporte</field>
+      <field name="model">account.account</field>
+      <field name="inherit_id" ref="account.view_account_form"/>
+      <field name="arch" type="xml">
+        
+        <xpath expr="//page[@name='accounting']//group/group[field[@name='company_ids']]" position="after">
+            <group>
+                <separator string="PLAN DE REPORTE"/>
+                <field name="pgm_alternate_code"/>
+                <field name="pgm_alternate_name"/>
+                <field name="pgm_alternate_account" readonly="1"/>
+                <field name="pgm_account_description"/>
+            </group>
+        </xpath>
+
+
+      </field>
+    </record>
+
+  </data>
+</odoo>

@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_partner_property_form_inh" model="ir.ui.view">
+            <field name="name">res.partner.form.inh</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="account.view_partner_property_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='accounting']/group/group[@name='banks']/field[@name='bank_ids']/list/field[@name='bank_id']" position="after">
+                    <field name="pgm_iban"/>
+                </xpath>
+                <xpath expr="//field[@name='category_id']" position="after">
+                    <field name="pgm_supplier_type"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_partner_stock_form_inh" model="ir.ui.view">
+            <field name="name">res.partner.form.inh.stock</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="stock.view_partner_stock_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//page[@name='sales_purchases']//*[@name='container_row_stock']" position="after">
+                    <separator string="DUE DILIGENCE"/>
+                    <group>
+                        <group>
+                            <field name="pgm_authorize_risk_queries"/>
+                            <field name="pgm_authorize_risk_reporting"/>
+                            <field name="pgm_registry_assets_check"/>
+                            <field name="pgm_transit_vehicles_check"/>
+                            <field name="pgm_due_diligence"/>
+                            <field name="pgm_date_due_diligence" readonly="1"/>
+                        </group>
+                    </group>    
+                </xpath>
+                <xpath expr="//div[hasclass('o_address_format')]"  position="after">
+                    <field name="pgm_linked_company"/>
+                    <field name="pgm_link_type"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="res_partner_form_required_fields_inh" model="ir.ui.view">
+            <field name="name">res.partner.form.required.fields.inh</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="base.view_partner_form"/>
+            <field name="priority">99</field>
+            <field name="arch" type="xml">
+
+                <xpath expr="//field[@name='name']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='email']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+
+                <xpath expr="//field[@name='vat']" position="attributes">
+                    <attribute name="required">1</attribute>
+                </xpath>
+
+            </field>
+        </record>
+
+
+    </data>
+</odoo>

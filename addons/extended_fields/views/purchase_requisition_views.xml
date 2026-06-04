@@ -1,0 +1,23 @@
+<odoo>
+    <record id="view_purchase_requisition_form_inh_expire_btn" model="ir.ui.view">
+        <field name="name">purchase.requisition.form.inh.expire.btn</field>
+        <field name="model">purchase.requisition</field>
+        <field name="inherit_id" ref="purchase_requisition.view_purchase_requisition_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='reference']" position="before">
+                <field name="is_contract_expired"/>           
+            </xpath>
+            <xpath expr="//header/button[@name='%(purchase_requisition.action_purchase_requisition_to_so)d']" position="attributes">
+                <attribute name="invisible">state != 'confirmed' or is_contract_expired</attribute>
+            </xpath>
+            <xpath expr="//button[@name='%(purchase_requisition.action_purchase_requisition_list)d' and contains(@class,'oe_stat_button')]" position="attributes">
+                <attribute name="type">object</attribute>
+                <attribute name="name">action_open_requisition_orders_safe</attribute>
+            </xpath>
+            <!-- <xpath expr="//field[@name='currency_id']" position="after">
+                <field name="budget_amount"/>
+                <field name="budget_spent" readonly="1"/>
+            </xpath> -->
+        </field>
+    </record>
+</odoo>

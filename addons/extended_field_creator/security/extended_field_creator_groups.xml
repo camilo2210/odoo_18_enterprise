@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!-- ============================================================ -->
+        <!-- Module Category                                              -->
+        <!-- ============================================================ -->
+        <record id="module_category_extended_field_creator" model="ir.module.category">
+            <field name="name">Extended Field Creator</field>
+            <field name="description">Category for the Extended Field Creator module.</field>
+            <field name="sequence">200</field>
+        </record>
+
+        <!-- ============================================================ -->
+        <!-- Security Groups                                              -->
+        <!-- ============================================================ -->
+
+        <!-- User: Read-only access -->
+        <record id="group_field_creator_user" model="res.groups">
+            <field name="name">User</field>
+            <field name="comment">
+                Read-only access to the Extended Field Creator records.
+                Can view all field creation entries but cannot create, modify, or delete.
+            </field>
+            <field name="category_id" ref="module_category_extended_field_creator"/>
+            <field name="implied_ids" eval="[(4, ref('base.group_user'))]"/>
+        </record>
+
+        <!-- Manager: Full CRUD + field creation/removal -->
+        <record id="group_field_creator_manager" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="comment">
+                Full access to the Extended Field Creator.
+                Can create, confirm, remove, and delete field creation records.
+            </field>
+            <field name="category_id" ref="module_category_extended_field_creator"/>
+            <field name="implied_ids" eval="[(4, ref('group_field_creator_user'))]"/>
+            <field name="users" eval="[(4, ref('base.user_root')), (4, ref('base.user_admin'))]"/>
+        </record>
+
+    </data>
+</odoo>

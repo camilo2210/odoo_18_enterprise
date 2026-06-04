@@ -1,0 +1,1199 @@
+# Translation of Odoo Server.
+# This file contains the translation of the following modules:
+# 	* extended_fields
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: Odoo Server 18.0+e\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-02-25 23:28+0000\n"
+"PO-Revision-Date: 2026-02-25 23:28+0000\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: \n"
+"Plural-Forms: \n"
+
+#. module: extended_fields
+#. odoo-python
+#: code:addons/extended_fields/models/account_payment.py:0
+msgid "'Purchase Order' is only applicable to vendor payments."
+msgstr "La 'Orden de compra' solo se aplica a los pagos a proveedores."
+
+#. module: extended_fields
+#: model_terms:ir.ui.view,arch_db:extended_fields.view_move_form_inh
+msgid "<span><strong>Total</strong></span>"
+msgstr "<span><strong>Total</strong></span>"
+
+#. module: extended_fields
+#: model_terms:ir.ui.view,arch_db:extended_fields.view_move_form_inh
+msgid "<span>Importe pendiente</span>"
+msgstr "<span>Importe pendiente</span>"
+
+#. module: extended_fields
+#: model_terms:ir.ui.view,arch_db:extended_fields.view_move_form_inh
+msgid "<span>Importe sin impuestos</span>"
+msgstr "<span>Importe sin impuestos</span>"
+
+#. module: extended_fields
+#: model_terms:ir.ui.view,arch_db:extended_fields.view_move_form_inh
+msgid "<span>Impuesto</span>"
+msgstr "<span>Impuesto</span>"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_bank__pgm_abba
+msgid "ABBA"
+msgstr "ABBA"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_sociedad_vinculada__pgm_asset_location_title
+msgid "ASSET LOCATION"
+msgstr "UBICACIÓN DE LOS ACTIVOS"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_account_account
+msgid "Account"
+msgstr "Cuenta"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_account__pgm_account_description
+msgid "Account Description"
+msgstr "Descripción de la cuenta"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_setup_bank_manual_config__account_type
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner_bank__account_type
+msgid "Account Type"
+msgstr "Tipo de cuenta"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_setup_bank_manual_config__account_type
+#: model:ir.model.fields,help:extended_fields.field_res_partner_bank__account_type
+msgid "Account Type: Savings & Checking"
+msgstr "Tipo de cuenta: Ahorros y cheques"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_purchase_order_line__pgm_purchase_type
+msgid "Accounting classification of the purchased good/service."
+msgstr "Clasificación contable del bien/servicio adquirido."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_acquisition_value
+msgid "Acquisition Value"
+msgstr "Valor de adquisición"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_move_line__pgm_notes
+msgid "Additional notes for the journal item."
+msgstr "Notas adicionales para el artículo del diario."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_address
+msgid "Address"
+msgstr "DIRECCIÓN"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_account__pgm_alternate_account
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__pgm_alternate_account
+msgid "Alternate Account"
+msgstr "Cuenta alternativa"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_account__pgm_alternate_code
+msgid "Alternate Code"
+msgstr "Código alternativo"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_account__pgm_alternate_name
+msgid "Alternate Name"
+msgstr "Nombre alternativo"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_analytic_account_id
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_analytic_account_id
+msgid "Analytic Account"
+msgstr "Cuenta Analítica"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_account_analytic_plan
+msgid "Analytic Plans"
+msgstr "Planes analíticos"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_asset_group_id
+msgid "Asset Group"
+msgstr "Grupo de activos"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_asset_group_id
+msgid "Asset Group/Category for accounting purposes."
+msgstr "Grupo/Categoría de Activos a efectos contables."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_address
+msgid "Asset Physical Address."
+msgstr "Dirección física del activo."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_state_id
+msgid "Asset State/Province (filtered by country)."
+msgstr "Estado/Provincia del activo (filtrado por país)."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_asset_status
+msgid "Asset Status"
+msgstr "Estado del activo"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_operational_state
+msgid "Asset Status (Operational)"
+msgstr "Estado del activo (operativo)"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_previous_accumulated_depreciation
+msgid ""
+"Asset accumulated depreciation in the prior system for accounting purposes."
+msgstr ""
+"Depreciación acumulada de los activos en el sistema anterior para efectos "
+"contables."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_previous_accumulated_depreciation_fiscal
+msgid "Asset accumulated depreciation in the prior system for tax purposes."
+msgstr ""
+"Depreciación acumulada de los activos en el sistema anterior para efectos "
+"tributarios."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_acquisition_value_fiscal
+msgid "Asset acquisition value for tax purposes."
+msgstr "Valor de adquisición del activo a efectos fiscales."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_operational_state
+msgid "Asset operational status."
+msgstr "Estado operativo del activo."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_asset_status
+msgid ""
+"Asset status for tracking (Operational, In Maintenance, Out of Use, Pending "
+"Deactivation)."
+msgstr ""
+"Estado de los activos para seguimiento (Operativo, En mantenimiento, Fuera "
+"de uso, Pendiente de desactivación)."
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_account_asset
+msgid "Asset/Revenue Recognition"
+msgstr "Reconocimiento de activos e ingresos"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move_line__pgm_link_type__asociada
+msgid "Associate (Significant Influence)"
+msgstr "Asociado (Influencia significativa)"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_link_type__asociada
+msgid "Associated (Significant Influence)"
+msgstr "Asociado (Influencia significativa)"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_authorize_risk_queries
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_authorize_risk_queries
+msgid "Authorize Credit Bureau Inquiry"
+msgstr "Autorizar Consulta de Buró de Crédito"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_authorize_risk_reporting
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_authorize_risk_reporting
+msgid "Authorize Credit Bureau Reporting"
+msgstr "Autorizar informes de buró de crédito"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_purchase_order__pgm_vendor_delivery_address
+msgid ""
+"Automatically filled with the vendor's first delivery address when selected."
+msgstr ""
+"Se completa automáticamente con la primera dirección de entrega del "
+"proveedor cuando se selecciona."
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_res_bank
+msgid "Bank"
+msgstr "Banco"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_res_partner_bank
+msgid "Bank Accounts"
+msgstr "Cuentas bancarias"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_bank__pgm_abba
+msgid "Bank's ABBA/Routing code."
+msgstr "ABA/código de ruta del banco."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_bank__pgm_swift
+msgid "Bank's SWIFT/BIC code."
+msgstr "Código SWIFT/BIC del banco."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__sistema_basico_equipo_movil
+msgid "Basic system mobile equipment"
+msgstr "Equipo móvil sistema básico"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__rodamientos_sellos
+msgid "Bearings and seals"
+msgstr "Rodamientos y sellos"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_purchase_type__activos_biologicos
+msgid "Biological assets"
+msgstr "Activos biológicos"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_brand
+msgid "Brand"
+msgstr "Marca"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_operation_type__capex
+msgid "CAPEX"
+msgstr "CAPEX"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_supplier_type__colaboradores
+msgid "COLLABORATORS"
+msgstr "COLABORADORES"
+
+#. module: extended_fields
+#: model_terms:ir.ui.view,arch_db:extended_fields.purchase_order_form_inh
+msgid "CONTACT REGISTRY"
+msgstr "REGISTRO DE CONTACTO"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_sociedad_vinculada__pgm_contacts_register_title
+msgid "CONTACTS REGISTRY"
+msgstr "REGISTRO DE CONTACTOS"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_product_product__pgm_material_type
+#: model:ir.model.fields,help:extended_fields.field_product_template__pgm_material_type
+msgid "Catalog of material type. Use it for goods (not services)."
+msgstr "Catálogo de tipo de material."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_registry_assets_check
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_registry_assets_check
+msgid "Check Registry Assets"
+msgstr "Verificar los activos del registro"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_transit_vehicles_check
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_transit_vehicles_check
+msgid "Check Transit Vehicles"
+msgstr "Verificar vehículos de tránsito"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_partner__pgm_due_diligence
+#: model:ir.model.fields,help:extended_fields.field_res_users__pgm_due_diligence
+msgid "Check when due diligence has been performed."
+msgstr "Verifique cuándo se ha realizado la debida diligencia."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner_bank__account_type__c
+msgid "Checking"
+msgstr "Corriente"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_city_id
+msgid "City"
+msgstr "Ciudad"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_city_id
+msgid "City of the asset (filtered by state)."
+msgstr "Ciudad del activo (filtrado por estado)."
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_res_company
+msgid "Companies"
+msgstr "Empresas"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_move_line__pgm_alternate_account
+msgid ""
+"Concatenation defined in the accounting account (visible in entries/journal "
+"items)."
+msgstr ""
+"Concatenación definida en la cuenta contable (visible en asientos/partidas "
+"del diario)."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_account__pgm_alternate_account
+msgid ""
+"Concatenation of Alternate Code and Alternate Name, separated by a space."
+msgstr ""
+"Concatenación de Código Alterno y Nombre Alterno, separados por un espacio."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move_line__pgm_link_type__consorcio_ut
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_link_type__consorcio_ut
+msgid "Consortium / Temporary Union"
+msgstr "Consorcio / Unión Temporal"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_res_partner
+msgid "Contact"
+msgstr "Contacto"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_move_line__pgm_link_type
+msgid "Corporate relationship with the company."
+msgstr "Relación corporativa con la empresa."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_country_id
+msgid "Country"
+msgstr "País"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_company_country_code
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_company_country_code
+msgid "Country Code"
+msgstr "Código del país"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_country_id
+msgid "Country associated with the asset."
+msgstr "País asociado al activo."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_sociedad_vinculada__create_uid
+msgid "Created by"
+msgstr "Creado por"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_sociedad_vinculada__create_date
+msgid "Created on"
+msgstr "Creado el"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_product_product__pgm_creation_request_date
+#: model:ir.model.fields,field_description:extended_fields.field_product_template__pgm_creation_request_date
+msgid "Creation Request Date"
+msgstr "Fecha de solicitud de creación"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_payment__pgm_bank_account_currency_id
+msgid "Currency of Bank Account"
+msgstr "Moneda de la cuenta bancaria"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_payment__pgm_bank_account_currency_id
+msgid "Currency of the bank account associated with the payment."
+msgstr "Moneda de la cuenta bancaria asociada al pago."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_bank_statement_line__pgm_identification_number
+#: model:ir.model.fields,help:extended_fields.field_account_move__pgm_identification_number
+msgid "Customer/Vendor Identification Number (VAT/NIT/RUT, etc.)"
+msgstr "Número de Identificación de Cliente/Vendedor (IVA/NIT/RUT, etc.)"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_due_diligence_title
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_due_diligence_title
+#: model_terms:ir.ui.view,arch_db:extended_fields.view_partner_stock_form_inh
+msgid "DUE DILIGENCE"
+msgstr "DEBIDA DILIGENCIA"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_date_due_diligence
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_date_due_diligence
+msgid "Date Due Diligence"
+msgstr "Fecha Debida Diligencia"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_partner__pgm_date_due_diligence
+#: model:ir.model.fields,help:extended_fields.field_res_users__pgm_date_due_diligence
+msgid "Date when 'Due Diligence' was marked. It updates automatically."
+msgstr "Fecha en la que se marcó la 'Due Diligence'."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_product_product__pgm_creation_request_date
+#: model:ir.model.fields,help:extended_fields.field_product_template__pgm_creation_request_date
+msgid "Date when the product creation request was made."
+msgstr "Fecha en la que se realizó la solicitud de creación del producto."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_asset__pgm_operational_state__baja
+msgid "Deactivated"
+msgstr "Desactivado"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_purchase_order__pgm_vendor_delivery_address
+msgid "Delivery Address"
+msgstr "Dirección de entrega"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_product_product__pgm_description
+#: model:ir.model.fields,field_description:extended_fields.field_product_template__pgm_description
+msgid "Description"
+msgstr "Descripción"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_product_product__pgm_description
+#: model:ir.model.fields,help:extended_fields.field_product_template__pgm_description
+msgid "Description of the product (multiline)."
+msgstr "Descripción del producto (multilínea)."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__pgm_detail
+msgid "Detail"
+msgstr "Detalle"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_sociedad_vinculada__display_name
+msgid "Display Name"
+msgstr "Nombre para mostrar"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__l10n_latam_document_number
+msgid "Document Number"
+msgstr "Número de Documento"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_move_line__l10n_latam_document_number
+msgid "Document number from the related journal entry."
+msgstr "Número de documento del asiento de diario relacionado."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_due_diligence
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_due_diligence
+msgid "Due Diligence"
+msgstr "Debida diligencia"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__repuestos_electricos
+msgid "Electrical spare parts"
+msgstr "repuestos electricos"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__repuestos_electronicos
+msgid "Electronic spare parts"
+msgstr "repuestos electronicos"
+
+#. module: extended_fields
+#: model:l10n_latam.identification.type,name:extended_fields.ein
+msgid "Employer Identification Number"
+msgstr "Número de identificación del empleador"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_operation_type__
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_purchase_type__
+msgid "Empty"
+msgstr "Vacío"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_move_line__pgm_trm
+msgid "Entry Rate (TRM): balance / foreign currency amount (amount_currency)."
+msgstr ""
+"Tasa de Entrada (TRM): saldo/monto en moneda extranjera (monto_moneda)."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_purchase_requisition__is_contract_expired
+msgid "Expired Contract"
+msgstr "Contrato vencido"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_account__pgm_account_description
+msgid "Extended description of the account."
+msgstr "Descripción ampliada de la cuenta."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_supplier_type__entidad_financiera
+msgid "FINANCIAL ENTITY"
+msgstr "ENTIDAD FINANCIERA"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_supplier_type__exterior
+msgid "FOREING"
+msgstr "ASOCIACIÓN"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_move_line__pgm_detail
+msgid "Field for additional details of the journal item."
+msgstr "Campo para detalles adicionales del artículo del diario."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__filtros
+msgid "Filters"
+msgstr "Filtros"
+
+#. module: extended_fields
+#: model_terms:ir.ui.view,arch_db:extended_fields.view_company_form_inh_firma
+msgid "Firma"
+msgstr "Negocio"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_previous_accumulated_depreciation_fiscal
+msgid "Fiscal Accumulated Depreciation"
+msgstr "Depreciación fiscal acumulada"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_acquisition_value_fiscal
+msgid "Fiscal Acquisition Value"
+msgstr "Valor de adquisición fiscal"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_bank_statement_line__pgm_fiscal_registry
+#: model:ir.model.fields,field_description:extended_fields.field_account_move__pgm_fiscal_registry
+msgid "Fiscal Log"
+msgstr "Registro fiscal"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_bank_statement_line__pgm_fiscal_registry
+#: model:ir.model.fields,help:extended_fields.field_account_move__pgm_fiscal_registry
+msgid "Fiscal Log associated with the document."
+msgstr "Registro Fiscal asociado al documento."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_purchase_order__pgm_fiscal_registry
+msgid "Fiscal log"
+msgstr "registro fiscal"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_purchase_order__pgm_fiscal_registry
+msgid "Fiscal log associated with the purchase order."
+msgstr "Registro fiscal asociado a la orden de compra."
+
+#. module: extended_fields
+#: model:l10n_latam.identification.type,name:extended_fields.fid
+msgid "Foreign ID"
+msgstr "DNI de Extranjero"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_account__pgm_alternate_code
+#: model:ir.model.fields,help:extended_fields.field_account_account__pgm_alternate_name
+msgid "Free-form Text (No length limit)."
+msgstr "Texto de formato libre (sin límite de longitud)."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__combustibles_lubricantes
+msgid "Fuels/Lubricants"
+msgstr "Combustibles/Lubricantes"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__articulos_generales
+msgid "General Articles"
+msgstr "Artículos generales"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move__pgm_payroll_document_type__nominag
+msgid "Group Payroll"
+msgstr "Nómina grupal"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move__pgm_payroll_document_type__nominag_ad
+msgid "Group Payroll Adjustment"
+msgstr "Ajuste de nómina grupal"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__ferreteria
+msgid "Hardware"
+msgstr "Hardware"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_helpdesk_ticket
+msgid "Helpdesk Ticket"
+msgstr "Ticket de soporte al cliente"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_setup_bank_manual_config__pgm_iban
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner_bank__pgm_iban
+msgid "IBAN"
+msgstr ""
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_setup_bank_manual_config__pgm_iban
+#: model:ir.model.fields,help:extended_fields.field_res_partner_bank__pgm_iban
+msgid "IBAN code of the bank account."
+msgstr "Código IBAN de la cuenta bancaria."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_sociedad_vinculada__id
+msgid "ID"
+msgstr "IDENTIFICACIÓN"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_asset__pgm_asset_status__desuso
+msgid "IDLE"
+msgstr "INACTIVO"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_bank_statement_line__pgm_identification_number
+#: model:ir.model.fields,field_description:extended_fields.field_account_move__pgm_identification_number
+msgid "Identification"
+msgstr "Identificación"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_bank_statement_line__l10n_latam_identification_type_id
+#: model:ir.model.fields,field_description:extended_fields.field_account_move__l10n_latam_identification_type_id
+msgid "Identification (type)"
+msgstr "Identificación (tipo)"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__pgm_identification_number
+msgid "Identification Number"
+msgstr "Número de identificación"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_move_line__pgm_identification_number
+msgid "Identification number of the contact (VAT/NIT/RUT, etc.)."
+msgstr "Número de identificación del contacto (IVA/NIT/RUT, etc.)."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__pgm_identification_type_id
+msgid "Identification type"
+msgstr "Tipo de identificación"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_company__firma_imagen
+msgid "Imagen de Firma"
+msgstr "Imagen de Firma"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_company__pgm_sello
+msgid "Imagen de Sello"
+msgstr "Imagen de Sello"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_asset__pgm_operational_state__mantenimiento
+msgid "In Maintenance"
+msgstr "En mantenimiento"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_asset__pgm_operational_state__inactivo
+msgid "Inactive"
+msgstr "Inactivo"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move_line__pgm_link_type__subsidiaria
+msgid "Indirect Subsidiary (Indirectly Controlled)"
+msgstr "Subsidiaria Indirecta (Controlada Indirectamente)"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move__pgm_payroll_document_type__nominai
+msgid "Individual Payroll"
+msgstr "Nómina Individual"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move__pgm_payroll_document_type__nominai_ad
+msgid "Individual Payroll Adjustment"
+msgstr "Ajuste de nómina individual"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_company__pgm_signed_by
+msgid ""
+"Ingrese el nombre de la persona que firma en representación de la empresa"
+msgstr "Ingrese el nombre de la persona que firma en representación de la empresa"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_company__pgm_tyc_purchase
+msgid "Ingrese los términos y condiciones para las compras en formato HTML"
+msgstr "Ingrese los términos y condiciones para las compras en formato HTML"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_company__pgm_tyc_sale
+msgid "Ingrese los términos y condiciones para las ventas en formato HTML"
+msgstr "Ingrese los términos y condiciones para las ventas en formato HTML"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_acquisition_value
+msgid "Initial acquisition value of the asset."
+msgstr "Valor de adquisición inicial del activo."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_purchase_type__intangibles
+msgid "Intangible assets"
+msgstr "Activos intangibles"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__pgm_intercompany_ref
+msgid "Intercompany Ref"
+msgstr "Referencia intercompañía"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_move_line__pgm_intercompany_ref
+msgid "Intercompany reference associated with the journal item."
+msgstr "Referencia intercompañía asociada con el artículo de diario."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_setup_bank_manual_config__is_intermediario
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner_bank__is_intermediario
+msgid "Intermediary"
+msgstr "Intermediario"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_bank_statement_line__pgm_consecutive_number
+#: model:ir.model.fields,help:extended_fields.field_account_move__pgm_consecutive_number
+msgid "Internal/DIAN consecutive number of the document."
+msgstr "Número consecutivo interno/DIAN del documento."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_purchase_order__pgm_consecutive_number
+msgid "Internal/DIAN consecutive number of the purchase order."
+msgstr "Número consecutivo interno/DIAN de la orden de compra."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_purchase_type__propiedades_inversion
+msgid "Investment Properties"
+msgstr "Propiedades de inversión"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move_line__pgm_link_type__joint_venture
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_link_type__joint_venture
+msgid "Joint Venture"
+msgstr "Empresa conjunta"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_account_move
+msgid "Journal Entry"
+msgstr "Asiento contable"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_account_move_line
+msgid "Journal Item"
+msgstr "Apunte contable"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_sociedad_vinculada__write_uid
+msgid "Last Updated by"
+msgstr "Actualizado por última vez por"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_sociedad_vinculada__write_date
+msgid "Last Updated on"
+msgstr "Última actualización el"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_license_plate
+msgid "License Plate"
+msgstr "Matrícula"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__pgm_link_type
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_link_type
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_link_type
+msgid "Link Type"
+msgstr "Tipo de Vínculo"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__pgm_linked_company_code
+msgid "Linked Company Code"
+msgstr "Sociedad Vínculada"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_move_line__pgm_linked_company_code
+msgid "Linked company code for intercompany operations."
+msgstr "Código de empresa vinculado para operaciones intercompañía."
+
+#. module: extended_fields
+#. odoo-python
+#: code:addons/extended_fields/models/stock_picking.py:0
+msgid "Línea"
+msgstr "Línea"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_asset__pgm_asset_status__mantenimiento
+msgid "MAINTENANCE"
+msgstr "MANTENIMIENTO"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_product_product__pgm_material_type
+#: model:ir.model.fields,field_description:extended_fields.field_product_template__pgm_material_type
+msgid "Material Type"
+msgstr "Tipo de material"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_supplier_type__nacional
+msgid "NATIONAL"
+msgstr "NACIONAL"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_supplier_type__no_recurrente
+msgid "NON-RECURRENT"
+msgstr "NO RECURRENTE"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_asset__pgm_operational_state__nuevo
+msgid "New"
+msgstr "Nuevo"
+
+#. module: extended_fields
+#. odoo-python
+#: code:addons/extended_fields/models/stock_picking.py:0
+msgid ""
+"No puedes validar este albarán porque existen líneas con cantidad hecha mayor a la solicitada:\n"
+"%s\n"
+"\n"
+"Ajusta las cantidades antes de validar."
+msgstr ""
+"No puedes validar este albarán porque existen líneas con cantidad hecha mayor a la solicitada:\n"
+"%s\n"
+"\n"
+"Ajusta las cantidades antes de validar."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_company__pgm_signed_by
+msgid "Nombre del Firmante"
+msgstr "Nombre del Firmante"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__pgm_notes
+msgid "Notes"
+msgstr "Notas"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_bank_statement_line__pgm_payment_proposal
+#: model:ir.model.fields,help:extended_fields.field_account_move__pgm_payment_proposal
+msgid "Notes or reference for payment proposals."
+msgstr "Notas o referencia para propuestas de pago."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_asset__pgm_asset_status__funcionando
+msgid "OPERATIONAL"
+msgstr "OPERACIONAL"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_operation_type__opex
+msgid "OPEX"
+msgstr "OPEX"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_purchase_order_line__pgm_operation_type
+msgid "Operation Type"
+msgstr "Tipo de operación"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_purchase_order_line__pgm_operation_type
+msgid "Operational classification of the purchase: CAPEX or OPEX."
+msgstr "Clasificación operativa de la compra: CAPEX u OPEX."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_asset__pgm_operational_state__operativo
+msgid "Operative"
+msgstr "Operatorio"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_asset__pgm_asset_status__pendiente_baja
+msgid "PENDING DISPOSAL"
+msgstr "DISPOSICIÓN PENDIENTE"
+
+#. module: extended_fields
+#: model_terms:ir.ui.view,arch_db:extended_fields.view_account_form_plan_reporte
+msgid "PLAN DE REPORTE"
+msgstr "PLAN DE REPORTE"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_purchase_type__ppe
+msgid "PPE"
+msgstr "EPI"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__material_empaque
+msgid "Packaging material"
+msgstr "Material de embalaje"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move_line__pgm_link_type__matriz
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_link_type__matriz
+msgid "Parent Company (Controlling)"
+msgstr "Sociedad matriz (Controladora)"
+
+#. module: extended_fields
+#: model:l10n_latam.identification.type,name:extended_fields.pass_us
+msgid "Passport"
+msgstr "Pasaporte"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_bank_statement_line__pgm_payment_proposal
+#: model:ir.model.fields,field_description:extended_fields.field_account_move__pgm_payment_proposal
+msgid "Payment proposal"
+msgstr "Propuesta de pago"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_account_payment
+msgid "Payments"
+msgstr "Pagos"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_bank_statement_line__pgm_payroll_document_type
+#: model:ir.model.fields,field_description:extended_fields.field_account_move__pgm_payroll_document_type
+msgid "Payroll Document Type"
+msgstr "Tipo de documento de nómina"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_bank_statement_line__pgm_payroll_document_type
+#: model:ir.model.fields,help:extended_fields.field_account_move__pgm_payroll_document_type
+msgid "Payroll document type for electronic DIAN reports."
+msgstr "Tipo de documento de nómina para reportes electrónicos de la DIAN."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__repuesto_mecanico_planta
+msgid "Plant mechanical spare parts"
+msgstr "Repuestos mecanicos de planta"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_purchase_type__gastos_anticipados
+msgid "Prepaid expenses"
+msgstr "Gastos prepagos"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_previous_accumulated_depreciation
+msgid "Prior Accumulated Depreciation"
+msgstr "Depreciación acumulada previa"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_product_template
+msgid "Product"
+msgstr "Producto"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_helpdesk_ticket__pgm_product_ids
+msgid "Products"
+msgstr "Productos"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_helpdesk_ticket__pgm_product_ids
+msgid "Products associated with this ticket."
+msgstr "Productos asociados a este billete."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_property_registry
+msgid "Property Registry"
+msgstr "Registro de la Propiedad"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_public_deed
+msgid "Public Deed"
+msgstr "Escritura Pública"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_purchase_order
+#: model:ir.model.fields,field_description:extended_fields.field_account_payment__purchase_order_id
+msgid "Purchase Order"
+msgstr "Orden de compra"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_purchase_order_line
+msgid "Purchase Order Line"
+msgstr "Línea de la orden de compra"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_purchase_requisition
+msgid "Purchase Requisition"
+msgstr "Solicitud de compra"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_purchase_order_line__pgm_purchase_type
+msgid "Purchase Type"
+msgstr "Tipo de compra"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_supplier_type__recurrente
+msgid "RECURRENT"
+msgstr "RECURRENTE"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_partner__pgm_due_diligence_title
+#: model:ir.model.fields,help:extended_fields.field_res_users__pgm_due_diligence_title
+msgid "Read-only field used as a visual title/header."
+msgstr "Campo de solo lectura utilizado como título/encabezado visual."
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_reference
+msgid "Reference"
+msgstr "Referencia"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_linked_company
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_linked_company
+msgid "Related Company"
+msgstr "Empresa Relacionada"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move_line__pgm_link_type__empresa_vinculada
+msgid "Related Company (Other)"
+msgstr "Empresa Relacionada (Otra)"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_link_type__empresa_vinculada
+msgid "Related Company (Others)"
+msgstr "Empresa Relacionada (Otras)"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_partner__pgm_linked_company
+#: model:ir.model.fields,help:extended_fields.field_res_users__pgm_linked_company
+msgid "Related Company Code or Name."
+msgstr "Código o nombre de empresa relacionado."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_partner__pgm_link_type
+#: model:ir.model.fields,help:extended_fields.field_res_users__pgm_link_type
+msgid "Related Company Relationship."
+msgstr "Relación Empresa Relacionada."
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__purchase_order_line__pgm_purchase_type__derechos_uso
+msgid "Rights of use"
+msgstr "Derechos de uso"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_supplier_type__siniestro
+msgid "SINISTER"
+msgstr "SINIESTRO"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_bank__pgm_swift
+msgid "SWIFT"
+msgstr "RÁPIDO"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner_bank__account_type__a
+msgid "Savings"
+msgstr "Ahorros"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_purchase_order__pgm_consecutive_number
+msgid "Sequence"
+msgstr "Secuencia"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_serial
+msgid "Serial"
+msgstr "De serie"
+
+#. module: extended_fields
+#: model:l10n_latam.identification.type,name:extended_fields.ssn
+msgid "Social Security Number"
+msgstr "Número de seguro social"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_sociedad_vinculada
+msgid "Sociedad Vinculada"
+msgstr "Sociedad Vinculada"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_state_id
+msgid "State"
+msgstr "Estado"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_company__firma_imagen
+msgid "Suba la imagen de la firma de la empresa"
+msgstr "Suba la imagen de la firma de la empresa"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_company__pgm_sello
+msgid "Suba la imagen del sello de la empresa"
+msgstr "Suba la imagen del sello de la empresa"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__account_move_line__pgm_link_type__filial
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_link_type__filial
+msgid "Subsidiary (Controlled)"
+msgstr "Subsidiaria (Controlada)"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_link_type__subsidiaria
+msgid "Subsidiary (Indirectly Controlled)"
+msgstr "Subsidiaria (Controlada Indirectamente)"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_move_line__pgm_trm
+msgid "TRM"
+msgstr "TRM"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_res_partner__pgm_company_country_code
+#: model:ir.model.fields,help:extended_fields.field_res_users__pgm_company_country_code
+msgid ""
+"The ISO country code in two chars. \n"
+"You can use this field for quick search."
+msgstr "El código ISO de país en dos caracteres."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_bank_statement_line__l10n_latam_identification_type_id
+#: model:ir.model.fields,help:extended_fields.field_account_move__l10n_latam_identification_type_id
+msgid "The type of identification"
+msgstr "El tipo de identificación"
+
+#. module: extended_fields
+#: model:ir.model.fields.selection,name:extended_fields.selection__product_template__pgm_material_type__herramientas
+msgid "Tools"
+msgstr "Herramientas"
+
+#. module: extended_fields
+#: model:ir.model,name:extended_fields.model_stock_picking
+msgid "Transfer"
+msgstr "Transferir "
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_company__pgm_tyc_purchase
+msgid "Términos y Condiciones de Compra"
+msgstr "Términos y Condiciones de Compra"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_company__pgm_tyc_sale
+msgid "Términos y Condiciones de Venta"
+msgstr "Términos y Condiciones de Venta"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_bank__pgm_vat
+msgid "Vat"
+msgstr "Tina"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_res_partner__pgm_supplier_type
+#: model:ir.model.fields,field_description:extended_fields.field_res_users__pgm_supplier_type
+msgid "Vendor Type"
+msgstr "Tipo de proveedor"
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_payment__purchase_order_id
+msgid ""
+"Vendors purchase orders related to the payment, confirmed or finalized, and "
+"not yet fully invoiced."
+msgstr ""
+"Órdenes de compra de proveedores relacionadas con el pago, confirmadas o "
+"finalizadas, y aún no facturadas en su totalidad."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_sociedad_vinculada__pgm_asset_location_title
+msgid "Visual title for the 'ASSET LOCATION' section."
+msgstr "Título visual de la sección 'UBICACIÓN DE ACTIVOS'."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_sociedad_vinculada__pgm_contacts_register_title
+msgid "Visual title for the 'CONTACTS REGISTRY' section."
+msgstr "Título visual para la sección 'REGISTRO DE CONTACTOS'."
+
+#. module: extended_fields
+#: model:ir.model.fields,help:extended_fields.field_account_asset__pgm_zip
+msgid "ZIP derived from the selected city"
+msgstr "ZIP derivado de la ciudad seleccionada"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_zip
+msgid "Zip"
+msgstr "Cremallera"
+
+#. module: extended_fields
+#: model:ir.model.fields,field_description:extended_fields.field_account_bank_statement_line__pgm_consecutive_number
+#: model:ir.model.fields,field_description:extended_fields.field_account_move__pgm_consecutive_number
+msgid "consecutive"
+msgstr "consecutivo"

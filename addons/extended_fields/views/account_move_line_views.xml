@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_line_tree_inh" model="ir.ui.view">
+        <field name="name">account.move.line.tree.inh</field>
+        <field name="model">account.move.line</field>
+        <field name="inherit_id" ref="account.view_move_line_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='account_id']" position="after">
+                <field name="pgm_alternate_account" optional="hide"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_id']" position="after">
+                <field name="pgm_identification_type_id" optional="hide"/>
+                <field name="pgm_identification_number"/>
+            </xpath>
+             <xpath expr="//field[@name='account_id']" position="before">
+                <field name="l10n_latam_document_number" optional="show"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="before">
+                <field name="pgm_linked_company_code" optional="hide"/>
+                <field name="pgm_link_type" optional="hide"/>
+            </xpath>
+            <xpath expr="//field[@name='matching_number']" position="after">
+                <field name="pgm_trm"/>
+            </xpath>
+            <xpath expr="//field[@name='name']" position="after">
+                <field name="pgm_detail" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
