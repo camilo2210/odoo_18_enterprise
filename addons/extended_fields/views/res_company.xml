@@ -1,20 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+
         <record id="view_company_form_inh_firma" model="ir.ui.view">
             <field name="name">res.company.form.inh.firma</field>
             <field name="model">res.company</field>
             <field name="inherit_id" ref="base.view_company_form"/>
+
             <field name="arch" type="xml">
-                <xpath expr="//field[@name='SSFF_company_code']" position="after">
+
+                <xpath expr="//field[@name='name']" position="after">
+
                     <separator string="Firma"/>
-                            <field name="firma_imagen" widget="image"/>
-                            <field name="pgm_sello" widget="image"/>
-                            <field name="pgm_tyc_purchase" widget="html" options="{'toolbar': False}" class="o_html_field"/>
-                            <field name="pgm_tyc_sale" widget="html" options="{'toolbar': False}" class="o_html_field"/>
-                            <field name="pgm_signed_by"/>
+
+                    <field name="firma_imagen" widget="image"/>
+                    <field name="pgm_sello" widget="image"/>
+
+                    <field name="pgm_tyc_purchase"
+                           widget="html"
+                           options="{'toolbar': False}"
+                           class="o_html_field"/>
+
+                    <field name="pgm_tyc_sale"
+                           widget="html"
+                           options="{'toolbar': False}"
+                           class="o_html_field"/>
+
+                    <field name="pgm_signed_by"/>
+
                 </xpath>
+
             </field>
         </record>
+
     </data>
 </odoo>

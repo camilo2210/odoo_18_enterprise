@@ -13,4 +13,3 @@ class ResCompany(models.Model):
     pgm_tyc_sale=fields.Html(string="Términos y Condiciones de Venta", help="Ingrese los términos y condiciones para las ventas en formato HTML")
     # Campo para almacenar nombre del firmante
     pgm_signed_by = fields.Char(string="Nombre del Firmante", help="Ingrese el nombre de la persona que firma en representación de la empresa")
-    SSFF_company_code = fields.Char(string="SSFF Code")
