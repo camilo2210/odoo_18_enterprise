@@ -1,21 +1,23 @@
 {
     'name': 'Extended Field Creator',
-    'summary': 'Create custom fields on any Odoo model via a user-friendly interface — no code required.',
+    'summary': 'Generate custom field code in the extended_fields module via a user-friendly interface.',
     'description': """
-        Extended Field Creator
-        ======================
-        Allows functional/technical consultants to dynamically create
-        new fields on any Odoo model from a simple UI.
+        Extended Field Creator — Code Generator
+        =========================================
+        Allows functional/technical consultants to define new fields
+        through a UI and generate the corresponding Python and XML code
+        directly into the ``extended_fields`` addon.
 
         Features:
         - Select target model, field name, type, and help text
-        - Auto-generates the technical name with the x_pgm_ prefix
-        - Creates the field in the database instantly (no restart needed)
-        - Auto-injects the field into the target model's form view
+        - Auto-generates the technical name with the smm_ prefix
+        - Generates Python field definitions in extended_fields/models/
+        - Generates XML view extensions in extended_fields/views/
+        - Auto-updates __init__.py and __manifest__.py when new files are needed
         - Supports: Char, Text, Integer, Float, Boolean, Date, Datetime,
           Html, Binary, Monetary, Many2one, and Selection field types
         - Full audit trail via chatter
-        - Clean removal of created fields and their view extensions
+        - Clean removal of generated code (comments out Python, removes XML)
     """,
     'author': 'PROGSUM',
     'website': 'https://www.progsum.com',

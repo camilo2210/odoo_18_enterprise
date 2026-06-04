@@ -80,16 +80,16 @@
                     <header>
                         <button name="action_confirm"
                                 type="object"
-                                string="✓ Confirm &amp; Create Field"
+                                string="✓ Confirm &amp; Generate Code"
                                 class="oe_highlight"
-                                confirm="This will create the field on the target model. Continue?"
+                                confirm="This will generate Python and XML code in the extended_fields module. You will need to upgrade that module afterwards. Continue?"
                                 invisible="state != 'draft'"
                                 groups="extended_field_creator.group_field_creator_manager"/>
                         <button name="action_remove_field"
                                 type="object"
-                                string="✗ Remove Field"
+                                string="✗ Remove Field Code"
                                 class="btn-danger"
-                                confirm="This will permanently remove the field and its data from the target model. This action cannot be undone. Continue?"
+                                confirm="This will comment out the field code in the extended_fields module. You will need to upgrade that module afterwards. Continue?"
                                 invisible="state != 'done'"
                                 groups="extended_field_creator.group_field_creator_manager"/>
                         <button name="action_reset_to_draft"
@@ -115,7 +115,9 @@
                                        readonly="state != 'draft'"/>
                             </h1>
                             <h3 class="text-muted">
-                                <field name="technical_name" class="text-muted"/>
+                                <field name="technical_name"
+                                       placeholder="e.g. smm_customer_score"
+                                       readonly="state != 'draft'"/>
                             </h3>
                         </div>
 
@@ -177,10 +179,10 @@
                             <!-- Technical Info Tab (read-only) -->
                             <page string="Technical Details" name="page_technical"
                                   invisible="state == 'draft'">
-                                <group string="Created Artefacts">
-                                    <field name="created_field_id"
+                                <group string="Generated Files">
+                                    <field name="generated_model_file"
                                            readonly="1"/>
-                                    <field name="created_view_id"
+                                    <field name="generated_view_file"
                                            readonly="1"/>
                                 </group>
                             </page>

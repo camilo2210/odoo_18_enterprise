@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 import logging
+import os
 import re
-import unicodedata
 
 from odoo import api, fields, models, _
 from odoo.exceptions import UserError, ValidationError
+import odoo.modules
 
 _logger = logging.getLogger(__name__)
 
@@ -26,14 +27,35 @@ FIELD_TYPE_SELECTION = [
     ('many2one', 'Link to another model (Many2one)'),
 ]
 
-TECHNICAL_NAME_PREFIX = 'x_pgm_'
+TECHNICAL_NAME_PREFIX = 'smm_'
+
+FIELD_CLASS_MAP = {
+    'char': 'Char',
+    'text': 'Text',
+    'html': 'Html',
+    'integer': 'Integer',
+    'float': 'Float',
+    'monetary': 'Monetary',
+    'boolean': 'Boolean',
+    'date': 'Date',
+    'datetime': 'Datetime',
+    'binary': 'Binary',
+    'selection': 'Selection',
+    'many2one': 'Many2one',
+}
+
+TARGET_MODULE = 'extended_fields'
 
 
 class ExtendedFieldCreator(models.Model):
-    """UI-driven dynamic field creator for functional consultants.
+    """UI-driven code generator for the ``extended_fields`` addon.
 
-    Creates ``ir.model.fields`` records at runtime and auto-injects
-    the new field into the target model's primary form view.
+    When a field definition is confirmed, this model generates:
+    - A Python field definition in ``extended_fields/models/<model>.py``
+    - An XML view extension in ``extended_fields/views/<model>_views.xml``
+
+    After generation, the ``extended_fields`` module must be upgraded
+    for the new field to become active.
     """
 
     _name = 'extended.field.creator'
@@ -59,11 +81,10 @@ class ExtendedFieldCreator(models.Model):
 
     technical_name = fields.Char(
         string="Technical Name",
-        compute='_compute_technical_name',
-        store=True,
-        readonly=True,
+        required=True,
         tracking=True,
-        help="Auto-generated Odoo-compatible technical name (x_pgm_…).",
+        help="Technical name used in Python code. Must start with 'smm_' "
+             "and contain only lowercase letters, digits, and underscores.",
     )
 
     field_type = fields.Selection(
@@ -150,23 +171,19 @@ class ExtendedFieldCreator(models.Model):
         copy=False,
     )
 
-    # --- References to created artefacts ---
-    created_field_id = fields.Many2one(
-        comodel_name='ir.model.fields',
-        string="Created Field",
+    # --- References to generated code files ---
+    generated_model_file = fields.Char(
+        string="Generated Model File",
         readonly=True,
-        ondelete='set null',
         copy=False,
-        help="Reference to the ir.model.fields record that was created.",
+        help="Relative path to the Python model file where the field was generated.",
     )
 
-    created_view_id = fields.Many2one(
-        comodel_name='ir.ui.view',
-        string="Created View Extension",
+    generated_view_file = fields.Char(
+        string="Generated View File",
         readonly=True,
-        ondelete='set null',
         copy=False,
-        help="Reference to the inheriting ir.ui.view record that injects the field.",
+        help="Relative path to the XML view file where the field was generated.",
     )
 
     company_id = fields.Many2one(
@@ -190,24 +207,16 @@ class ExtendedFieldCreator(models.Model):
     # ------------------------------------------------------------------
     # Computed Fields
     # ------------------------------------------------------------------
-    @api.depends('name')
-    def _compute_technical_name(self):
-        """Auto-generate ``x_pgm_<sanitized_label>`` from the field label."""
+    @api.onchange('technical_name')
+    def _onchange_technical_name(self):
+        """Auto-prepend ``smm_`` prefix if the user forgets it."""
         for rec in self:
-            if not rec.name:
-                rec.technical_name = False
-                continue
-            # Normalize unicode → strip accents → lowercase
-            normalized = unicodedata.normalize('NFKD', rec.name)
-            ascii_name = normalized.encode('ascii', 'ignore').decode('ascii')
-            lower_name = ascii_name.lower().strip()
-            # Replace anything non-alphanumeric with underscores
-            clean_name = re.sub(r'[^a-z0-9]+', '_', lower_name)
-            clean_name = clean_name.strip('_')
-            if clean_name:
-                rec.technical_name = f'{TECHNICAL_NAME_PREFIX}{clean_name}'
-            else:
-                rec.technical_name = False
+            if rec.technical_name and not rec.technical_name.startswith(TECHNICAL_NAME_PREFIX):
+                # Clean the input: lowercase, replace non-alnum with underscores
+                cleaned = re.sub(r'[^a-z0-9_]+', '_', rec.technical_name.lower().strip())
+                cleaned = cleaned.strip('_')
+                if cleaned:
+                    rec.technical_name = f'{TECHNICAL_NAME_PREFIX}{cleaned}'
 
     # ------------------------------------------------------------------
     # Onchange / Validation
@@ -232,7 +241,7 @@ class ExtendedFieldCreator(models.Model):
     @api.constrains('technical_name')
     def _check_technical_name_valid(self):
         for rec in self:
-            if rec.technical_name and not re.match(r'^x_pgm_[a-z0-9_]+$', rec.technical_name):
+            if rec.technical_name and not re.match(r'^smm_[a-z0-9_]+$', rec.technical_name):
                 raise ValidationError(
                     _("The technical name '%(name)s' is invalid. "
                       "It must only contain lowercase letters, digits, and underscores.",
@@ -243,7 +252,7 @@ class ExtendedFieldCreator(models.Model):
     # Actions
     # ------------------------------------------------------------------
     def action_confirm(self):
-        """Create the field in ``ir.model.fields`` and inject into the form view."""
+        """Generate Python and XML code in the ``extended_fields`` addon."""
         self.ensure_one()
         if self.state != 'draft':
             raise UserError(_("Only records in 'Draft' status can be confirmed."))
@@ -251,124 +260,144 @@ class ExtendedFieldCreator(models.Model):
             raise UserError(_("Cannot confirm: the technical name could not be generated. "
                               "Please enter a valid Field Label."))
 
-        # --- Check for duplicate field on target model ---
-        existing_field = self.env['ir.model.fields'].sudo().search([
-            ('model_id', '=', self.model_id.id),
-            ('name', '=', self.technical_name),
-        ], limit=1)
-        if existing_field:
-            raise UserError(
-                _("A field with technical name '%(tech)s' already exists on model '%(model)s'.",
-                  tech=self.technical_name,
-                  model=self.model_id.name)
-            )
+        module_path = self._get_extended_fields_path()
+
+        # --- Check for duplicate field in target model file ---
+        model_filename = self._get_model_filename()
+        model_filepath = os.path.join(module_path, 'models', model_filename)
+        if os.path.isfile(model_filepath):
+            content = self._read_file(model_filepath)
+            # Match both active and commented-out definitions
+            if re.search(rf'^\s+{re.escape(self.technical_name)}\s*=\s*fields\.', content, re.MULTILINE):
+                raise UserError(
+                    _("A field with technical name '%(tech)s' already exists in %(file)s.",
+                      tech=self.technical_name,
+                      file=model_filename)
+                )
 
         _logger.info(
-            "Creating field '%s' (%s) on model '%s' ...",
+            "Generating code for field '%s' (%s) on model '%s' ...",
             self.technical_name, self.field_type, self.model_id.model,
         )
 
+        # --- Generate Python model code ---
         try:
-            created_field = self._create_ir_model_field()
+            model_file_rel = self._generate_model_code(module_path)
             _logger.info(
-                "Field '%s' (id=%s) created successfully on '%s'.",
-                self.technical_name, created_field.id, self.model_id.model,
+                "Python code generated in '%s' for field '%s'.",
+                model_file_rel, self.technical_name,
             )
         except Exception:
             _logger.exception(
-                "Failed to create ir.model.fields for '%s' on '%s'.",
+                "Failed to generate model code for '%s' on '%s'.",
                 self.technical_name, self.model_id.model,
             )
             raise
 
-        # --- Auto-inject into form view ---
-        created_view = False
+        # --- Generate XML view code ---
+        view_file_rel = False
         try:
-            created_view = self._inject_into_form_view()
-            if created_view:
+            view_file_rel = self._generate_view_xml(module_path)
+            if view_file_rel:
                 _logger.info(
-                    "View extension (id=%s) created to inject '%s' into '%s' form.",
-                    created_view.id, self.technical_name, self.model_id.model,
+                    "XML view code generated in '%s' for field '%s'.",
+                    view_file_rel, self.technical_name,
                 )
             else:
                 _logger.warning(
                     "No form view found for model '%s'. "
-                    "Field '%s' was created but not injected into any view.",
+                    "Field '%s' code was generated but no view extension was created.",
                     self.model_id.model, self.technical_name,
                 )
         except Exception:
             _logger.exception(
-                "Failed to inject '%s' into form view of '%s'. "
-                "The field was created but is not visible in any view.",
+                "Failed to generate view XML for '%s' on '%s'. "
+                "The Python code was generated but the field is not visible in any view.",
                 self.technical_name, self.model_id.model,
             )
 
         self.write({
             'state': 'done',
-            'created_field_id': created_field.id,
-            'created_view_id': created_view.id if created_view else False,
+            'generated_model_file': model_file_rel,
+            'generated_view_file': view_file_rel or False,
         })
 
         return {
             'type': 'ir.actions.client',
             'tag': 'display_notification',
             'params': {
-                'title': _("Field Created Successfully"),
+                'title': _("Code Generated Successfully"),
                 'message': _(
-                    "The field '%(label)s' (%(tech)s) has been created on %(model)s.",
+                    "The field '%(label)s' (%(tech)s) has been generated in the "
+                    "extended_fields module.\n"
+                    "Please upgrade the 'extended_fields' module to activate the field.",
                     label=self.name,
                     tech=self.technical_name,
-                    model=self.model_id.name,
                 ),
                 'type': 'success',
-                'sticky': False,
+                'sticky': True,
                 'next': {'type': 'ir.actions.act_window_close'},
             },
         }
 
     def action_remove_field(self):
-        """Remove the created field and its view extension from the database."""
+        """Remove the generated field code from the ``extended_fields`` addon."""
         self.ensure_one()
         if self.state != 'done':
             raise UserError(_("Only records in 'Created' status can be removed."))
 
         _logger.info(
-            "Removing field '%s' from model '%s' ...",
+            "Removing generated code for field '%s' from model '%s' ...",
             self.technical_name, self.model_id.model,
         )
 
+        module_path = self._get_extended_fields_path()
         errors = []
 
-        # --- Remove view extension first ---
-        if self.created_view_id:
+        # --- Remove from XML view first ---
+        if self.generated_view_file:
             try:
-                view_id = self.created_view_id.id
-                self.created_view_id.sudo().unlink()
-                _logger.info("Removed view extension (id=%s).", view_id)
+                self._remove_field_from_view(module_path)
+                _logger.info("Removed field '%s' from view XML.", self.technical_name)
             except Exception:
-                _logger.exception("Failed to remove view extension (id=%s).", self.created_view_id.id)
-                errors.append(_("Could not remove the view extension."))
+                _logger.exception("Failed to remove field '%s' from view XML.", self.technical_name)
+                errors.append(_("Could not remove the field from the view XML."))
 
-        # --- Remove the field ---
-        if self.created_field_id:
+        # --- Comment out from Python model ---
+        if self.generated_model_file:
             try:
-                field_id = self.created_field_id.id
-                self.created_field_id.sudo().unlink()
-                _logger.info("Removed ir.model.fields (id=%s).", field_id)
+                self._remove_field_from_model(module_path)
+                _logger.info("Commented out field '%s' in model code.", self.technical_name)
             except Exception:
-                _logger.exception("Failed to remove ir.model.fields (id=%s).", self.created_field_id.id)
-                errors.append(_("Could not remove the field from the model."))
+                _logger.exception("Failed to comment out field '%s' in model code.", self.technical_name)
+                errors.append(_("Could not comment out the field in the model code."))
 
         if errors:
             raise UserError('\n'.join(errors))
 
         self.write({
             'state': 'removed',
-            'created_field_id': False,
-            'created_view_id': False,
+            'generated_model_file': False,
+            'generated_view_file': False,
         })
 
-        _logger.info("Field '%s' removed successfully.", self.technical_name)
+        _logger.info("Field '%s' code removed successfully.", self.technical_name)
+
+        return {
+            'type': 'ir.actions.client',
+            'tag': 'display_notification',
+            'params': {
+                'title': _("Field Code Removed"),
+                'message': _(
+                    "The code for field '%(label)s' (%(tech)s) has been removed.\n"
+                    "Please upgrade the 'extended_fields' module to apply changes.",
+                    label=self.name,
+                    tech=self.technical_name,
+                ),
+                'type': 'warning',
+                'sticky': True,
+            },
+        }
 
     def action_reset_to_draft(self):
         """Reset a removed record back to draft so it can be re-created."""
@@ -382,7 +411,7 @@ class ExtendedFieldCreator(models.Model):
     # CRUD Overrides
     # ------------------------------------------------------------------
     def unlink(self):
-        """Clean up created fields and views when the creator record is deleted."""
+        """Prevent deletion of records whose code is already generated."""
         for rec in self:
             if rec.state == 'done':
                 raise UserError(
@@ -399,54 +428,349 @@ class ExtendedFieldCreator(models.Model):
         return super().copy(default)
 
     # ------------------------------------------------------------------
-    # Private Helpers
+    # Code Generation — Python Model
     # ------------------------------------------------------------------
-    def _create_ir_model_field(self):
-        """Create an ``ir.model.fields`` record for the configured field.
+    def _generate_model_code(self, module_path):
+        """Generate or append a Python field definition in ``extended_fields``.
 
         Returns:
-            ir.model.fields recordset (singleton)
+            str: Relative path to the generated model file (e.g. ``models/res_partner.py``).
         """
         self.ensure_one()
-        vals = {
-            'name': self.technical_name,
-            'field_description': self.name,
-            'model_id': self.model_id.id,
-            'ttype': self.field_type,
-            'help': self.help_text or False,
-            'required': self.required_field,
-            'copied': self.copied_field,
-        }
+        model_filename = self._get_model_filename()
+        model_filepath = os.path.join(module_path, 'models', model_filename)
+        field_code = self._build_field_definition()
 
-        # --- Selection options ---
-        if self.field_type == 'selection':
-            parsed_options = self._parse_selection_options()
-            vals['selection_ids'] = [
-                (0, 0, {
-                    'value': key,
-                    'name': label,
-                    'sequence': idx * 10,
-                })
-                for idx, (key, label) in enumerate(parsed_options)
-            ]
+        if os.path.isfile(model_filepath):
+            # Append field to existing file
+            content = self._read_file(model_filepath)
+            if not content.endswith('\n'):
+                content += '\n'
+            content += '\n' + field_code + '\n'
+            self._write_file(model_filepath, content)
+        else:
+            # Create new model file
+            class_name = self._get_class_name()
+            content = (
+                "# -*- coding: utf-8 -*-\n"
+                "from odoo import fields, models\n"
+                "\n"
+                "\n"
+                f"class {class_name}(models.Model):\n"
+                f"    _inherit = '{self.model_id.model}'\n"
+                "\n"
+                f"{field_code}\n"
+            )
+            self._write_file(model_filepath, content)
+            # Update models/__init__.py
+            self._update_init_file(module_path, model_filename.replace('.py', ''))
 
-        # --- Many2one relation ---
+        return f"models/{model_filename}"
+
+    def _build_field_definition(self):
+        """Build a Python field definition string.
+
+        Returns:
+            str: Multi-line field definition indented with 4 spaces.
+        """
+        self.ensure_one()
+        field_class = FIELD_CLASS_MAP.get(self.field_type, 'Char')
+
+        # Positional arguments (before keyword args)
+        positional_args = []
+
         if self.field_type == 'many2one':
-            vals['relation'] = self.relation_model_id.model
-            vals['on_delete'] = 'set null'
+            positional_args.append(f"'{self.relation_model_id.model}'")
 
-        return self.env['ir.model.fields'].sudo().create(vals)
+        if self.field_type == 'selection':
+            options = self._parse_selection_options()
+            sel_items = ', '.join(f"('{k}', '{l}')" for k, l in options)
+            positional_args.append(f"[{sel_items}]")
 
-    def _inject_into_form_view(self):
-        """Create an inheriting ``ir.ui.view`` that adds the field to the
-        target model's primary form view.
+        # Keyword arguments
+        kwargs = []
+        kwargs.append(f'string="{self.name}"')
+
+        if self.help_text:
+            escaped_help = self.help_text.replace('\\', '\\\\').replace('"', '\\"')
+            kwargs.append(f'help="{escaped_help}"')
+
+        if self.required_field:
+            kwargs.append('required=True')
+
+        if not self.copied_field:
+            kwargs.append('copy=False')
+
+        if self.field_type == 'many2one':
+            kwargs.append("ondelete='set null'")
+
+        # Combine all args
+        all_args = positional_args + kwargs
+
+        # Always use multi-line format for consistency with extended_fields style
+        formatted_args = ',\n        '.join(all_args)
+        return (
+            f"    {self.technical_name} = fields.{field_class}(\n"
+            f"        {formatted_args},\n"
+            f"    )"
+        )
+
+    # ------------------------------------------------------------------
+    # Code Generation — XML View
+    # ------------------------------------------------------------------
+    def _generate_view_xml(self, module_path):
+        """Generate or append an XML view extension in ``extended_fields``.
 
         Returns:
-            ir.ui.view recordset (singleton) or False if no form view found.
+            str or False: Relative path to the view file, or False if no form view found.
         """
         self.ensure_one()
+        view_filename = self._get_view_filename(module_path)
+        view_filepath = os.path.join(module_path, 'views', view_filename)
 
-        # Find the primary (non-inherited) form view for the model
+        # We need the base form view's external ID for the inherit_id ref
+        base_view_xmlid = self._find_base_form_view_xmlid()
+        if not base_view_xmlid:
+            return False
+
+        model_safe = self.model_id.model.replace('.', '_')
+        record_id = f"view_{model_safe}_form_extended_custom_fields"
+        field_line = f'                        <field name="{self.technical_name}"/>'
+
+        if os.path.isfile(view_filepath):
+            content = self._read_file(view_filepath)
+
+            if f'id="{record_id}"' in content:
+                # Record already exists — add field to the existing custom fields group
+                marker = 'name="extended_custom_fields"'
+                marker_idx = content.find(marker)
+                if marker_idx != -1:
+                    # Find the closing </group> tag after the marker
+                    close_group_idx = content.find('</group>', marker_idx)
+                    if close_group_idx != -1:
+                        # Insert the field line before </group>
+                        indent = '                    '
+                        insert_text = field_line + '\n' + indent
+                        content = (
+                            content[:close_group_idx]
+                            + insert_text
+                            + content[close_group_idx:]
+                        )
+                        self._write_file(view_filepath, content)
+            else:
+                # Record doesn't exist yet — create a new one in this file
+                new_record = self._build_view_record(record_id, base_view_xmlid)
+                # Insert before the closing </odoo> or </data> tag
+                for closing_tag in ['</data>', '</odoo>']:
+                    close_idx = content.rfind(closing_tag)
+                    if close_idx != -1:
+                        content = (
+                            content[:close_idx]
+                            + '\n' + new_record + '\n\n    '
+                            + content[close_idx:]
+                        )
+                        self._write_file(view_filepath, content)
+                        break
+        else:
+            # Create a brand-new view file
+            content = self._build_view_file(record_id, base_view_xmlid)
+            # Ensure the views directory exists
+            views_dir = os.path.join(module_path, 'views')
+            os.makedirs(views_dir, exist_ok=True)
+            self._write_file(view_filepath, content)
+            # Update __manifest__.py
+            self._update_manifest_file(module_path, view_filename)
+
+        return f"views/{view_filename}"
+
+    def _build_view_record(self, record_id, base_view_xmlid):
+        """Build an XML ``<record>`` string for a custom fields view extension.
+
+        Returns:
+            str: XML record block.
+        """
+        self.ensure_one()
+        model_name = self.model_id.model
+        return (
+            f'    <record id="{record_id}" model="ir.ui.view">\n'
+            f'        <field name="name">{model_name}.form.extended.custom.fields</field>\n'
+            f'        <field name="model">{model_name}</field>\n'
+            f'        <field name="inherit_id" ref="{base_view_xmlid}"/>\n'
+            f'        <field name="priority">999</field>\n'
+            f'        <field name="arch" type="xml">\n'
+            f'            <xpath expr="//sheet" position="inside">\n'
+            f'                <group string="Custom Fields (Extended)" name="extended_custom_fields">\n'
+            f'                    <field name="{self.technical_name}"/>\n'
+            f'                </group>\n'
+            f'            </xpath>\n'
+            f'        </field>\n'
+            f'    </record>'
+        )
+
+    def _build_view_file(self, record_id, base_view_xmlid):
+        """Build a complete XML view file with one inherited view record.
+
+        Returns:
+            str: Full XML file content.
+        """
+        self.ensure_one()
+        record_content = self._build_view_record(record_id, base_view_xmlid)
+        return (
+            '<?xml version="1.0" encoding="utf-8"?>\n'
+            '<odoo>\n'
+            f'{record_content}\n'
+            '</odoo>\n'
+        )
+
+    # ------------------------------------------------------------------
+    # Code Removal
+    # ------------------------------------------------------------------
+    def _remove_field_from_model(self, module_path):
+        """Comment out the field definition in the Python model file."""
+        self.ensure_one()
+        model_filename = self._get_model_filename()
+        model_filepath = os.path.join(module_path, 'models', model_filename)
+
+        if not os.path.isfile(model_filepath):
+            _logger.warning("Model file '%s' not found; nothing to remove.", model_filepath)
+            return
+
+        content = self._read_file(model_filepath)
+        lines = content.split('\n')
+
+        field_pattern = re.compile(
+            rf'^(\s+){re.escape(self.technical_name)}\s*=\s*fields\.'
+        )
+
+        field_start = None
+        field_end = None
+
+        for i, line in enumerate(lines):
+            if field_pattern.match(line):
+                field_start = i
+                # Track parentheses to find the end of the field definition
+                paren_depth = 0
+                for j in range(i, len(lines)):
+                    paren_depth += lines[j].count('(') - lines[j].count(')')
+                    if paren_depth <= 0:
+                        field_end = j
+                        break
+                if field_end is None:
+                    field_end = i
+                break
+
+        if field_start is not None:
+            for i in range(field_start, field_end + 1):
+                lines[i] = '    # REMOVED: ' + lines[i].lstrip()
+            self._write_file(model_filepath, '\n'.join(lines))
+            _logger.info(
+                "Commented out lines %d-%d in '%s'.",
+                field_start + 1, field_end + 1, model_filepath,
+            )
+        else:
+            _logger.warning(
+                "Could not find field '%s' in '%s'; file was not modified.",
+                self.technical_name, model_filepath,
+            )
+
+    def _remove_field_from_view(self, module_path):
+        """Remove the field element from the XML view file."""
+        self.ensure_one()
+        view_filename = self._get_view_filename(module_path)
+        view_filepath = os.path.join(module_path, 'views', view_filename)
+
+        if not os.path.isfile(view_filepath):
+            _logger.warning("View file '%s' not found; nothing to remove.", view_filepath)
+            return
+
+        content = self._read_file(view_filepath)
+
+        # Remove lines containing <field name="technical_name"/>
+        field_pattern = re.compile(
+            rf'^\s*<field\s+name="{re.escape(self.technical_name)}"\s*/>\s*\n?',
+            re.MULTILINE,
+        )
+        new_content = field_pattern.sub('', content)
+
+        if new_content != content:
+            self._write_file(view_filepath, new_content)
+            _logger.info("Removed field '%s' from '%s'.", self.technical_name, view_filepath)
+        else:
+            _logger.warning(
+                "Could not find field '%s' in view file '%s'.",
+                self.technical_name, view_filepath,
+            )
+
+    # ------------------------------------------------------------------
+    # Path & Naming Helpers
+    # ------------------------------------------------------------------
+    def _get_extended_fields_path(self):
+        """Return the absolute filesystem path to the ``extended_fields`` addon.
+
+        Raises:
+            UserError: If the module cannot be found.
+        """
+        module_path = odoo.modules.get_module_path(TARGET_MODULE, display_warning=False)
+        if not module_path:
+            raise UserError(
+                _("Cannot find the '%(module)s' module on the filesystem. "
+                  "Please ensure it is installed and the addons path is configured correctly.",
+                  module=TARGET_MODULE)
+            )
+        return module_path
+
+    def _get_model_filename(self):
+        """Return the Python filename for the target model (e.g. ``res_partner.py``).
+
+        Returns:
+            str
+        """
+        self.ensure_one()
+        return self.model_id.model.replace('.', '_') + '.py'
+
+    def _get_view_filename(self, module_path):
+        """Return the XML view filename for the target model.
+
+        Tries to find an existing file first (with or without ``_views`` suffix),
+        falling back to ``{model}_views.xml`` for new files.
+
+        Returns:
+            str
+        """
+        self.ensure_one()
+        model_safe = self.model_id.model.replace('.', '_')
+        views_dir = os.path.join(module_path, 'views')
+
+        # Check existing naming patterns
+        candidate_views = f"{model_safe}_views.xml"
+        candidate_plain = f"{model_safe}.xml"
+
+        if os.path.isfile(os.path.join(views_dir, candidate_views)):
+            return candidate_views
+        if os.path.isfile(os.path.join(views_dir, candidate_plain)):
+            return candidate_plain
+
+        # Default for new files
+        return candidate_views
+
+    def _get_class_name(self):
+        """Generate a Python class name from the model name.
+
+        Example: ``account.move.line`` → ``AccountMoveLine``
+
+        Returns:
+            str
+        """
+        self.ensure_one()
+        return ''.join(word.capitalize() for word in self.model_id.model.split('.'))
+
+    def _find_base_form_view_xmlid(self):
+        """Find the external XML ID of the primary form view for the target model.
+
+        Returns:
+            str or False: e.g. ``account.view_account_form``
+        """
+        self.ensure_one()
         form_view = self.env['ir.ui.view'].sudo().search([
             ('model', '=', self.model_id.model),
             ('type', '=', 'form'),
@@ -456,32 +780,96 @@ class ExtendedFieldCreator(models.Model):
         if not form_view:
             return False
 
-        # Build a small arch that injects the field inside the sheet
-        field_widget = self._get_widget_for_type()
-        field_attrs = f'name="{self.technical_name}"'
-        if field_widget:
-            field_attrs += f' widget="{field_widget}"'
+        external_ids = form_view.get_external_id()
+        xmlid = external_ids.get(form_view.id, '')
+        return xmlid or False
 
-        arch = (
-            '<data>\n'
-            '    <xpath expr="//sheet" position="inside">\n'
-            '        <group string="Custom Fields (Extended)" name="extended_custom_fields">\n'
-            f'            <field {field_attrs}/>\n'
-            '        </group>\n'
-            '    </xpath>\n'
-            '</data>'
-        )
+    # ------------------------------------------------------------------
+    # File Update Helpers
+    # ------------------------------------------------------------------
+    def _update_init_file(self, module_path, module_name):
+        """Add an import line to ``models/__init__.py`` if not already present.
 
-        view_vals = {
-            'name': f'extended.field.creator.inject.{self.technical_name}',
-            'model': self.model_id.model,
-            'inherit_id': form_view.id,
-            'arch': arch,
-            'priority': 999,
-        }
+        Args:
+            module_path: Absolute path to the ``extended_fields`` addon.
+            module_name: Python module name (without ``.py``), e.g. ``res_partner``.
+        """
+        init_path = os.path.join(module_path, 'models', '__init__.py')
+        import_line = f"from . import {module_name}"
 
-        return self.env['ir.ui.view'].sudo().create(view_vals)
+        if os.path.isfile(init_path):
+            content = self._read_file(init_path)
+            if import_line in content:
+                return  # Already present
+            if not content.endswith('\n'):
+                content += '\n'
+            content += f"{import_line}\n"
+            self._write_file(init_path, content)
+        else:
+            content = f"# -*- coding: utf-8 -*-\n{import_line}\n"
+            self._write_file(init_path, content)
 
+        _logger.info("Updated %s with import for '%s'.", init_path, module_name)
+
+    def _update_manifest_file(self, module_path, view_filename):
+        """Add a view file entry to ``__manifest__.py``'s ``data`` list.
+
+        Args:
+            module_path: Absolute path to the ``extended_fields`` addon.
+            view_filename: Filename of the view XML file, e.g. ``crm_lead_views.xml``.
+        """
+        manifest_path = os.path.join(module_path, '__manifest__.py')
+        view_entry = f"views/{view_filename}"
+
+        content = self._read_file(manifest_path)
+        if view_entry in content:
+            return  # Already present
+
+        # Find the 'data' list and insert before its closing bracket
+        lines = content.split('\n')
+        in_data = False
+        insert_idx = None
+
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+            if "'data'" in line or '"data"' in line:
+                in_data = True
+            if in_data and (stripped.startswith('],') or stripped == ']'):
+                insert_idx = i
+                break
+
+        if insert_idx is not None:
+            # Determine indentation from surrounding lines
+            indent = '        '
+            new_line = f"{indent}'{view_entry}',"
+            lines.insert(insert_idx, new_line)
+            self._write_file(manifest_path, '\n'.join(lines))
+            _logger.info("Updated %s with view file '%s'.", manifest_path, view_entry)
+        else:
+            _logger.warning(
+                "Could not find 'data' list in %s. Please add '%s' manually.",
+                manifest_path, view_entry,
+            )
+
+    # ------------------------------------------------------------------
+    # File I/O
+    # ------------------------------------------------------------------
+    @staticmethod
+    def _read_file(filepath):
+        """Read a file and return its content as a string."""
+        with open(filepath, 'r', encoding='utf-8') as f:
+            return f.read()
+
+    @staticmethod
+    def _write_file(filepath, content):
+        """Write content to a file, creating parent directories if needed."""
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        with open(filepath, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+    # ------------------------------------------------------------------
+    # Selection Options Parser
+    # ------------------------------------------------------------------
     def _parse_selection_options(self):
         """Parse the ``selection_options`` text field into a list of (key, label) tuples.
 
@@ -536,9 +924,3 @@ class ExtendedFieldCreator(models.Model):
                   "Please provide key:Label pairs, one per line.")
             )
         return result
-
-    @staticmethod
-    def _get_widget_for_type():
-        """Return a recommended widget name for the field type, or False."""
-        # Most types use the default widget — only override where it helps.
-        return False
