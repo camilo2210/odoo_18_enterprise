@@ -521,7 +521,7 @@ msgstr "ENTIDAD FINANCIERA"
 #. module: extended_fields
 #: model:ir.model.fields.selection,name:extended_fields.selection__res_partner__pgm_supplier_type__exterior
 msgid "FOREING"
-msgstr "ASOCIACIÓN"
+msgstr "EXTRANJERO"
 
 #. module: extended_fields
 #: model:ir.model.fields,help:extended_fields.field_account_move_line__pgm_detail
@@ -961,16 +961,6 @@ msgstr "Depreciación acumulada previa"
 #: model:ir.model,name:extended_fields.model_product_template
 msgid "Product"
 msgstr "Producto"
-
-#. module: extended_fields
-#: model:ir.model.fields,field_description:extended_fields.field_helpdesk_ticket__pgm_product_ids
-msgid "Products"
-msgstr "Productos"
-
-#. module: extended_fields
-#: model:ir.model.fields,help:extended_fields.field_helpdesk_ticket__pgm_product_ids
-msgid "Products associated with this ticket."
-msgstr "Productos asociados a este billete."
 
 #. module: extended_fields
 #: model:ir.model.fields,field_description:extended_fields.field_account_asset__pgm_property_registry

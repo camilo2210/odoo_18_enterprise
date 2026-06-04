@@ -6,18 +6,18 @@
         <field name="inherit_id" ref="purchase.purchase_order_form"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='order_line']/list/field[@name='product_qty']" position="after">
-                <field name="pgm_operation_type"/>
+                <!-- <field name="pgm_operation_type"/> -->
                 <field name="pgm_purchase_type"/>
             </xpath>
             <xpath expr="//field[@name='partner_id']" position="after">
                 <field name="pgm_vendor_delivery_address"/>
             </xpath>
-            <xpath expr="//page[@name='purchase_delivery_invoice']//group" position="inside">
+            <!-- <xpath expr="//page[@name='purchase_delivery_invoice']//group" position="inside">
                 <group string="CONTACT REGISTRY">
                     <field name="pgm_fiscal_registry"/>
                     <field name="pgm_consecutive_number"/>
                 </group>
-            </xpath>
+            </xpath> -->
         </field>
     </record>
 

@@ -5,22 +5,23 @@
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
-            <field name="invoice_incoterm_id" position="after">
+            <!-- <field name="invoice_incoterm_id" position="after">
                 <field name="pgm_fiscal_registry"/>
                 <field name="pgm_consecutive_number"/>
-            </field>
+            </field> -->
             <field name="ref" position="after">
                 <field name="pgm_payment_proposal"/>
             </field>
-            <group>
-                <div class="border-top mt-3 mb-3"/>
+            <!-- <group> -->
+                
                 <xpath expr="//field[@name='amount_residual']" position="after">
+                    <div class="border-top mt-3 mb-3"/>
                     <field name="amount_untaxed_signed" class="mt-5"/>
                     <field name="amount_tax_signed"/>
                     <field name="amount_total_signed"/>
                     <field name="amount_residual_signed"/>
                 </xpath>
-            </group>
+            <!-- </group> -->
         </field>
     </record>
 
@@ -50,6 +51,7 @@
         <field name="arch" type="xml">
             <xpath expr="//field[@name='ref']" position="before">
                 <field name="l10n_latam_document_type_id" optional="show"/>
+                <!-- <field name="pgm_detail"/> -->
                 <field name="l10n_latam_document_number" optional="show"/>
             </xpath>
         </field>

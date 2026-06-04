@@ -7,13 +7,13 @@ class PurchaseOrder(models.Model):
     _inherit = 'purchase.order'
 
     # pgm_fiscal_registry = fields.Char(
-            # string="Fiscal log",
-            # help="Fiscal log associated with the purchase order.",
-        # )
+    #         string="Fiscal log",
+    #         help="Fiscal log associated with the purchase order.",
+    #     )
 
     # pgm_consecutive_number = fields.Char(
-        # string="Sequence",
-        # help="Internal/DIAN consecutive number of the purchase order.",
+    #     string="Sequence",
+    #     help="Internal/DIAN consecutive number of the purchase order.",
     # )
     pgm_vendor_delivery_address = fields.Char(
         string="Delivery Address",

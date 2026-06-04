@@ -5,7 +5,7 @@
     'support': 'info@progsum.com',
     'maintainer': 'PROGSUM',
     'category': 'Technical Settings',
-    'version': "18.0.0.6",
+    'version': "18.0.0.7",
     "license": "OPL-1",
     'depends': [
         'base_address_extended','base', 'account', 'helpdesk', 'purchase', 'product', 'sale_project', 'account_asset', 'account_loans', 'stock', 'purchase_requisition', 'l10n_latam_base'
