@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="res_config_settings_view_form_mcp" model="ir.ui.view">
+        <field name="name">res.config.settings.view.form.inherit.mcp</field>
+        <field name="model">res.config.settings</field>
+        <field name="priority">20</field>
+        <field name="inherit_id" ref="base.res_config_settings_view_form" />
+        <field name="arch" type="xml">
+            <xpath expr="//block[@name='integration']" position="after">
+                <div class="app_settings_block" data-string="MCP Server" string="MCP Server"
+                    data-key="mcp_server">
+                    <h2>MCP Server Configuration</h2>
+                    <div class="row mt16 o_settings_container" id="mcp_settings">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="mcp_enabled" />
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="mcp_enabled" />
+                                <a title="Master switch to enable or disable all MCP server functionality. When disabled, all MCP endpoints (REST API and XML-RPC) will return errors and deny access to any MCP operations." 
+                                   class="o_doc_link me-2">
+                                    <i class="fa fa-question-circle"></i>
+                                </a>
+                                <div class="text-muted">
+                                    Enable or disable MCP server access globally
+                                </div>
+                                <br />
+                                <div class="content-group" invisible="not mcp_enabled">
+                                    <button name="%(mcp_server.action_mcp_enabled_models)d"
+                                        icon="oi-arrow-right" type="action"
+                                        string="Manage MCP Available Models" class="btn-link" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mt16 o_settings_container"
+                        invisible="not mcp_enabled">
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="mcp_enable_logging" />
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="mcp_enable_logging" />
+                                <a title="Enable audit logging for all MCP operations. When enabled, all API calls (REST and XML-RPC) will be logged to the mcp.log model including request details, user information, and responses. Note: Enabling logging may impact performance for high-volume API usage." 
+                                   class="o_doc_link me-2">
+                                    <i class="fa fa-question-circle"></i>
+                                </a>
+                                <div class="text-muted">
+                                    Log all MCP requests and responses
+                                </div>
+                                
+                                <div class="content-group mt16" invisible="not mcp_enable_logging">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label for="mcp_log_retention_days" class="o_light_label"/>
+                                            <a title="Number of days to keep MCP log entries. Logs older than this will be automatically deleted by a scheduled action to save storage space. Set to 0 to keep logs forever. Default: 30 days." 
+                                               class="o_doc_link me-2">
+                                                <i class="fa fa-question-circle"></i>
+                                            </a>
+                                            <div class="text-muted">
+                                                Log retention period
+                                            </div>
+                                            <field name="mcp_log_retention_days" class="o_light_label oe_inline" style="width: 100px;"/> days
+                                        </div>
+                                    </div>
+                                    <div class="row mt16">
+                                        <div class="col-12">
+                                            <button name="%(mcp_server.action_mcp_logs)d"
+                                                icon="oi-arrow-right" type="action"
+                                                string="View MCP Logs" class="btn-link" />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6 o_setting_box">
+                            <div class="o_setting_left_pane">
+                                <field name="mcp_enable_rate_limiting" />
+                            </div>
+                            <div class="o_setting_right_pane">
+                                <label for="mcp_enable_rate_limiting" />
+                                <a title="Enable rate limiting to prevent API abuse and ensure fair usage. When enabled, requests will be limited per user per minute. You can configure the specific limits below. Disabling this allows unlimited API requests which may impact server performance."
+                                   class="o_doc_link me-2">
+                                    <i class="fa fa-question-circle"></i>
+                                </a>
+                                <div class="text-muted">
+                                    Enforce request limits to prevent API abuse
+                                </div>
+
+                                <div class="content-group mt16" invisible="not mcp_enable_rate_limiting">
+                                    <div class="row">
+                                        <div class="col-12">
+                                            <label for="mcp_request_limit" class="o_light_label"/>
+                                            <a title="Maximum API requests allowed per user per minute. Set to 0 for unlimited requests (not recommended for production). Default: 300. Lower values provide better protection against abuse but may impact legitimate usage. Consider your typical API usage patterns when setting this limit."
+                                               class="o_doc_link me-2">
+                                                <i class="fa fa-question-circle"></i>
+                                            </a>
+                                            <div class="text-muted">
+                                                Maximum requests per minute per user (0 = unlimited)
+                                            </div>
+                                            <field name="mcp_request_limit" class="o_light_label oe_inline" style="width: 100px;"/> requests/minute
+                                        </div>
+                                    </div>
+
+                                    <div class="row mt16">
+                                        <div class="col-12">
+                                            <label for="mcp_request_timeout" class="o_light_label"/>
+                                            <a title="Maximum time allowed for processing a single API request. Default: 30 seconds. This setting is informational only - actual request timeouts should be configured at the web server level (nginx, Apache) or Odoo worker level. Setting to 0 disables the timeout warning."
+                                               class="o_doc_link me-2">
+                                                <i class="fa fa-question-circle"></i>
+                                            </a>
+                                            <div class="text-muted">
+                                                Request timeout warning threshold
+                                            </div>
+                                            <field name="mcp_request_timeout" class="o_light_label oe_inline" style="width: 100px;"/> seconds
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

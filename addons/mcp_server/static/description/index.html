@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Server for Odoo - Connect AI Assistants to Your Odoo Data</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #2D3748; background-color: #ffffff; margin: 0; padding: 0;">
+    <div style="max-width: 900px; margin: 0 auto; padding: 0 20px;">
+
+        <!-- Module Header -->
+        <div style="background-color: white; padding: 40px 0 20px; text-align: center; border-bottom: 1px solid #e5e7eb;">
+            <h1 style="font-size: 28px; font-weight: 600; color: #1A365D; margin-bottom: 10px; line-height: 1.3; margin-top: 0;">Connect AI Assistants to Your Odoo Data with MCP Server</h1>
+            <p style="font-size: 18px; color: #1A365D; font-weight: 600; margin-bottom: 30px; margin-top: 0;">Enable natural language to search, create, update, and manage your Odoo records.</p>
+        </div>
+
+        <!-- Main Hero Section -->
+        <div style="padding: 0; margin: 40px 0;">
+            <p style="font-size: 18px; color: #2D3748; text-align: left; margin: 0 auto 30px; line-height: 1.7;">
+                MCP Server for Odoo seamlessly connects any AI assistant that supports the Model Context Protocol to your Odoo instance, giving you the power to search, create, update, and manage records using natural language; all through a secure, standards-based integration.
+            </p>
+            <div style="background-color: #ffffff; border-radius: 16px; padding: 40px; margin: 40px 0; text-align: center;">
+                <img src="mcp_demo.gif" alt="AI Query Demo" style="width: 100%; height: auto; display: block; object-fit: contain; box-shadow: 0 10px 30px rgba(26, 54, 93, 0.15); border-radius: 12px;">
+            </div>
+        </div>
+
+        <!-- What is MCP -->
+        <h2 style="font-size: 32px; font-weight: 700; color: #1A365D; margin: 60px 0 40px;">What is Model Context Protocol (MCP)?</h2>
+        <p style="font-size: 16px; color: #2D3748; line-height: 1.8; margin-bottom: 40px; margin-top: 0;">
+            <a href="https://modelcontextprotocol.io/" target="_blank" style="color: #1A365D; font-weight: 600;">Model Context Protocol (MCP)</a> is an open standard developed by Anthropic that enables seamless integration between AI assistants and data sources. It provides a universal way for AI systems to securely access and interact with local and remote resources while maintaining user control and privacy. One integration, every MCP-compatible AI tool.
+        </p>
+
+        <!-- Why MCP is Revolutionary - Card Grid -->
+        <div style="display: table; width: 100%; margin: 40px 0;">
+            <div style="display: table-row;">
+                <div style="display: table-cell; width: 33.33%; padding: 0 15px; vertical-align: top;">
+                    <div style="background-color: #D6E4F0; padding: 30px; border-radius: 16px; text-align: left; height: 280px; box-sizing: border-box;">
+                        <span style="font-size: 24px; margin-bottom: 20px; display: block;">🔌</span>
+                        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1A365D; margin-top: 0;">Universal Compatibility</h4>
+                        <p style="font-size: 14px; color: #2D3748; line-height: 1.6; margin: 0;">
+                            One integration works with ALL AI assistants that support MCP - no need for multiple custom integrations or proprietary connectors.
+                        </p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 33.33%; padding: 0 15px; vertical-align: top;">
+                    <div style="background-color: #D6E4F0; padding: 30px; border-radius: 16px; text-align: left; height: 280px; box-sizing: border-box;">
+                        <span style="font-size: 24px; margin-bottom: 20px; display: block;">🔒</span>
+                        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1A365D; margin-top: 0;">Secure by Design</h4>
+                        <p style="font-size: 14px; color: #2D3748; line-height: 1.6; margin: 0;">
+                            Built-in security with controlled access, API key authentication, and granular per-model permissions for every operation.
+                        </p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 33.33%; padding: 0 15px; vertical-align: top;">
+                    <div style="background-color: #D6E4F0; padding: 30px; border-radius: 16px; text-align: left; height: 280px; box-sizing: border-box;">
+                        <span style="font-size: 24px; margin-bottom: 20px; display: block;">🚀</span>
+                        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1A365D; margin-top: 0;">Future-Proof</h4>
+                        <p style="font-size: 14px; color: #2D3748; line-height: 1.6; margin: 0;">
+                            As new AI tools emerge, they'll support MCP - your Odoo integration automatically works with them. No vendor lock-in, ever.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Key Features -->
+        <h2 style="font-size: 32px; font-weight: 700; color: #1A365D; margin: 60px 0 40px;">Key Features &amp; Benefits</h2>
+
+        <div style="display: table; width: 100%; margin: 40px 0;">
+            <div style="display: table-row;">
+                <div style="display: table-cell; width: 33.33%; padding: 0 15px; vertical-align: top;">
+                    <div style="background-color: #FCE7E0; padding: 30px; border-radius: 16px; text-align: left; height: 320px; box-sizing: border-box;">
+                        <span style="font-size: 24px; margin-bottom: 20px; display: block;">🚀</span>
+                        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1A365D; margin-top: 0;">Instant AI Integration</h4>
+                        <p style="font-size: 14px; color: #2D3748; line-height: 1.6; margin: 0;">
+                            Connect any MCP-compatible AI assistant to your Odoo data without complex API development. One integration, every tool.
+                        </p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 33.33%; padding: 0 15px; vertical-align: top;">
+                    <div style="background-color: #FCE7E0; padding: 30px; border-radius: 16px; text-align: left; height: 320px; box-sizing: border-box;">
+                        <span style="font-size: 24px; margin-bottom: 20px; display: block;">👥</span>
+                        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1A365D; margin-top: 0;">Empower Your Team</h4>
+                        <p style="font-size: 14px; color: #2D3748; line-height: 1.6; margin: 0;">
+                            Let employees use their preferred AI tools to access Odoo data naturally and efficiently - no retraining required.
+                        </p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 33.33%; padding: 0 15px; vertical-align: top;">
+                    <div style="background-color: #FCE7E0; padding: 30px; border-radius: 16px; text-align: left; height: 320px; box-sizing: border-box;">
+                        <span style="font-size: 24px; margin-bottom: 20px; display: block;">&lt;/&gt;</span>
+                        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1A365D; margin-top: 0;">No Vendor Lock-in</h4>
+                        <p style="font-size: 14px; color: #2D3748; line-height: 1.6; margin: 0;">
+                            Switch between AI providers anytime - your MCP integration continues to work seamlessly with any future MCP-compatible tool.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="display: table; width: 100%; margin: 40px 0;">
+            <div style="display: table-row;">
+                <div style="display: table-cell; width: 33.33%; padding: 0 15px; vertical-align: top;">
+                    <div style="background-color: #FCE7E0; padding: 30px; border-radius: 16px; text-align: left; height: 320px; box-sizing: border-box;">
+                        <span style="font-size: 24px; margin-bottom: 20px; display: block;">💬</span>
+                        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1A365D; margin-top: 0;">Natural Language Operations</h4>
+                        <p style="font-size: 14px; color: #2D3748; line-height: 1.6; margin: 0;">
+                            Not just queries - create, update, and delete records naturally. Ask "Create a new customer for Acme Corp" or "Update John Doe's phone number" and watch it happen instantly.
+                        </p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 33.33%; padding: 0 15px; vertical-align: top;">
+                    <div style="background-color: #FCE7E0; padding: 30px; border-radius: 16px; text-align: left; height: 320px; box-sizing: border-box;">
+                        <span style="font-size: 24px; margin-bottom: 20px; display: block;">🛡️</span>
+                        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1A365D; margin-top: 0;">Secure &amp; Controlled Access</h4>
+                        <p style="font-size: 14px; color: #2D3748; line-height: 1.6; margin: 0;">
+                            Control exactly which models AI can access with granular permissions. Secure API key authentication ensures your data remains protected at all times.
+                        </p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 33.33%; padding: 0 15px; vertical-align: top;">
+                    <div style="background-color: #FCE7E0; padding: 30px; border-radius: 16px; text-align: left; height: 320px; box-sizing: border-box;">
+                        <span style="font-size: 24px; margin-bottom: 20px; display: block;">⚙️</span>
+                        <h4 style="font-size: 18px; font-weight: 600; margin-bottom: 15px; color: #1A365D; margin-top: 0;">Easy Configuration</h4>
+                        <p style="font-size: 14px; color: #2D3748; line-height: 1.6; margin: 0;">
+                            Set up in minutes through Odoo's standard settings interface. No technical expertise required - just point, click, and configure.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Full CRUD Highlight Section -->
+        <div style="position: relative; background-color: #e8f4fd; border: 2px solid #3182ce; border-radius: 20px; padding: 50px 30px 40px; margin: 60px 0 40px; box-shadow: 0 8px 25px rgba(49, 130, 206, 0.15);">
+            <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background-color: #3182ce; color: #ffffff; padding: 8px 24px; border-radius: 25px; font-weight: 700; font-size: 16px; box-shadow: 0 4px 15px rgba(49, 130, 206, 0.3);">
+                 Full CRUD Capabilities
+            </div>
+
+            <p style="font-size: 16px; color: #2D3748; line-height: 1.7; margin: 20px 0 30px; text-align: center;">
+                Go beyond simple queries. Create, Read, Update, and Delete operations for any enabled model - all through natural language.
+            </p>
+
+            <div style="display: table; width: 100%;">
+                <div style="display: table-row;">
+                    <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top;">
+                        <div style="background-color: #ffffff; padding: 25px; border-radius: 16px; text-align: left; min-height: 300px; box-sizing: border-box; border: 1px solid #bee3f8; box-shadow: 0 4px 15px rgba(49, 130, 206, 0.1);">
+                            <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #2c5aa0; margin-top: 0;">➕ Create</h4>
+                            <div style="font-size: 13px; color: #2D3748; line-height: 1.6;">
+                                <div style="padding: 8px 0;">"Create a new customer for Acme Corp"</div>
+                                <div style="height: 1px; background-color: #bee3f8;"></div>
+                                <div style="padding: 8px 0;">"Add a product called Premium Widget"</div>
+                                <div style="height: 1px; background-color: #bee3f8;"></div>
+                                <div style="padding: 8px 0;">"Schedule a meeting for tomorrow"</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top;">
+                        <div style="background-color: #ffffff; padding: 25px; border-radius: 16px; text-align: left; min-height: 300px; box-sizing: border-box; border: 1px solid #bee3f8; box-shadow: 0 4px 15px rgba(49, 130, 206, 0.1);">
+                            <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #2c5aa0; margin-top: 0;">🔍 Read</h4>
+                            <div style="font-size: 13px; color: #2D3748; line-height: 1.6;">
+                                <div style="padding: 8px 0;">"Show me all customers from Spain"</div>
+                                <div style="height: 1px; background-color: #bee3f8;"></div>
+                                <div style="padding: 8px 0;">"Find unpaid invoices from last month"</div>
+                                <div style="height: 1px; background-color: #bee3f8;"></div>
+                                <div style="padding: 8px 0;">"List products below reorder point"</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top;">
+                        <div style="background-color: #ffffff; padding: 25px; border-radius: 16px; text-align: left; min-height: 300px; box-sizing: border-box; border: 1px solid #bee3f8; box-shadow: 0 4px 15px rgba(49, 130, 206, 0.1);">
+                            <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #2c5aa0; margin-top: 0;">✏️ Update</h4>
+                            <div style="font-size: 13px; color: #2D3748; line-height: 1.6;">
+                                <div style="padding: 8px 0;">"Update John's phone number"</div>
+                                <div style="height: 1px; background-color: #bee3f8;"></div>
+                                <div style="padding: 8px 0;">"Change order status to confirmed"</div>
+                                <div style="height: 1px; background-color: #bee3f8;"></div>
+                                <div style="padding: 8px 0;">"Set product price to $99.99"</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top;">
+                        <div style="background-color: #ffffff; padding: 25px; border-radius: 16px; text-align: left; min-height: 300px; box-sizing: border-box; border: 1px solid #bee3f8; box-shadow: 0 4px 15px rgba(49, 130, 206, 0.1);">
+                            <h4 style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: #2c5aa0; margin-top: 0;">🗑️ Delete</h4>
+                            <div style="font-size: 13px; color: #2D3748; line-height: 1.6;">
+                                <div style="padding: 8px 0;">"Remove the test contact"</div>
+                                <div style="height: 1px; background-color: #bee3f8;"></div>
+                                <div style="padding: 8px 0;">"Delete cancelled orders"</div>
+                                <div style="height: 1px; background-color: #bee3f8;"></div>
+                                <div style="padding: 8px 0;">"Clean up duplicate records"</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compatible AI Clients -->
+        <h2 style="font-size: 32px; font-weight: 700; color: #1A365D; margin: 60px 0 40px;">Works with ANY MCP-Compatible AI Assistant</h2>
+        <p style="font-size: 16px; color: #2D3748; line-height: 1.8; margin-bottom: 40px; margin-top: 0;">
+            The beauty of open standards - one integration, endless possibilities. MCP is rapidly becoming the industry standard, with new clients added regularly. View the growing list of compatible clients at <a href="https://modelcontextprotocol.io/clients" target="_blank" style="color: #1A365D; font-weight: 600;">modelcontextprotocol.io/clients</a>.
+        </p>
+
+        <h4 style="font-size: 20px; font-weight: 600; color: #1A365D; margin: 40px 0 30px; text-align: center;">Popular MCP Clients Include:</h4>
+
+        <div style="display: table; width: 100%; margin: 0 0 40px; table-layout: fixed;">
+            <div style="display: table-row;">
+                <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top; text-align: center;">
+                    <div style="background-color: #D6E4F0; padding: 30px 20px; border-radius: 16px; height: 200px; box-sizing: border-box;">
+                        <img src="claude_logo.png" alt="Claude Desktop" style="height: 60px; margin-bottom: 15px; object-fit: contain;">
+                        <h5 style="font-size: 16px; font-weight: 600; color: #1A365D; margin: 0 0 8px;">Claude Desktop</h5>
+                        <p style="font-size: 13px; color: #2D3748; margin: 0; line-height: 1.5;">Anthropic's flagship MCP client</p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top; text-align: center;">
+                    <div style="background-color: #D6E4F0; padding: 30px 20px; border-radius: 16px; height: 200px; box-sizing: border-box;">
+                        <img src="cursor_logo.png" alt="Cursor" style="height: 60px; margin-bottom: 15px; object-fit: contain;">
+                        <h5 style="font-size: 16px; font-weight: 600; color: #1A365D; margin: 0 0 8px;">Cursor</h5>
+                        <p style="font-size: 13px; color: #2D3748; margin: 0; line-height: 1.5;">AI-first code editor</p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top; text-align: center;">
+                    <div style="background-color: #D6E4F0; padding: 30px 20px; border-radius: 16px; height: 200px; box-sizing: border-box;">
+                        <img src="windsurf.png" alt="Windsurf" style="height: 60px; margin-bottom: 15px; object-fit: contain;">
+                        <h5 style="font-size: 16px; font-weight: 600; color: #1A365D; margin: 0 0 8px;">Windsurf</h5>
+                        <p style="font-size: 13px; color: #2D3748; margin: 0; line-height: 1.5;">Agentic IDE with MCP directory</p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top; text-align: center;">
+                    <div style="background-color: #D6E4F0; padding: 30px 20px; border-radius: 16px; height: 200px; box-sizing: border-box;">
+                        <img src="vscode_logo.png" alt="VS Code" style="height: 60px; margin-bottom: 15px; object-fit: contain;">
+                        <h5 style="font-size: 16px; font-weight: 600; color: #1A365D; margin: 0 0 8px;">VS Code</h5>
+                        <p style="font-size: 13px; color: #2D3748; margin: 0; line-height: 1.5;">Native MCP in Copilot agent mode</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div style="background-color: #F6F1EF; padding: 30px; border-radius: 16px; margin: 0 0 40px;">
+            <h4 style="font-size: 20px; font-weight: 600; color: #1A365D; margin: 0 0 20px; text-align: center;">And Many More...</h4>
+            <p style="margin: 0; font-size: 15px; color: #2D3748; line-height: 1.8;">
+                <strong style="color: #1A365D;">🤖 Coding agents &amp; CLIs:</strong> Claude Code, Codex CLI, Gemini CLI, Goose, Cline<br>
+                <strong style="color: #1A365D;">💻 IDEs &amp; editors:</strong> Zed, Continue.dev, Roo Code, Kilo Code<br>
+                <strong style="color: #1A365D;">💬 Chat clients:</strong> ChatGPT (via Apps SDK), LibreChat, Cherry Studio<br>
+                <strong style="color: #1A365D;">🧩 Frameworks &amp; custom solutions:</strong> Chainlit, LangChain, any tool built with the MCP SDK
+            </p>
+            <p style="margin: 20px 0 0; font-size: 14px; color: #2D3748; font-style: italic; text-align: center;">
+                The MCP ecosystem now spans 500+ clients and is growing rapidly - new clients are added every week.
+            </p>
+        </div>
+
+        <!-- Feature Details Tabs -->
+        <h2 style="font-size: 32px; font-weight: 700; color: #1A365D; margin: 60px 0 40px;">Feature Details</h2>
+        <p style="font-size: 16px; color: #2D3748; line-height: 1.8; margin-bottom: 40px; margin-top: 0;">
+            Dive deeper into the technical capabilities that make MCP Server for Odoo so powerful and flexible.
+        </p>
+
+        <div style="display: table; width: 100%; margin: 0 0 40px;">
+            <div style="display: table-row;">
+                <div style="display: table-cell; width: 50%; padding-right: 15px; vertical-align: middle;">
+                    <img src="main_screenshot.png" alt="MCP Models Configuration in Odoo Settings" style="width: 100%; height: auto; display: block; object-fit: contain; box-shadow: 0 10px 30px rgba(26, 54, 93, 0.15); border-radius: 12px;">
+                </div>
+                <div style="display: table-cell; width: 50%; padding-left: 15px; vertical-align: middle;">
+                    <img src="security_settings.png" alt="MCP Server Configuration in Odoo Settings" style="width: 100%; height: auto; display: block; object-fit: contain; box-shadow: 0 10px 30px rgba(26, 54, 93, 0.15); border-radius: 12px;">
+                </div>
+            </div>
+        </div>
+
+        <ul role="tablist" class="nav nav-tabs justify-content-center flex-nowrap" data-tabs="tabs" style="border:none; background-color:unset; margin:0 auto; white-space: nowrap;">
+            <li class="nav-item" style="border-top-right-radius:10px; border-top-left-radius:10px; background-color:#D6E4F0; margin-right:8px; border:1px solid #ddd; border-bottom:0" role="presentation">
+                <a href="#crud_ops" data-bs-toggle="tab" class="nav-link show active" style="text-transform:uppercase; font-weight:600; font-size:13px; letter-spacing:1px; padding:11px 16px; border-top-left-radius:10px; border-top-right-radius:10px; color:#1A365D; border:1px solid transparent" role="tab">CRUD Operations</a>
+            </li>
+            <li class="nav-item" style="border-top-right-radius:10px; border-top-left-radius:10px; background-color:#D6E4F0; margin-right:8px; border:1px solid #ddd; border-bottom:0" role="presentation">
+                <a href="#security" data-bs-toggle="tab" class="nav-link" style="text-transform:uppercase; font-weight:600; font-size:13px; letter-spacing:1px; padding:11px 16px; border-top-left-radius:10px; border-top-right-radius:10px; color:#1A365D; border:1px solid transparent" role="tab">Security</a>
+            </li>
+            <li class="nav-item" style="border-top-right-radius:10px; border-top-left-radius:10px; background-color:#D6E4F0; margin-right:8px; border:1px solid #ddd; border-bottom:0" role="presentation">
+                <a href="#permissions" data-bs-toggle="tab" class="nav-link" style="text-transform:uppercase; font-weight:600; font-size:13px; letter-spacing:1px; padding:11px 16px; border-top-left-radius:10px; border-top-right-radius:10px; color:#1A365D; border:1px solid transparent" role="tab">Permissions</a>
+            </li>
+            <li class="nav-item" style="border-top-right-radius:10px; border-top-left-radius:10px; background-color:#D6E4F0; margin-right:8px; border:1px solid #ddd; border-bottom:0" role="presentation">
+                <a href="#transports" data-bs-toggle="tab" class="nav-link" style="text-transform:uppercase; font-weight:600; font-size:13px; letter-spacing:1px; padding:11px 16px; border-top-left-radius:10px; border-top-right-radius:10px; color:#1A365D; border:1px solid transparent" role="tab">Transports</a>
+            </li>
+            <li class="nav-item" style="border-top-right-radius:10px; border-top-left-radius:10px; background-color:#D6E4F0; margin-right:0; border:1px solid #ddd; border-bottom:0" role="presentation">
+                <a href="#performance" data-bs-toggle="tab" class="nav-link" style="text-transform:uppercase; font-weight:600; font-size:13px; letter-spacing:1px; padding:11px 16px; border-top-left-radius:10px; border-top-right-radius:10px; color:#1A365D; border:1px solid transparent" role="tab">Performance</a>
+            </li>
+        </ul>
+
+        <div class="tab-content" style="background-color: #f8fafc; border-radius: 0 0 20px 20px; padding: 40px; margin: 0 0 40px; border: 1px solid #e2e8f0;">
+
+            <div id="crud_ops" class="tab-pane fade show active" role="tabpanel">
+                <h3 style="font-size: 22px; font-weight: 700; color: #1A365D; margin-bottom: 20px; margin-top: 0;">Full CRUD Through Natural Language</h3>
+                <p style="color: #2D3748; line-height: 1.7; margin-bottom: 15px; font-size: 16px;">
+                    Complete data management through conversation, with the same ease as asking questions.
+                </p>
+                <ul style="color: #2D3748; line-height: 1.7; margin: 0; padding-left: 20px; font-size: 15px;">
+                    <li><strong>Create:</strong> Add new records to any enabled model - customers, products, orders, tasks, and more</li>
+                    <li><strong>Read:</strong> Search, filter, and retrieve records with complex criteria expressed in plain English</li>
+                    <li><strong>Update:</strong> Modify individual fields or bulk-update records based on conditions</li>
+                    <li><strong>Delete:</strong> Remove records with full respect for Odoo's referential integrity rules</li>
+                    <li><strong>Per-model toggles:</strong> Enable each operation independently for each exposed model</li>
+                </ul>
+            </div>
+
+            <div id="security" class="tab-pane fade" role="tabpanel">
+                <h3 style="font-size: 22px; font-weight: 700; color: #1A365D; margin-bottom: 20px; margin-top: 0;">Enterprise-Grade Security</h3>
+                <p style="color: #2D3748; line-height: 1.7; margin-bottom: 15px; font-size: 16px;">
+                    Security-first design with controls at every layer of the integration.
+                </p>
+                <ul style="color: #2D3748; line-height: 1.7; margin: 0; padding-left: 20px; font-size: 15px;">
+                    <li><strong>API key authentication:</strong> Token-based authentication with user-level permissions - no passwords stored</li>
+                    <li><strong>Easy key rotation:</strong> Generate, revoke, and rotate API keys directly from user settings</li>
+                    <li><strong>Audit logging:</strong> Comprehensive trail of every MCP operation for security monitoring and compliance</li>
+                    <li><strong>Model whitelist:</strong> Explicitly enable each model - default-deny posture protects unconfigured data</li>
+                    <li><strong>Encrypted storage:</strong> Credentials and tokens stored using Odoo's secure storage mechanisms</li>
+                </ul>
+            </div>
+
+            <div id="permissions" class="tab-pane fade" role="tabpanel">
+                <h3 style="font-size: 22px; font-weight: 700; color: #1A365D; margin-bottom: 20px; margin-top: 0;">Granular Permission System</h3>
+                <p style="color: #2D3748; line-height: 1.7; margin-bottom: 15px; font-size: 16px;">
+                    Control exactly what each AI assistant can do, down to the model and operation level.
+                </p>
+                <ul style="color: #2D3748; line-height: 1.7; margin: 0; padding-left: 20px; font-size: 15px;">
+                    <li><strong>Model-level permissions:</strong> Choose which Odoo models AI can access - res.partner, sale.order, account.move, or any custom model</li>
+                    <li><strong>Operation-level permissions:</strong> Independently enable Create, Read, Update, and Delete per model</li>
+                    <li><strong>Read-only mode:</strong> Grant safe reporting access without write capabilities</li>
+                    <li><strong>Full CRUD mode:</strong> Enable complete data management for trusted workflows</li>
+                    <li><strong>Familiar interface:</strong> All managed through standard Odoo settings - no separate admin tools</li>
+                </ul>
+            </div>
+
+            <div id="transports" class="tab-pane fade" role="tabpanel">
+                <h3 style="font-size: 22px; font-weight: 700; color: #1A365D; margin-bottom: 20px; margin-top: 0;">Multiple Transport Options</h3>
+                <p style="color: #2D3748; line-height: 1.7; margin-bottom: 15px; font-size: 16px;">
+                    Flexible connectivity options to fit any deployment scenario.
+                </p>
+                <ul style="color: #2D3748; line-height: 1.7; margin: 0; padding-left: 20px; font-size: 15px;">
+                    <li><strong>stdio transport:</strong> Default option for local clients like Claude Desktop and Cursor</li>
+                    <li><strong>streamable-http transport:</strong> Web-based and remote clients with full bidirectional streaming</li>
+                    <li><strong>REST API endpoints:</strong> Standard HTTP integration for custom applications</li>
+                    <li><strong>XML-RPC compatibility:</strong> Works alongside Odoo's existing integration protocols</li>
+                    <li><strong>MCP client package:</strong> Drop-in <code>mcp-server-odoo</code> package for instant client setup</li>
+                </ul>
+            </div>
+
+            <div id="performance" class="tab-pane fade" role="tabpanel">
+                <h3 style="font-size: 22px; font-weight: 700; color: #1A365D; margin-bottom: 20px; margin-top: 0;">Built for Performance</h3>
+                <p style="color: #2D3748; line-height: 1.7; margin-bottom: 15px; font-size: 16px;">
+                    Production-ready performance features for reliable operation at scale.
+                </p>
+                <ul style="color: #2D3748; line-height: 1.7; margin: 0; padding-left: 20px; font-size: 15px;">
+                    <li><strong>Connection pooling:</strong> Efficient reuse of database connections under high concurrency</li>
+                    <li><strong>Response caching:</strong> TTL-based caching reduces redundant queries for frequently-accessed data</li>
+                    <li><strong>Rate limiting:</strong> Built-in protection prevents runaway AI agents from overwhelming the server</li>
+                    <li><strong>Optimized payloads:</strong> Data formatting tuned for LLM context efficiency</li>
+                    <li><strong>Async-friendly:</strong> Designed to handle long-running AI sessions without blocking</li>
+                </ul>
+            </div>
+
+        </div>
+
+        <!-- Setup Steps -->
+        <h2 style="font-size: 32px; font-weight: 700; color: #1A365D; margin: 60px 0 40px;">Simple Setup Process</h2>
+        <p style="font-size: 16px; color: #2D3748; line-height: 1.8; margin-bottom: 40px; margin-top: 0;">
+            Get started in just 4 easy steps - from installation to your first AI-powered Odoo query in under 15 minutes.
+        </p>
+
+        <div style="display: table; width: 100%; margin: 40px 0;">
+            <div style="display: table-row;">
+                <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top;">
+                    <div style="background-color: #D6E4F0; padding: 25px; border-radius: 16px; text-align: center; height: 220px; box-sizing: border-box;">
+                        <div style="background-color: #1A365D; color: white; width: 40px; height: 40px; border-radius: 50%; line-height: 40px; font-weight: 700; margin: 0 auto 15px;">1</div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1A365D; margin: 0 0 10px;">Install Module</h4>
+                        <p style="font-size: 13px; color: #2D3748; line-height: 1.5; margin: 0;">Install MCP Server in your Odoo instance like any other module.</p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top;">
+                    <div style="background-color: #D6E4F0; padding: 25px; border-radius: 16px; text-align: center; height: 220px; box-sizing: border-box;">
+                        <div style="background-color: #1A365D; color: white; width: 40px; height: 40px; border-radius: 50%; line-height: 40px; font-weight: 700; margin: 0 auto 15px;">2</div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1A365D; margin: 0 0 10px;">Configure Access</h4>
+                        <p style="font-size: 13px; color: #2D3748; line-height: 1.5; margin: 0;">Choose which models to expose and set permissions through Settings.</p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top;">
+                    <div style="background-color: #D6E4F0; padding: 25px; border-radius: 16px; text-align: center; height: 220px; box-sizing: border-box;">
+                        <div style="background-color: #1A365D; color: white; width: 40px; height: 40px; border-radius: 50%; line-height: 40px; font-weight: 700; margin: 0 auto 15px;">3</div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1A365D; margin: 0 0 10px;">Generate API Key</h4>
+                        <p style="font-size: 13px; color: #2D3748; line-height: 1.5; margin: 0;">Create secure API keys for authentication in user settings.</p>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 25%; padding: 0 10px; vertical-align: top;">
+                    <div style="background-color: #D6E4F0; padding: 25px; border-radius: 16px; text-align: center; height: 220px; box-sizing: border-box;">
+                        <div style="background-color: #1A365D; color: white; width: 40px; height: 40px; border-radius: 50%; line-height: 40px; font-weight: 700; margin: 0 auto 15px;">4</div>
+                        <h4 style="font-size: 16px; font-weight: 600; color: #1A365D; margin: 0 0 10px;">Connect AI</h4>
+                        <p style="font-size: 13px; color: #2D3748; line-height: 1.5; margin: 0;">Install MCP client on your AI assistant and start querying.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Use Cases -->
+        <h2 style="font-size: 32px; font-weight: 700; color: #1A365D; margin: 60px 0 40px;">Use Cases &amp; Examples</h2>
+
+        <div style="background-color: #F6F1EF; padding: 30px; border-radius: 16px; margin-bottom: 30px; text-align: left;">
+            <div style="text-align: left; margin-bottom: 20px; font-size: 40px;">🎧</div>
+            <h4 style="font-size: 20px; font-weight: 600; color: #1A365D; margin-bottom: 5px; margin-top: 0; border-bottom: 3px solid #F25E4F; display: inline-block; padding-bottom: 5px;">Customer Service Acceleration</h4>
+            <p style="color: #2D3748; line-height: 1.8; margin-bottom: 10px; margin-top: 15px;">
+                <strong>Scenario:</strong> Support agents need instant access to customer data while on calls<br>
+                With MCP Server, support teams can ask their AI assistant to:
+            </p>
+            <ul style="color: #2D3748; line-height: 1.6; margin: 0 0 15px 0; padding-left: 20px;">
+                <li>"Look up all orders for customer X in the last 6 months"</li>
+                <li>"Create a new support ticket for this complaint"</li>
+                <li>"Update the customer's preferred contact method to email"</li>
+                <li>"Show me unresolved tickets assigned to my team"</li>
+                <li>"Add a note about the resolution to this customer's record"</li>
+            </ul>
+            <p style="color: #1A365D; font-weight: 600; margin: 0;">
+                Business Impact: Agents handle calls without switching screens, reducing call times and improving customer satisfaction scores.
+            </p>
+        </div>
+
+        <div style="background-color: #F6F1EF; padding: 30px; border-radius: 16px; margin-bottom: 30px; text-align: left;">
+            <div style="text-align: left; margin-bottom: 20px; font-size: 40px;">📈</div>
+            <h4 style="font-size: 20px; font-weight: 600; color: #1A365D; margin-bottom: 5px; margin-top: 0; border-bottom: 3px solid #F25E4F; display: inline-block; padding-bottom: 5px;">Sales Intelligence on Demand</h4>
+            <p style="color: #2D3748; line-height: 1.8; margin-bottom: 10px; margin-top: 15px;">
+                <strong>Scenario:</strong> Sales reps need to manage their CRM during prospect research and outreach<br>
+                Sales teams can interact with their pipeline conversationally:
+            </p>
+            <ul style="color: #2D3748; line-height: 1.6; margin: 0 0 15px 0; padding-left: 20px;">
+                <li>"Create a lead for Acme Corp with priority high"</li>
+                <li>"Update opportunity 'Q3 Enterprise Deal' status to won"</li>
+                <li>"Show me all opportunities closing this month"</li>
+                <li>"Which deals haven't had activity in 14+ days?"</li>
+                <li>"Add a follow-up activity for tomorrow on this lead"</li>
+            </ul>
+            <p style="color: #1A365D; font-weight: 600; margin: 0;">
+                Business Impact: Sales reps spend less time on data entry and more time selling, with cleaner pipeline data as a side effect.
+            </p>
+        </div>
+
+        <div style="background-color: #F6F1EF; padding: 30px; border-radius: 16px; margin-bottom: 30px; text-align: left;">
+            <div style="text-align: left; margin-bottom: 20px; font-size: 40px;">📦</div>
+            <h4 style="font-size: 20px; font-weight: 600; color: #1A365D; margin-bottom: 5px; margin-top: 0; border-bottom: 3px solid #F25E4F; display: inline-block; padding-bottom: 5px;">Inventory Management Made Conversational</h4>
+            <p style="color: #2D3748; line-height: 1.8; margin-bottom: 10px; margin-top: 15px;">
+                <strong>Scenario:</strong> Warehouse managers need quick stock insights and updates<br>
+                Operations teams can manage inventory through natural language:
+            </p>
+            <ul style="color: #2D3748; line-height: 1.6; margin: 0 0 15px 0; padding-left: 20px;">
+                <li>"List products below reorder point"</li>
+                <li>"Create a new product variant for Widget Pro in red"</li>
+                <li>"Update stock levels for SKU-1234 to 500 units"</li>
+                <li>"Show me incoming shipments expected this week"</li>
+                <li>"Find products with no movement in the last 90 days"</li>
+            </ul>
+            <p style="color: #1A365D; font-weight: 600; margin: 0;">
+                Business Impact: Faster stock decisions, fewer stockouts, and reduced time spent navigating inventory screens.
+            </p>
+        </div>
+
+        <div style="background-color: #F6F1EF; padding: 30px; border-radius: 16px; margin-bottom: 30px; text-align: left;">
+            <div style="text-align: left; margin-bottom: 20px; font-size: 40px;">💰</div>
+            <h4 style="font-size: 20px; font-weight: 600; color: #1A365D; margin-bottom: 5px; margin-top: 0; border-bottom: 3px solid #F25E4F; display: inline-block; padding-bottom: 5px;">Financial Operations Through Chat</h4>
+            <p style="color: #2D3748; line-height: 1.8; margin-bottom: 10px; margin-top: 15px;">
+                <strong>Scenario:</strong> Finance teams need rapid invoice processing and customer payment insights<br>
+                Accountants can handle daily finance operations conversationally:
+            </p>
+            <ul style="color: #2D3748; line-height: 1.6; margin: 0 0 15px 0; padding-left: 20px;">
+                <li>"Find unpaid invoices from last month over €5,000"</li>
+                <li>"Create an invoice for customer X with these line items"</li>
+                <li>"Update payment terms on this order to Net 60"</li>
+                <li>"Show overdue receivables grouped by customer"</li>
+                <li>"List all credit notes issued this quarter"</li>
+            </ul>
+            <p style="color: #1A365D; font-weight: 600; margin: 0;">
+                Business Impact: Month-end close runs faster, dunning workflows become proactive, and AR teams spot issues earlier.
+            </p>
+        </div>
+
+        <div style="background-color: #F6F1EF; padding: 30px; border-radius: 16px; margin-bottom: 30px; text-align: left;">
+            <div style="text-align: left; margin-bottom: 20px; font-size: 40px;">👥</div>
+            <h4 style="font-size: 20px; font-weight: 600; color: #1A365D; margin-bottom: 5px; margin-top: 0; border-bottom: 3px solid #F25E4F; display: inline-block; padding-bottom: 5px;">HR Records at Your Fingertips</h4>
+            <p style="color: #2D3748; line-height: 1.8; margin-bottom: 10px; margin-top: 15px;">
+                <strong>Scenario:</strong> HR teams handle frequent record updates and lookups<br>
+                HR professionals can manage employee data through conversation:
+            </p>
+            <ul style="color: #2D3748; line-height: 1.6; margin: 0 0 15px 0; padding-left: 20px;">
+                <li>"Add new employee John Doe to the Engineering department"</li>
+                <li>"Update Sarah Chen's department to Marketing"</li>
+                <li>"List employees with upcoming work anniversaries"</li>
+                <li>"Show me all open positions in the company"</li>
+                <li>"Find employees who haven't completed onboarding"</li>
+            </ul>
+            <p style="color: #1A365D; font-weight: 600; margin: 0;">
+                Business Impact: Reduces administrative overhead for HR staff and surfaces actionable insights from people data.
+            </p>
+        </div>
+
+        <div style="background-color: #F6F1EF; padding: 30px; border-radius: 16px; margin-bottom: 30px; text-align: left;">
+            <div style="text-align: left; margin-bottom: 20px; font-size: 40px;">📋</div>
+            <h4 style="font-size: 20px; font-weight: 600; color: #1A365D; margin-bottom: 5px; margin-top: 0; border-bottom: 3px solid #F25E4F; display: inline-block; padding-bottom: 5px;">Project Management Without the Clicks</h4>
+            <p style="color: #2D3748; line-height: 1.8; margin-bottom: 10px; margin-top: 15px;">
+                <strong>Scenario:</strong> Project managers juggle tasks, milestones, and resource allocation across multiple projects<br>
+                PMs can drive their projects through natural language:
+            </p>
+            <ul style="color: #2D3748; line-height: 1.6; margin: 0 0 15px 0; padding-left: 20px;">
+                <li>"Create a task 'Website redesign kickoff' due next Friday"</li>
+                <li>"Update milestone deadline for the Q4 launch to December 15"</li>
+                <li>"Show overdue tasks for the Marketing team"</li>
+                <li>"List all tasks blocked waiting on the design team"</li>
+                <li>"Assign this task to the next available developer"</li>
+            </ul>
+            <p style="color: #1A365D; font-weight: 600; margin: 0;">
+                Business Impact: PMs spend more time managing people and outcomes, less time wrangling tools.
+            </p>
+        </div>
+
+        <!-- Technical Specifications -->
+        <h2 style="font-size: 32px; font-weight: 700; color: #1A365D; margin: 60px 0 40px;">Technical Specifications</h2>
+
+        <div style="display: table; width: 100%; margin: 40px 0;">
+            <div style="display: table-row;">
+                <div style="display: table-cell; width: 50%; padding-right: 15px; vertical-align: top;">
+                    <div style="background-color: #D6E4F0; padding: 30px; border-radius: 16px; height: 100%; box-sizing: border-box;">
+                        <h4 style="font-size: 18px; font-weight: 600; color: #1A365D; margin: 0 0 15px;">Requirements</h4>
+                        <ul style="color: #2D3748; line-height: 1.7; margin: 0; padding-left: 20px; font-size: 15px;">
+                            <li>Odoo 18.0</li>
+                            <li>MCP client package: <code>mcp-server-odoo</code></li>
+                            <li>Compatible AI assistant with MCP support</li>
+                        </ul>
+
+                        <h4 style="font-size: 18px; font-weight: 600; color: #1A365D; margin: 25px 0 15px;">Protocols Supported</h4>
+                        <ul style="color: #2D3748; line-height: 1.7; margin: 0; padding-left: 20px; font-size: 15px;">
+                            <li>Model Context Protocol (MCP)</li>
+                            <li>stdio transport (local clients)</li>
+                            <li>streamable-http transport (web clients)</li>
+                            <li>REST API endpoints</li>
+                            <li>XML-RPC integration</li>
+                        </ul>
+                    </div>
+                </div>
+                <div style="display: table-cell; width: 50%; padding-left: 15px; vertical-align: top;">
+                    <div style="background-color: #D6E4F0; padding: 30px; border-radius: 16px; height: 100%; box-sizing: border-box;">
+                        <h4 style="font-size: 18px; font-weight: 600; color: #1A365D; margin: 0 0 15px;">Performance Features</h4>
+                        <ul style="color: #2D3748; line-height: 1.7; margin: 0; padding-left: 20px; font-size: 15px;">
+                            <li>Connection pooling for efficiency</li>
+                            <li>Response caching with TTL</li>
+                            <li>Rate limiting protection</li>
+                            <li>Optimized data formatting for LLMs</li>
+                        </ul>
+
+                        <h4 style="font-size: 18px; font-weight: 600; color: #1A365D; margin: 25px 0 15px;">Security Features</h4>
+                        <ul style="color: #2D3748; line-height: 1.7; margin: 0; padding-left: 20px; font-size: 15px;">
+                            <li>API key authentication</li>
+                            <li>Per-model whitelist</li>
+                            <li>Per-operation permissions</li>
+                            <li>Complete audit logging</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Call to Action -->
+        <div style="border: 2px solid #1A365D; color: #2D3748; padding: 40px; border-radius: 16px; text-align: center; margin: 60px 0 40px;">
+            <h2 style="font-size: 28px; font-weight: 700; margin-bottom: 20px; margin-top: 0; color: #1A365D;">Ready to connect AI to your Odoo data?</h2>
+            <p style="font-size: 18px; line-height: 1.7; margin-bottom: 30px; margin-top: 0;">
+                Join the AI revolution and make your Odoo data instantly accessible through natural language. Experience the future of business data interaction today.
+            </p>
+            <p style="font-size: 16px; margin: 0; font-style: italic;">
+                For support or questions, contact <a style="color:#1A365D; font-weight: 600;" href="mailto:product@erp.muchconsulting.de">much. Consulting</a>.
+            </p>
+        </div>
+
+    </div>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
