@@ -5,7 +5,8 @@
         <!-- =================================================================
              HELPDESK TEAM — Form View Inheritance
              Adds portal multi-company configuration fields at the bottom
-             of the team form sheet.
+             of the team form sheet, including the website_id field to show
+             that it gets cleared when portal publication is enabled.
              ================================================================= -->
         <record id="helpdesk_team_view_form_inherit_multicompany_website"
                 model="ir.ui.view">
@@ -19,6 +20,10 @@
                         <group>
                             <field name="is_published_on_portal"
                                    widget="boolean_toggle"/>
+                            <field name="website_id"
+                                   invisible="not is_published_on_portal"
+                                   readonly="is_published_on_portal"
+                                   string="Sitio Web (sin restricción)"/>
                             <field name="website_icon"
                                    invisible="not is_published_on_portal"/>
                         </group>
@@ -28,6 +33,15 @@
                                    invisible="not is_published_on_portal"/>
                         </group>
                     </group>
+                    <div class="alert alert-info" role="alert"
+                         invisible="not is_published_on_portal">
+                        <i class="fa fa-info-circle me-1"/>
+                        Al publicar en el Portal Multicompañía, el campo
+                        <strong>Sitio Web</strong> se vacía automáticamente para
+                        que el formulario de tickets sea accesible desde
+                        <strong>cualquier</strong> sitio web del entorno y evitar
+                        errores 404.
+                    </div>
                 </xpath>
             </field>
         </record>
