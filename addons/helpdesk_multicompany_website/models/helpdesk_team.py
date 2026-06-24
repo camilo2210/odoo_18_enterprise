@@ -104,63 +104,67 @@ class HelpdeskTeam(models.Model):
                 ))
 
     # -------------------------------------------------------------------------
-    # ONCHANGE — UX: auto-clear website_id in UI
+    # ONCHANGE — UX: auto-clear website_id and auto-publish
     # -------------------------------------------------------------------------
 
     @api.onchange('is_published_on_portal')
     def _onchange_is_published_on_portal(self):
-        """Auto-clear website restriction when publishing on portal.
-
-        This provides a smooth admin experience: the user enables the
-        toggle and the website restriction is cleared automatically with
-        a warning explaining why.
-        """
-        if self.is_published_on_portal and self.website_id:
+        """Auto-clear website restriction and auto-publish when enabled."""
+        if self.is_published_on_portal:
             self.website_id = False
+            
+            # Auto-publish the team on the website (fixes 404 for unpublished teams)
+            if 'is_published' in self._fields:
+                self.is_published = True
+            elif 'website_published' in self._fields:
+                self.website_published = True
+                
             return {
                 'warning': {
-                    'title': _('Restricción de sitio web eliminada'),
+                    'title': _('Ajustes automáticos aplicados'),
                     'message': _(
-                        'Se ha eliminado la restricción de sitio web de este '
-                        'equipo para que su formulario de creación de tickets '
-                        'sea accesible desde CUALQUIER sitio web.\n\n'
-                        'Esto evita errores 404 cuando un usuario accede al '
-                        'formulario desde un sitio web diferente al configurado '
-                        'originalmente en el equipo.'
+                        'Se han aplicado dos ajustes para evitar errores 404:\n'
+                        '1. Se eliminó la restricción de sitio web.\n'
+                        '2. El equipo se marcó como "Publicado" en el sitio web.'
                     ),
                 }
             }
 
     # -------------------------------------------------------------------------
-    # CRUD OVERRIDES — enforce website_id=False for portal teams
+    # CRUD OVERRIDES — enforce website_id=False and is_published=True
     # -------------------------------------------------------------------------
 
     @api.model_create_multi
     def create(self, vals_list):
-        """Force website_id=False for portal-published teams on creation."""
+        """Force website_id=False and is_published=True for portal teams."""
         for vals in vals_list:
             if vals.get('is_published_on_portal'):
                 vals['website_id'] = False
+                if 'is_published' in self._fields and 'is_published' not in vals:
+                    vals['is_published'] = True
+                elif 'website_published' in self._fields and 'website_published' not in vals:
+                    vals['website_published'] = True
+                    
                 _logger.info(
-                    'Creating portal-published team "%s": website_id forced '
-                    'to False for cross-website accessibility.',
+                    'Creating portal-published team "%s": website_id=False and is_published=True',
                     vals.get('name', _('Nuevo')),
                 )
         return super().create(vals_list)
 
     def write(self, vals):
-        """Enforce website_id=False when enabling portal publication.
-
-        Also prevents setting website_id on teams that are already
-        portal-published.
-        """
-        # Case 1: Enabling portal publication → force clear website_id
+        """Enforce website rules when enabling portal publication."""
+        # Case 1: Enabling portal publication → force website adjustments
         if vals.get('is_published_on_portal'):
             vals = dict(vals)  # Don't mutate the original
             vals['website_id'] = False
+            if 'is_published' in self._fields:
+                vals['is_published'] = True
+            elif 'website_published' in self._fields:
+                vals['website_published'] = True
+                
             _logger.info(
                 'Portal publication enabled for teams %s: '
-                'website_id forced to False.',
+                'website_id forced to False, is_published to True.',
                 self.mapped('name'),
             )
 
@@ -170,20 +174,38 @@ class HelpdeskTeam(models.Model):
             if portal_teams:
                 _logger.warning(
                     'Blocked website_id assignment on portal-published '
-                    'teams: %s. Portal teams must have website_id=False.',
-                    portal_teams.mapped('name'),
+                    'teams: %s.', portal_teams.mapped('name')
                 )
-                # Write other vals to portal teams (without website_id)
                 other_vals = {k: v for k, v in vals.items() if k != 'website_id'}
                 if other_vals:
                     super(HelpdeskTeam, portal_teams).write(other_vals)
-                # Write full vals to non-portal teams
                 non_portal = self - portal_teams
                 if non_portal:
                     return super(HelpdeskTeam, non_portal).write(vals)
                 return True
 
         return super().write(vals)
+
+    # -------------------------------------------------------------------------
+    # WEBSITE OVERRIDES
+    # -------------------------------------------------------------------------
+
+    def can_access_from_current_website(self, website_id=False):
+        """Allow access to portal-published teams from any website.
+        
+        Odoo's default ir.http routing checks this method and raises a 404 
+        NotFound if the team's company_id doesn't match the website's company_id.
+        Since we want central access, we bypass this check for portal teams.
+        """
+        can_access = True
+        for team in self:
+            if team.is_published_on_portal:
+                continue
+            if hasattr(super(), 'can_access_from_current_website'):
+                if not super(HelpdeskTeam, team).can_access_from_current_website(website_id):
+                    can_access = False
+                    break
+        return can_access
 
     # -------------------------------------------------------------------------
     # BUSINESS METHODS
