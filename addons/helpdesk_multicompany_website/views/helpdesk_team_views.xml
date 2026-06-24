@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- =================================================================
+             HELPDESK TEAM — Form View Inheritance
+             Adds portal multi-company configuration fields at the bottom
+             of the team form sheet.
+             ================================================================= -->
+        <record id="helpdesk_team_view_form_inherit_multicompany_website"
+                model="ir.ui.view">
+            <field name="name">helpdesk.team.form.inherit.multicompany.website</field>
+            <field name="model">helpdesk.team</field>
+            <field name="inherit_id" ref="helpdesk.helpdesk_team_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet" position="inside">
+                    <separator string="Portal Multicompañía"/>
+                    <group>
+                        <group>
+                            <field name="is_published_on_portal"
+                                   widget="boolean_toggle"/>
+                            <field name="website_icon"
+                                   invisible="not is_published_on_portal"/>
+                        </group>
+                        <group>
+                            <field name="website_description"
+                                   placeholder="Texto que verá el usuario en la tarjeta del portal. Dejar vacío para texto automático."
+                                   invisible="not is_published_on_portal"/>
+                        </group>
+                    </group>
+                </xpath>
+            </field>
+        </record>
+
+        <!-- =================================================================
+             HELPDESK TEAM — List View Inheritance
+             Adds is_published_on_portal as optional column.
+             ================================================================= -->
+        <record id="helpdesk_team_view_list_inherit_multicompany_website"
+                model="ir.ui.view">
+            <field name="name">helpdesk.team.list.inherit.multicompany.website</field>
+            <field name="model">helpdesk.team</field>
+            <field name="inherit_id" ref="helpdesk.helpdesk_team_view_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='company_id']" position="after">
+                    <field name="is_published_on_portal"
+                           string="Portal MC"
+                           optional="hide"/>
+                </xpath>
+            </field>
+        </record>
+
+    </data>
+</odoo>

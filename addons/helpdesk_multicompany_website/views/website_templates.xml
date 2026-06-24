@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- =================================================================
+             HELPDESK TEAMS — Website Portal Page (QWeb Template)
+
+             This template renders the multi-company helpdesk team selector
+             page at /helpdesk/teams. It replaces the previous hardcoded
+             HTML with a fully dynamic, scalable solution.
+
+             Variables injected by the controller:
+               - teams:          recordset of helpdesk.team (published)
+               - companies:      recordset of res.company (unique from teams)
+               - active_company: current user's active res.company
+               - is_public_user: boolean, True if anonymous access
+             ================================================================= -->
+        <template id="helpdesk_teams_page" name="Equipos de Mesa de Ayuda">
+            <t t-call="website.layout">
+                <t t-set="additional_title">Mesa de Ayuda</t>
+
+                <!-- ========== CSS ========== -->
+                <style>
+                    .hd-mc-card {
+                        border-radius: 8px;
+                        transition: all 0.25s ease;
+                    }
+                    .hd-mc-card:hover {
+                        transform: translateY(-4px);
+                        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                    }
+                    .hd-mc-icon {
+                        font-size: 55px;
+                        color: #4e3bc7;
+                        margin-bottom: 15px;
+                        display: block;
+                        width: 70px;
+                        height: 70px;
+                        line-height: 70px;
+                    }
+                    .hd-mc-company-card {
+                        border-left: 4px solid #4e3bc7 !important;
+                        border-radius: 8px;
+                    }
+                    .hd-mc-title {
+                        color: #4e3bc7;
+                    }
+                    .hd-mc-btn {
+                        background-color: #4e3bc7;
+                        border-radius: 20px;
+                        transition: background-color 0.2s ease;
+                    }
+                    .hd-mc-btn:hover {
+                        background-color: #3d2ea3;
+                    }
+                    .hd-mc-separator {
+                        border-top: 2px solid #4e3bc7;
+                        opacity: 1;
+                        margin-bottom: 30px;
+                    }
+                </style>
+
+                <!-- ========== PAGE CONTENT ========== -->
+                <div id="wrap" class="oe_structure">
+                    <div class="container my-5">
+
+                        <!-- Page header -->
+                        <div class="col-12 text-center mb-5">
+                            <h1 class="fw-bold hd-mc-title">
+                                Seleccione su equipo para ayuda
+                            </h1>
+                            <p class="text-muted mt-2"
+                               t-if="not is_public_user">
+                                Mostrando equipos de:
+                                <strong t-esc="active_company.name"/>
+                            </p>
+                            <p class="text-muted mt-2"
+                               t-if="is_public_user">
+                                Inicie sesión para ver los equipos de su empresa
+                            </p>
+                        </div>
+
+                        <!-- ===== TEAMS EXIST ===== -->
+                        <t t-if="teams">
+                            <t t-foreach="companies" t-as="company">
+                                <div class="card mb-5 border-0 shadow-sm hd-mc-company-card">
+                                    <div class="card-body p-4">
+
+                                        <!-- Company header -->
+                                        <h4 class="fw-bold text-uppercase mb-2 hd-mc-title">
+                                            <i class="fa fa-building-o me-2"></i>
+                                            <t t-esc="company.name"/>
+                                        </h4>
+                                        <hr class="hd-mc-separator"/>
+
+                                        <!-- Team cards row -->
+                                        <div class="row justify-content-center">
+                                            <t t-foreach="teams.filtered(lambda t: t.company_id.id == company.id)"
+                                               t-as="team">
+                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                                                    <article class="card border-1 shadow-sm h-100 text-center hd-mc-card">
+                                                        <div class="card-body d-flex flex-column align-items-center p-4">
+
+                                                            <!-- Dynamic icon -->
+                                                            <i t-attf-class="fa #{team.website_icon or 'fa-users'} hd-mc-icon"></i>
+
+                                                            <!-- Team name -->
+                                                            <h6 class="fw-bold mt-2 hd-mc-title">
+                                                                <t t-esc="team.name"/>
+                                                            </h6>
+
+                                                            <!-- Description -->
+                                                            <p class="text-muted small mt-2 mb-4"
+                                                               style="font-size: 0.85rem; line-height: 1.4">
+                                                                <t t-if="team.website_description">
+                                                                    <t t-esc="team.website_description"/>
+                                                                </t>
+                                                                <t t-else="">
+                                                                    Seleccione este equipo para crear
+                                                                    solicitudes relacionadas con
+                                                                    <strong><t t-esc="team.name"/></strong>.
+                                                                </t>
+                                                            </p>
+
+                                                            <!-- Create ticket button -->
+                                                            <t t-if="team.website_url">
+                                                                <a t-att-href="team.website_url"
+                                                                   class="btn mt-auto text-white fw-bold w-100 hd-mc-btn">
+                                                                    <i class="fa fa-edit me-1"></i>
+                                                                    Crear Ticket
+                                                                </a>
+                                                            </t>
+
+                                                        </div>
+                                                    </article>
+                                                </div>
+                                            </t>
+                                        </div>
+                                        <!-- /row -->
+
+                                    </div>
+                                </div>
+                            </t>
+                        </t>
+
+                        <!-- ===== NO TEAMS AVAILABLE ===== -->
+                        <t t-else="">
+                            <div class="text-center py-5">
+                                <i class="fa fa-info-circle fa-3x text-muted mb-3 d-block"></i>
+                                <h4 class="text-muted">
+                                    No hay equipos de ayuda disponibles
+                                </h4>
+                                <p class="text-muted">
+                                    <t t-if="is_public_user">
+                                        Inicie sesión para ver los equipos
+                                        de ayuda de su empresa.
+                                    </t>
+                                    <t t-else="">
+                                        No se encontraron equipos de ayuda
+                                        publicados para
+                                        <strong><t t-esc="active_company.name"/></strong>.
+                                        <br/>
+                                        Contacte al administrador si necesita
+                                        asistencia.
+                                    </t>
+                                </p>
+                            </div>
+                        </t>
+
+                    </div>
+                    <!-- /container -->
+                </div>
+                <!-- /wrap -->
+
+            </t>
+        </template>
+
+    </data>
+</odoo>
