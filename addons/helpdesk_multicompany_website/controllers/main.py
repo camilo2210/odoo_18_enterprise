@@ -7,12 +7,25 @@ from odoo.http import request
 _logger = logging.getLogger(__name__)
 
 
-class HelpdeskMulticompanyWebsiteController(http.Controller):
-    """Controller for the multi-company helpdesk teams portal page.
+# Lazy import to avoid circular imports at module load time
+def _get_helpdesk_controller():
+    try:
+        from odoo.addons.helpdesk.controllers.main import HelpdeskController
+        return HelpdeskController
+    except ImportError:
+        return http.Controller
 
-    Renders a public page at /helpdesk/teams showing all published
-    helpdesk teams, filtered by the logged-in user's active company.
-    Public (anonymous) users see all published teams grouped by company.
+
+class HelpdeskMulticompanyController(http.Controller):
+    """Multi-company helpdesk portal controller.
+
+    Provides the /helpdesk/teams page (company selector).
+
+    The 404 fix for individual team pages (/helpdesk/<slug>) is handled
+    in the model layer (helpdesk_team.py) by overriding the method
+    `can_access_from_current_website`, which is called by Odoo's model
+    converter during URL routing. This means no controller override is
+    needed for individual team pages — the model fix alone is sufficient.
     """
 
     @http.route(
@@ -23,43 +36,33 @@ class HelpdeskMulticompanyWebsiteController(http.Controller):
         sitemap=True,
     )
     def helpdesk_teams_page(self, **kwargs):
-        """Render the helpdesk teams selector page.
+        """Render the multi-company helpdesk team selector page.
 
         Business rules:
-        - Only teams with is_published_on_portal=True are shown
-        - Logged-in users see only teams from their active company
-        - Public users see all published teams from all companies
-        - Teams are grouped by company and ordered by sequence/name
+        - Only teams with is_published_on_portal=True are shown.
+        - Logged-in users see only teams from their active company.
+        - Public/anonymous users see all published teams grouped by company.
+        - Teams are ordered by company, then sequence, then name.
         """
         user = request.env.user
         is_public_user = user._is_public()
         active_company = request.env.company
 
-        # Base domain: only portal-published teams
         domain = [('is_published_on_portal', '=', True)]
 
-        # For logged-in users, filter by their active company
         if not is_public_user:
             domain.append(('company_id', '=', active_company.id))
             _logger.info(
-                'Helpdesk teams page accessed by user "%s" '
-                '(active company: "%s", id=%s)',
-                user.login,
-                active_company.name,
-                active_company.id,
+                'Helpdesk teams page: user="%s", company="%s" (id=%s)',
+                user.login, active_company.name, active_company.id,
             )
         else:
-            _logger.info(
-                'Helpdesk teams page accessed by public user'
-            )
+            _logger.info('Helpdesk teams page: anonymous user')
 
-        # sudo() to bypass company-level record rules
-        # We apply our own company filtering above
+        # sudo() to read across companies; company filter applied above
         teams = request.env['helpdesk.team'].sudo().search(
             domain, order='company_id, sequence, name'
         )
-
-        # Ordered unique companies from the resulting teams
         companies = teams.mapped('company_id')
 
         values = {
