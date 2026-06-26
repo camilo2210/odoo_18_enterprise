@@ -5,9 +5,9 @@
         <!-- =================================================================
              HELPDESK TEAM — Form View: sección "Portal Multicompañía"
              ================================================================= -->
-        <record id="helpdesk_team_view_form_inherit_mc"
+        <record id="helpdesk_team_view_form_inherit_multicompany_website"
                 model="ir.ui.view">
-            <field name="name">helpdesk.team.form.inherit.mc</field>
+            <field name="name">helpdesk.team.form.inherit.multicompany.website</field>
             <field name="model">helpdesk.team</field>
             <field name="inherit_id" ref="helpdesk.helpdesk_team_view_form"/>
             <field name="arch" type="xml">
@@ -42,9 +42,9 @@
         <!-- =================================================================
              HELPDESK TEAM — List View: columna opcional "Portal MC"
              ================================================================= -->
-        <record id="helpdesk_team_view_list_inherit_mc"
+        <record id="helpdesk_team_view_list_inherit_multicompany_website"
                 model="ir.ui.view">
-            <field name="name">helpdesk.team.list.inherit.mc</field>
+            <field name="name">helpdesk.team.list.inherit.multicompany.website</field>
             <field name="model">helpdesk.team</field>
             <field name="inherit_id" ref="helpdesk.helpdesk_team_view_tree"/>
             <field name="arch" type="xml">
