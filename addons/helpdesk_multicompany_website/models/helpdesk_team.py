@@ -55,3 +55,14 @@ class HelpdeskTeam(models.Model):
         translate=True,
         help='Texto para la tarjeta del portal. Vacío = texto automático.',
     )
+
+    # =========================================================================
+    # OVERRIDES
+    # =========================================================================
+
+    def _compute_website_url(self):
+        """Redirige el botón nativo 'Ir al sitio web' a nuestra ruta."""
+        super()._compute_website_url()
+        for team in self:
+            if team.is_published_on_portal:
+                team.website_url = '/helpdesk/mc/%d' % team.id

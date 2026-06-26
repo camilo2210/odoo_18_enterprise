@@ -106,16 +106,16 @@ class HelpdeskMCController(http.Controller):
             return request.not_found()
 
         # Tipos de ticket: lectura defensiva.
-        # helpdesk.ticket.type puede no tener ACL para usuarios públicos/portal
-        # en Odoo 18 Enterprise, o el modelo puede tener un nombre diferente.
-        # Si no hay acceso, simplemente no se muestra el selector de tipos.
-        try:
-            ticket_types = request.env['helpdesk.ticket.type'].search(
-                [('team_ids', 'in', [team.id])],
-                order='name',
-            )
-        except Exception:
-            ticket_types = request.env['helpdesk.ticket.type'].browse([])
+        # helpdesk.ticket.type puede no existir si el submódulo no está instalado.
+        ticket_types = False
+        if 'helpdesk.ticket.type' in request.env:
+            try:
+                ticket_types = request.env['helpdesk.ticket.type'].search(
+                    [('team_ids', 'in', [team.id])],
+                    order='name',
+                )
+            except Exception:
+                ticket_types = False
 
         return request.render(
             'helpdesk_multicompany_website.helpdesk_ticket_form_page',
