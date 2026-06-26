@@ -7,48 +7,39 @@
              ================================================================= -->
         <template id="helpdesk_teams_page" name="Mesa de Ayuda — Equipos">
             <t t-call="website.layout">
-                <t t-set="additional_title">Mesa de Ayuda</t>
-
-                <div id="wrap" class="oe_structure">
-                    <div class="container mt-4 mb-4">
+                <div class="container">
+                    <div class="col-md px-0 team_list_columns">
                         
-                        <div class="text-center mb-4">
-                            <h1>Mesa de Ayuda</h1>
-                            <p class="text-muted" t-if="not is_public">
-                                Equipos disponibles para sus compañías autorizadas
-                            </p>
-                            <p class="text-muted" t-if="is_public">
-                                Inicie sesión para ver los equipos de su empresa
-                            </p>
+                        <div class="row">
+                            <div class="col-12 text-center">
+                                <h1 class="o_page_header mb32 mt32">Seleccione su equipo para ayuda</h1>
+                                <p class="text-muted" t-if="not is_public">
+                                    Mostrando equipos de sus compañías autorizadas
+                                </p>
+                            </div>
                         </div>
 
-                        <!-- Equipos encontrados -->
+                        <!-- Bucle por compañías para agrupar los equipos -->
                         <t t-if="teams">
                             <t t-foreach="companies" t-as="company">
-                                <div class="mb-5">
-                                    <h3 class="mb-3"><t t-esc="company.name"/></h3>
-                                    
-                                    <div class="row">
-                                        <t t-foreach="teams.filtered(lambda t: t.company_id.id == company.id)" t-as="team">
-                                            <div class="col-md-4 mb-3">
-                                                <div class="card h-100">
-                                                    <div class="card-body">
-                                                        <h5 class="card-title"><t t-esc="team.name"/></h5>
-                                                        <p class="card-text">
-                                                            <t t-if="team.website_description">
-                                                                <t t-esc="team.website_description"/>
-                                                            </t>
-                                                            <t t-else="">
-                                                                Cree solicitudes de soporte relacionadas con <t t-esc="team.name"/>.
-                                                            </t>
-                                                        </p>
-                                                        <a t-attf-href="/helpdesk/mc/#{team.id}" class="btn btn-primary">
-                                                            Crear Solicitud
-                                                        </a>
+                                <div class="row mt-4">
+                                    <div class="col-12">
+                                        <h3 class="mb-3"><t t-esc="company.name"/></h3>
+                                    </div>
+                                    <div t-foreach="teams.filtered(lambda t: t.company_id.id == company.id)" t-as="team" class="col-md-6 col-lg-4 mb-4">
+                                        <article class="card border-1 shadow-sm h-100 team_card">
+                                            <a t-attf-href="#{team.website_url}" class="text-reset text-decoration-none h-100 d-flex flex-column">
+                                                <img src="/website_helpdesk/static/src/img/team_image.jpg" alt="Imagen"/>
+                                                <main class="card-body d-flex flex-column">
+                                                    <h2 t-attf-class="fw-bold my-3">
+                                                        <span t-field="team.name" itemprop="name"/>
+                                                    </h2>
+                                                    <div class="navbar-brand fw-bold text-primary text-uppercase h5 me-auto w-100">
+                                                        Contáctenos <i class="oi oi-arrow-right"/>
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </t>
+                                                </main>
+                                            </a>
+                                        </article>
                                     </div>
                                 </div>
                             </t>
@@ -56,14 +47,17 @@
 
                         <!-- Sin equipos disponibles -->
                         <t t-else="">
-                            <div class="alert alert-info" role="alert">
-                                <t t-if="is_public">
-                                    Inicie sesión para ver los equipos de su empresa.
-                                </t>
-                                <t t-else="">
-                                    No hay equipos publicados para las <t t-esc="user_companies_count"/> compañías a las que tiene acceso.
-                                    Contacte al administrador.
-                                </t>
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="alert alert-info" role="alert">
+                                        <t t-if="is_public">
+                                            Inicie sesión para ver los equipos de su empresa.
+                                        </t>
+                                        <t t-else="">
+                                            No hay equipos publicados para las <t t-esc="user_companies_count"/> compañías a las que tiene acceso. Contacte al administrador.
+                                        </t>
+                                    </div>
+                                </div>
                             </div>
                         </t>
 
