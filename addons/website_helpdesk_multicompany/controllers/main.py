@@ -24,21 +24,14 @@ class WebsiteHelpdeskMulticompany(WebsiteHelpdesk):
 
         1. Ejecuta la lógica original con super() para mantener
            toda la preparación nativa del contexto.
-        2. Reemplaza el recordset ``teams`` con uno que incluya
+        2. Si super() lanza un 404 (NotFound) porque el usuario portal
+           no ve ningún equipo en su entorno, lo atrapamos.
+        3. Reemplaza el recordset ``teams`` con uno que incluya
            equipos de todas las compañías vía sudo().
         """
-        response = super().website_helpdesk_teams(**kwargs)
-
-        # Solo modificar si estamos en la página de listado
-        # y el contexto tiene la variable 'teams'
-        if not hasattr(response, 'qcontext') or not response.qcontext:
-            return response
-
-        if 'teams' not in response.qcontext:
-            return response
+        from werkzeug.exceptions import NotFound
 
         # Detectar el campo booleano correcto para filtrar equipos
-        # con helpdesk web activo (varía entre versiones de Odoo 18)
         HelpdeskTeam = request.env['helpdesk.team'].sudo()
         team_fields = HelpdeskTeam._fields
 
@@ -47,22 +40,37 @@ class WebsiteHelpdeskMulticompany(WebsiteHelpdesk):
         elif 'use_website_helpdesk' in team_fields:
             domain = [('use_website_helpdesk', '=', True)]
         else:
-            # Fallback: traer todos los equipos si no se encuentra el campo
-            _logger.warning(
-                'website_helpdesk_multicompany: No se encontró el campo '
-                'use_website_helpdesk_form ni use_website_helpdesk. '
-                'Se mostrarán todos los equipos.'
-            )
             domain = []
 
-        # Buscar equipos de TODAS las compañías, ordenados por compañía
-        all_teams = HelpdeskTeam.search(
-            domain,
-            order='company_id, sequence, id',
-        )
+        all_teams = HelpdeskTeam.search(domain, order='company_id, sequence, id')
 
-        if all_teams:
-            response.qcontext['teams'] = all_teams
+        if not all_teams:
+            raise NotFound()
+
+        try:
+            response = super().website_helpdesk_teams(**kwargs)
+            # Si super() hizo un redirect (porque creía que había solo 1 equipo), 
+            # pero en realidad hay MÁS de 1 equipo globalmente, debemos evitar el redirect
+            # y renderizar la lista completa.
+            if response.status_code in (301, 302, 303) and len(all_teams) > 1:
+                # Odoo normalmente usa 'website_helpdesk.team' para la lista de equipos.
+                # Se requiere pasar 'team': False para que la plantilla no falle con KeyError.
+                response = request.render("website_helpdesk.team", {'teams': all_teams, 'team': False})
+            
+            elif hasattr(response, 'qcontext') and response.qcontext:
+                response.qcontext['teams'] = all_teams
+                if 'team' not in response.qcontext:
+                    response.qcontext['team'] = False
+
+        except NotFound:
+            # Si el usuario no veía equipos por multi-compañía, super() lanzó NotFound.
+            # Renderizamos la plantilla de lista de equipos directamente.
+            # Si solo hay 1 equipo a nivel global, redirigir a ese equipo:
+            if len(all_teams) == 1:
+                return request.redirect('/helpdesk/%s' % all_teams[0].id)
+            
+            # De lo contrario, mostrar la lista completa
+            response = request.render("website_helpdesk.team", {'teams': all_teams, 'team': False})
 
         _logger.info(
             'website_helpdesk_multicompany: Mostrando %d equipos de %d compañías',
