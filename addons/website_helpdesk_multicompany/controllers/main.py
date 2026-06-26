@@ -54,13 +54,13 @@ class WebsiteHelpdeskMulticompany(WebsiteHelpdesk):
             # y renderizar la lista completa.
             if response.status_code in (301, 302, 303) and len(all_teams) > 1:
                 # Odoo normalmente usa 'website_helpdesk.team' para la lista de equipos.
-                # Se requiere pasar 'team': False para que la plantilla no falle con KeyError.
-                response = request.render("website_helpdesk.team", {'teams': all_teams, 'team': False})
+                # Se requiere pasar 'team': recordset vacío para que la plantilla no falle con AttributeError.
+                response = request.render("website_helpdesk.team", {'teams': all_teams, 'team': request.env['helpdesk.team'].sudo()})
             
             elif hasattr(response, 'qcontext') and response.qcontext:
                 response.qcontext['teams'] = all_teams
-                if 'team' not in response.qcontext:
-                    response.qcontext['team'] = False
+                if 'team' not in response.qcontext or isinstance(response.qcontext['team'], bool):
+                    response.qcontext['team'] = request.env['helpdesk.team'].sudo()
 
         except NotFound:
             # Si el usuario no veía equipos por multi-compañía, super() lanzó NotFound.
@@ -70,7 +70,7 @@ class WebsiteHelpdeskMulticompany(WebsiteHelpdesk):
                 return request.redirect('/helpdesk/%s' % all_teams[0].id)
             
             # De lo contrario, mostrar la lista completa
-            response = request.render("website_helpdesk.team", {'teams': all_teams, 'team': False})
+            response = request.render("website_helpdesk.team", {'teams': all_teams, 'team': request.env['helpdesk.team'].sudo()})
 
         _logger.info(
             'website_helpdesk_multicompany: Mostrando %d equipos de %d compañías',
