@@ -3,14 +3,11 @@
     <data>
 
         <!-- =================================================================
-             HELPDESK TEAM — Form View Inheritance
-             Adds portal multi-company configuration fields at the bottom
-             of the team form sheet, including the website_id field to show
-             that it gets cleared when portal publication is enabled.
+             HELPDESK TEAM — Form View: sección "Portal Multicompañía"
              ================================================================= -->
-        <record id="helpdesk_team_view_form_inherit_multicompany_website"
+        <record id="helpdesk_team_view_form_inherit_mc"
                 model="ir.ui.view">
-            <field name="name">helpdesk.team.form.inherit.multicompany.website</field>
+            <field name="name">helpdesk.team.form.inherit.mc</field>
             <field name="model">helpdesk.team</field>
             <field name="inherit_id" ref="helpdesk.helpdesk_team_view_form"/>
             <field name="arch" type="xml">
@@ -20,39 +17,35 @@
                         <group>
                             <field name="is_published_on_portal"
                                    widget="boolean_toggle"/>
-                            <field name="website_id"
-                                   invisible="not is_published_on_portal"
-                                   readonly="is_published_on_portal"
-                                   string="Sitio Web (sin restricción)"/>
                             <field name="website_icon"
                                    invisible="not is_published_on_portal"/>
                         </group>
                         <group>
                             <field name="website_description"
-                                   placeholder="Texto que verá el usuario en la tarjeta del portal. Dejar vacío para texto automático."
+                                   placeholder="Descripción para la tarjeta del portal. Vacío = texto automático."
                                    invisible="not is_published_on_portal"/>
                         </group>
                     </group>
-                    <div class="alert alert-info" role="alert"
+                    <div class="alert alert-info mb-0" role="alert"
                          invisible="not is_published_on_portal">
-                        <i class="fa fa-info-circle me-1"/>
-                        Al publicar en el Portal Multicompañía, el campo
-                        <strong>Sitio Web</strong> se vacía automáticamente para
-                        que el formulario de tickets sea accesible desde
-                        <strong>cualquier</strong> sitio web del entorno y evitar
-                        errores 404.
+                        <i class="fa fa-info-circle me-2"/>
+                        Este equipo aparecerá en
+                        <strong>/helpdesk/teams</strong>. El formulario de
+                        tickets se abrirá en
+                        <strong>/helpdesk/mc/<t t-esc="id"/></strong>,
+                        ruta propia del módulo que funciona desde
+                        <strong>cualquier sitio web</strong> sin errores 404.
                     </div>
                 </xpath>
             </field>
         </record>
 
         <!-- =================================================================
-             HELPDESK TEAM — List View Inheritance
-             Adds is_published_on_portal as optional column.
+             HELPDESK TEAM — List View: columna opcional "Portal MC"
              ================================================================= -->
-        <record id="helpdesk_team_view_list_inherit_multicompany_website"
+        <record id="helpdesk_team_view_list_inherit_mc"
                 model="ir.ui.view">
-            <field name="name">helpdesk.team.list.inherit.multicompany.website</field>
+            <field name="name">helpdesk.team.list.inherit.mc</field>
             <field name="model">helpdesk.team</field>
             <field name="inherit_id" ref="helpdesk.helpdesk_team_view_tree"/>
             <field name="arch" type="xml">

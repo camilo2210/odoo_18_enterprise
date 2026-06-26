@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data noupdate="1">
+
+        <!--
+            RECORD RULES — Helpdesk Multi-Company Website
+            ================================================
+            Estas reglas complementan la ACL (ir.model.access.csv):
+            - La ACL define QUÉ modelos puede leer un grupo
+            - Las record rules definen QUÉ registros específicos son visibles
+
+            Principio de mínimo privilegio:
+            - Usuarios públicos/portal ven SOLO equipos publicados en portal
+            - No pueden ver equipos internos ni de otras compañías
+        -->
+
+        <!-- ================================================================
+             REGLA 1: Usuarios PÚBLICOS (anónimos)
+             Solo ven helpdesk.team con is_published_on_portal = True
+             ================================================================ -->
+        <record id="helpdesk_mc_team_public_rule"
+                model="ir.rule">
+            <field name="name">Portal MC: Teams públicos solo ven equipos publicados</field>
+            <field name="model_id" ref="helpdesk.model_helpdesk_team"/>
+            <field name="domain_force">[('is_published_on_portal', '=', True)]</field>
+            <field name="groups" eval="[(4, ref('base.group_public'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+        <!-- ================================================================
+             REGLA 2: Usuarios de PORTAL
+             Solo ven helpdesk.team con is_published_on_portal = True
+             ================================================================ -->
+        <record id="helpdesk_mc_team_portal_rule"
+                model="ir.rule">
+            <field name="name">Portal MC: Usuarios portal solo ven equipos publicados</field>
+            <field name="model_id" ref="helpdesk.model_helpdesk_team"/>
+            <field name="domain_force">[('is_published_on_portal', '=', True)]</field>
+            <field name="groups" eval="[(4, ref('base.group_portal'))]"/>
+            <field name="perm_read" eval="True"/>
+            <field name="perm_write" eval="False"/>
+            <field name="perm_create" eval="False"/>
+            <field name="perm_unlink" eval="False"/>
+        </record>
+
+    </data>
+</odoo>

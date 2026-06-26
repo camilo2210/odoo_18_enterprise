@@ -1,32 +1,34 @@
 # -*- coding: utf-8 -*-
 import logging
 
-from odoo import http
+from odoo import http, _
 from odoo.http import request
+from odoo.exceptions import ValidationError, AccessError
 
 _logger = logging.getLogger(__name__)
 
 
-# Lazy import to avoid circular imports at module load time
-def _get_helpdesk_controller():
-    try:
-        from odoo.addons.helpdesk.controllers.main import HelpdeskController
-        return HelpdeskController
-    except ImportError:
-        return http.Controller
-
-
-class HelpdeskMulticompanyController(http.Controller):
-    """Multi-company helpdesk portal controller.
-
-    Provides the /helpdesk/teams page (company selector).
-
-    The 404 fix for individual team pages (/helpdesk/<slug>) is handled
-    in the model layer (helpdesk_team.py) by overriding the method
-    `can_access_from_current_website`, which is called by Odoo's model
-    converter during URL routing. This means no controller override is
-    needed for individual team pages — the model fix alone is sufficient.
+class HelpdeskMCController(http.Controller):
     """
+    Controlador del Portal Multicompañía de Helpdesk.
+
+    POLÍTICA DE SEGURIDAD:
+    - Este controlador NO usa sudo() en ningún punto.
+    - El control de acceso a lectura se delega a las ACL y record rules
+      definidas en security/ir.model.access.csv y security/helpdesk_mc_security.xml.
+    - La creación de tickets se delega al método de servicio
+      helpdesk.ticket.create_portal_mc_ticket() que encapsula la lógica
+      de negocio y el único sudo() justificado (para res.partner).
+
+    Rutas:
+      GET  /helpdesk/teams              → selector de equipos por compañía
+      GET  /helpdesk/mc/<team_id>       → formulario de creación de ticket
+      POST /helpdesk/mc/<team_id>/submit → procesa y crea el ticket
+    """
+
+    # =========================================================================
+    # RUTA 1: /helpdesk/teams — Página de selección de equipos
+    # =========================================================================
 
     @http.route(
         '/helpdesk/teams',
@@ -36,43 +38,156 @@ class HelpdeskMulticompanyController(http.Controller):
         sitemap=True,
     )
     def helpdesk_teams_page(self, **kwargs):
-        """Render the multi-company helpdesk team selector page.
+        """
+        Muestra los equipos de helpdesk publicados, agrupados por compañía.
 
-        Business rules:
-        - Only teams with is_published_on_portal=True are shown.
-        - Logged-in users see only teams from their active company.
-        - Public/anonymous users see all published teams grouped by company.
-        - Teams are ordered by company, then sequence, then name.
+        Sin sudo(): el ORM aplica automáticamente las record rules que
+        restringen la visibilidad a equipos con is_published_on_portal=True.
+        El filtro por compañía activa se aplica para usuarios autenticados.
         """
         user = request.env.user
-        is_public_user = user._is_public()
+        is_public = user._is_public()
         active_company = request.env.company
 
-        domain = [('is_published_on_portal', '=', True)]
-
-        if not is_public_user:
+        # Dominio base: las record rules ya filtran por is_published_on_portal=True.
+        # Para usuarios autenticados, añadimos filtro por su compañía activa.
+        domain = []
+        if not is_public:
             domain.append(('company_id', '=', active_company.id))
-            _logger.info(
-                'Helpdesk teams page: user="%s", company="%s" (id=%s)',
-                user.login, active_company.name, active_company.id,
-            )
-        else:
-            _logger.info('Helpdesk teams page: anonymous user')
 
-        # sudo() to read across companies; company filter applied above
-        teams = request.env['helpdesk.team'].sudo().search(
+        # Sin sudo: el ORM aplica ACL + record rules de security/
+        teams = request.env['helpdesk.team'].search(
             domain, order='company_id, sequence, name'
         )
         companies = teams.mapped('company_id')
 
-        values = {
-            'teams': teams,
-            'companies': companies,
-            'active_company': active_company,
-            'is_public_user': is_public_user,
-        }
-
         return request.render(
             'helpdesk_multicompany_website.helpdesk_teams_page',
-            values,
+            {
+                'teams': teams,
+                'companies': companies,
+                'active_company': active_company,
+                'is_public': is_public,
+            },
         )
+
+    # =========================================================================
+    # RUTA 2: /helpdesk/mc/<team_id> — Formulario de ticket (GET)
+    # =========================================================================
+
+    @http.route(
+        '/helpdesk/mc/<int:team_id>',
+        type='http',
+        auth='public',
+        website=True,
+        sitemap=False,
+    )
+    def helpdesk_ticket_form(self, team_id, error=None, success=False, **kwargs):
+        """
+        Renderiza el formulario de creación de ticket para un equipo.
+
+        Sin sudo(): el equipo se busca con browse() + verificación de acceso.
+        Si el usuario no tiene acceso al equipo (no publicado o no existe),
+        el ORM levantará AccessError que se convierte en 404.
+
+        Usa /helpdesk/mc/<int:team_id> (ID entero) en lugar del slug nativo
+        para evitar completamente el enrutador de Odoo que aplica restricciones
+        de website_id y causa 404 en entornos multicompañía sin subdominios.
+        """
+        # browse() sin sudo: el ORM verificará el acceso vía ACL + record rules
+        team = request.env['helpdesk.team'].browse(team_id)
+
+        try:
+            # Verificar acceso: si el equipo no es visible (record rule),
+            # exists() o el acceso al campo lanzará un error controlado
+            if not team.exists() or not team.is_published_on_portal:
+                return request.not_found()
+        except AccessError:
+            return request.not_found()
+
+        # Tipos de ticket: ACL en security/ permite lectura a public/portal
+        ticket_types = request.env['helpdesk.ticket.type'].search(
+            [('team_ids', 'in', [team.id])],
+            order='name',
+        )
+
+        return request.render(
+            'helpdesk_multicompany_website.helpdesk_ticket_form_page',
+            {
+                'team': team,
+                'ticket_types': ticket_types,
+                'error': error or {},
+                'success': success,
+                'default_values': kwargs,
+            },
+        )
+
+    # =========================================================================
+    # RUTA 3: /helpdesk/mc/<team_id>/submit — Procesa el formulario (POST)
+    # =========================================================================
+
+    @http.route(
+        '/helpdesk/mc/<int:team_id>/submit',
+        type='http',
+        auth='public',
+        website=True,
+        methods=['POST'],
+        csrf=True,
+    )
+    def helpdesk_ticket_submit(self, team_id, **post):
+        """
+        Valida los datos del formulario y delega la creación al modelo.
+
+        Sin sudo() en el controlador: la validación de negocio y la creación
+        del ticket se realizan a través del método de servicio del modelo
+        helpdesk.ticket.create_portal_mc_ticket(), que gestiona la elevación
+        de privilegios de forma controlada y documentada.
+        """
+        # --- Validación de campos obligatorios ---
+        error = {}
+        name = (post.get('name') or '').strip()
+        description = (post.get('description') or '').strip()
+        partner_email = (post.get('partner_email') or '').strip()
+        partner_name = (post.get('partner_name') or '').strip()
+
+        if not name:
+            error['name'] = _('El asunto es obligatorio.')
+        if not partner_email:
+            error['partner_email'] = _('El correo electrónico es obligatorio.')
+        if not partner_name:
+            error['partner_name'] = _('El nombre es obligatorio.')
+
+        refill_values = {
+            k: post.get(k, '')
+            for k in ['name', 'description', 'partner_email',
+                      'partner_name', 'ticket_type_id']
+        }
+
+        if error:
+            return self.helpdesk_ticket_form(
+                team_id, error=error, **refill_values
+            )
+
+        # --- Delegar creación al modelo (sin sudo en el controlador) ---
+        try:
+            request.env['helpdesk.ticket'].create_portal_mc_ticket(
+                team_id=team_id,
+                name=name,
+                partner_name=partner_name,
+                partner_email=partner_email,
+                description=description,
+                ticket_type_id=post.get('ticket_type_id'),
+            )
+        except AccessError as e:
+            _logger.warning('Portal MC: AccessError al crear ticket: %s', str(e))
+            return request.not_found()
+        except (ValidationError, Exception) as e:
+            _logger.error('Portal MC: error al crear ticket: %s', str(e))
+            return self.helpdesk_ticket_form(
+                team_id,
+                error={'_global': str(e)},
+                **refill_values,
+            )
+
+        # --- Redirigir con flag de éxito ---
+        return request.redirect('/helpdesk/mc/%d?success=1' % team_id)

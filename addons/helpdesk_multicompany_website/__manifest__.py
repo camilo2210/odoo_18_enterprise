@@ -1,23 +1,25 @@
 # -*- coding: utf-8 -*-
 {
     'name': 'Helpdesk Multi-Company Website',
-    'version': '18.0.1.0.0',
+    'version': '18.0.3.0.0',
     'category': 'Services/Helpdesk',
-    'summary': 'Página centralizada de equipos de mesa de ayuda multi-compañía en el sitio web',
+    'summary': 'Página centralizada de mesa de ayuda para entornos multi-compañía',
     'description': """
 Helpdesk Multi-Company Website
 ===============================
 
-Permite configurar y mostrar múltiples equipos de helpdesk de distintas
-compañías en una sola página del sitio web, con filtrado automático por
-la compañía activa del usuario.
+Muestra múltiples equipos de helpdesk de distintas compañías en una
+sola página del sitio web, sin necesitar subdominios.
 
-Características principales:
-- Página dinámica /helpdesk/teams con todos los equipos publicados
-- Filtrado automático por compañía activa del usuario logueado
-- Iconos y descripciones configurables por equipo desde el backend
-- Escalable: nuevos equipos aparecen automáticamente al publicarlos
-- Validación estricta para evitar tickets cross-company
+Arquitectura de seguridad (sin sudo() en controladores):
+- ACL (ir.model.access.csv): define qué grupos pueden leer qué modelos
+- Record rules: restringen qué registros son visibles por grupo
+- Método de servicio en el modelo: único punto de elevación de privilegio
+  documentado y acotado (solo para res.partner en flujo de portal)
+
+Rutas del módulo:
+- /helpdesk/teams         : selector de equipos por compañía
+- /helpdesk/mc/<team_id>  : formulario de ticket (sin restricción website_id)
     """,
     'author': 'Custom Development',
     'website': '',
@@ -26,6 +28,8 @@ Características principales:
         'website',
     ],
     'data': [
+        'security/ir.model.access.csv',
+        'security/helpdesk_mc_security.xml',
         'views/helpdesk_team_views.xml',
         'views/website_templates.xml',
     ],

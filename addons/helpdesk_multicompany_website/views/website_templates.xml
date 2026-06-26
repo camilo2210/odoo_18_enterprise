@@ -3,175 +3,392 @@
     <data>
 
         <!-- =================================================================
-             HELPDESK TEAMS — Website Portal Page (QWeb Template)
+             TEMPLATE 1: /helpdesk/teams — Selector de equipos multicompañía
 
-             This template renders the multi-company helpdesk team selector
-             page at /helpdesk/teams. It replaces the previous hardcoded
-             HTML with a fully dynamic, scalable solution.
-
-             Variables injected by the controller:
-               - teams:          recordset of helpdesk.team (published)
-               - companies:      recordset of res.company (unique from teams)
-               - active_company: current user's active res.company
-               - is_public_user: boolean, True if anonymous access
+             Variables del controlador:
+               teams          : recordset helpdesk.team (publicados)
+               companies      : recordset res.company (únicos de teams)
+               active_company : res.company del usuario autenticado
+               is_public      : bool, True si usuario anónimo
              ================================================================= -->
-        <template id="helpdesk_teams_page" name="Equipos de Mesa de Ayuda">
+        <template id="helpdesk_teams_page" name="Mesa de Ayuda — Equipos">
             <t t-call="website.layout">
                 <t t-set="additional_title">Mesa de Ayuda</t>
 
-                <!-- ========== CSS ========== -->
                 <style>
                     .hd-mc-card {
-                        border-radius: 8px;
-                        transition: all 0.25s ease;
+                        border-radius: 10px;
+                        transition: transform 0.22s ease, box-shadow 0.22s ease;
+                        border: 1px solid #e2e8f0;
                     }
                     .hd-mc-card:hover {
-                        transform: translateY(-4px);
-                        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+                        transform: translateY(-5px);
+                        box-shadow: 0 8px 24px rgba(78,59,199,.15) !important;
+                        border-color: #4e3bc7;
                     }
                     .hd-mc-icon {
-                        font-size: 55px;
+                        font-size: 48px;
                         color: #4e3bc7;
-                        margin-bottom: 15px;
-                        display: block;
-                        width: 70px;
-                        height: 70px;
-                        line-height: 70px;
+                        margin-bottom: 12px;
                     }
-                    .hd-mc-company-card {
-                        border-left: 4px solid #4e3bc7 !important;
+                    .hd-mc-section {
+                        border-left: 4px solid #4e3bc7;
                         border-radius: 8px;
-                    }
-                    .hd-mc-title {
-                        color: #4e3bc7;
-                    }
-                    .hd-mc-btn {
-                        background-color: #4e3bc7;
-                        border-radius: 20px;
-                        transition: background-color 0.2s ease;
-                    }
-                    .hd-mc-btn:hover {
-                        background-color: #3d2ea3;
+                        background: #fafbff;
                     }
                     .hd-mc-separator {
                         border-top: 2px solid #4e3bc7;
                         opacity: 1;
-                        margin-bottom: 30px;
+                        margin-bottom: 24px;
                     }
+                    .hd-mc-btn {
+                        background-color: #4e3bc7;
+                        border-radius: 22px;
+                        border: none;
+                        transition: background-color 0.2s;
+                    }
+                    .hd-mc-btn:hover { background-color: #3d2ea3; }
+                    .hd-mc-company-name { color: #4e3bc7; }
                 </style>
 
-                <!-- ========== PAGE CONTENT ========== -->
                 <div id="wrap" class="oe_structure">
                     <div class="container my-5">
 
-                        <!-- Page header -->
-                        <div class="col-12 text-center mb-5">
-                            <h1 class="fw-bold hd-mc-title">
-                                Seleccione su equipo para ayuda
+                        <!-- Encabezado -->
+                        <div class="text-center mb-5">
+                            <h1 class="fw-bold hd-mc-company-name">
+                                Mesa de Ayuda
                             </h1>
-                            <p class="text-muted mt-2"
-                               t-if="not is_public_user">
-                                Mostrando equipos de:
+                            <p class="text-muted fs-5" t-if="not is_public">
+                                Equipos disponibles para
                                 <strong t-esc="active_company.name"/>
                             </p>
-                            <p class="text-muted mt-2"
-                               t-if="is_public_user">
+                            <p class="text-muted fs-5" t-if="is_public">
                                 Inicie sesión para ver los equipos de su empresa
                             </p>
                         </div>
 
-                        <!-- ===== TEAMS EXIST ===== -->
+                        <!-- Equipos encontrados -->
                         <t t-if="teams">
                             <t t-foreach="companies" t-as="company">
-                                <div class="card mb-5 border-0 shadow-sm hd-mc-company-card">
-                                    <div class="card-body p-4">
+                                <div class="card border-0 shadow-sm mb-5 p-4 hd-mc-section">
 
-                                        <!-- Company header -->
-                                        <h4 class="fw-bold text-uppercase mb-2 hd-mc-title">
-                                            <i class="fa fa-building-o me-2"></i>
-                                            <t t-esc="company.name"/>
-                                        </h4>
-                                        <hr class="hd-mc-separator"/>
+                                    <!-- Cabecera compañía -->
+                                    <h4 class="fw-bold text-uppercase mb-2 hd-mc-company-name">
+                                        <i class="fa fa-building-o me-2"/>
+                                        <t t-esc="company.name"/>
+                                    </h4>
+                                    <hr class="hd-mc-separator"/>
 
-                                        <!-- Team cards row -->
-                                        <div class="row justify-content-center">
-                                            <t t-foreach="teams.filtered(lambda t: t.company_id.id == company.id)"
-                                               t-as="team">
-                                                <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
-                                                    <article class="card border-1 shadow-sm h-100 text-center hd-mc-card">
-                                                        <div class="card-body d-flex flex-column align-items-center p-4">
+                                    <!-- Tarjetas de equipos -->
+                                    <div class="row">
+                                        <t t-foreach="teams.filtered(lambda t: t.company_id.id == company.id)"
+                                           t-as="team">
+                                            <div class="col-xl-3 col-lg-4 col-md-6 mb-4">
+                                                <article class="card h-100 text-center hd-mc-card">
+                                                    <div class="card-body d-flex flex-column align-items-center p-4">
 
-                                                            <!-- Dynamic icon -->
-                                                            <i t-attf-class="fa #{team.website_icon or 'fa-users'} hd-mc-icon"></i>
+                                                        <!-- Ícono dinámico -->
+                                                        <i t-attf-class="fa #{team.website_icon or 'fa-users'} hd-mc-icon"/>
 
-                                                            <!-- Team name -->
-                                                            <h6 class="fw-bold mt-2 hd-mc-title">
-                                                                <t t-esc="team.name"/>
-                                                            </h6>
+                                                        <!-- Nombre del equipo -->
+                                                        <h6 class="fw-bold mt-1 hd-mc-company-name">
+                                                            <t t-esc="team.name"/>
+                                                        </h6>
 
-                                                            <!-- Description -->
-                                                            <p class="text-muted small mt-2 mb-4"
-                                                               style="font-size: 0.85rem; line-height: 1.4">
-                                                                <t t-if="team.website_description">
-                                                                    <t t-esc="team.website_description"/>
-                                                                </t>
-                                                                <t t-else="">
-                                                                    Seleccione este equipo para crear
-                                                                    solicitudes relacionadas con
-                                                                    <strong><t t-esc="team.name"/></strong>.
-                                                                </t>
-                                                            </p>
-
-                                                            <!-- Create ticket button -->
-                                                            <t t-if="team.website_url">
-                                                                <a t-att-href="team.website_url"
-                                                                   class="btn mt-auto text-white fw-bold w-100 hd-mc-btn">
-                                                                    <i class="fa fa-edit me-1"></i>
-                                                                    Crear Ticket
-                                                                </a>
+                                                        <!-- Descripción -->
+                                                        <p class="text-muted small mt-2 mb-4 flex-grow-1"
+                                                           style="font-size:.84rem;line-height:1.45">
+                                                            <t t-if="team.website_description">
+                                                                <t t-esc="team.website_description"/>
                                                             </t>
+                                                            <t t-else="">
+                                                                Cree solicitudes de soporte relacionadas con
+                                                                <strong><t t-esc="team.name"/></strong>.
+                                                            </t>
+                                                        </p>
 
-                                                        </div>
-                                                    </article>
-                                                </div>
-                                            </t>
-                                        </div>
-                                        <!-- /row -->
+                                                        <!-- Botón: apunta a nuestra ruta propia /helpdesk/mc/<id> -->
+                                                        <a t-attf-href="/helpdesk/mc/#{team.id}"
+                                                           class="btn text-white fw-semibold w-100 hd-mc-btn">
+                                                            <i class="fa fa-ticket me-1"/>
+                                                            Crear Solicitud
+                                                        </a>
 
+                                                    </div>
+                                                </article>
+                                            </div>
+                                        </t>
                                     </div>
+
                                 </div>
                             </t>
                         </t>
 
-                        <!-- ===== NO TEAMS AVAILABLE ===== -->
+                        <!-- Sin equipos disponibles -->
                         <t t-else="">
                             <div class="text-center py-5">
-                                <i class="fa fa-info-circle fa-3x text-muted mb-3 d-block"></i>
-                                <h4 class="text-muted">
-                                    No hay equipos de ayuda disponibles
-                                </h4>
+                                <i class="fa fa-info-circle fa-3x text-muted mb-3 d-block"/>
+                                <h4 class="text-muted">No hay equipos de ayuda disponibles</h4>
                                 <p class="text-muted">
-                                    <t t-if="is_public_user">
-                                        Inicie sesión para ver los equipos
-                                        de ayuda de su empresa.
+                                    <t t-if="is_public">
+                                        Inicie sesión para ver los equipos de su empresa.
                                     </t>
                                     <t t-else="">
-                                        No se encontraron equipos de ayuda
-                                        publicados para
+                                        No hay equipos publicados para
                                         <strong><t t-esc="active_company.name"/></strong>.
-                                        <br/>
-                                        Contacte al administrador si necesita
-                                        asistencia.
+                                        Contacte al administrador.
                                     </t>
                                 </p>
                             </div>
                         </t>
 
                     </div>
-                    <!-- /container -->
                 </div>
-                <!-- /wrap -->
+            </t>
+        </template>
 
+        <!-- =================================================================
+             TEMPLATE 2: /helpdesk/mc/<team_id> — Formulario de ticket
+
+             Variables del controlador:
+               team          : helpdesk.team (el equipo seleccionado)
+               ticket_types  : recordset helpdesk.ticket.type del equipo
+               error         : dict {campo: mensaje} o {'_global': msg}
+               success       : bool, True tras creación exitosa
+               default_values: dict con valores previos del formulario (re-fill)
+             ================================================================= -->
+        <template id="helpdesk_ticket_form_page" name="Mesa de Ayuda — Crear Ticket">
+            <t t-call="website.layout">
+                <t t-set="additional_title">
+                    Crear Solicitud — <t t-esc="team.name"/>
+                </t>
+
+                <style>
+                    .hd-form-card {
+                        border-radius: 12px;
+                        border: 1px solid #e2e8f0;
+                    }
+                    .hd-form-header {
+                        background: linear-gradient(135deg,#4e3bc7,#7c5cbf);
+                        border-radius: 12px 12px 0 0;
+                        color: #fff;
+                        padding: 28px 32px;
+                    }
+                    .hd-form-body { padding: 32px; }
+                    .hd-form-label { font-weight: 600; color: #374151; }
+                    .hd-form-control {
+                        border-radius: 8px;
+                        border: 1px solid #d1d5db;
+                        transition: border-color .2s;
+                    }
+                    .hd-form-control:focus {
+                        border-color: #4e3bc7;
+                        box-shadow: 0 0 0 3px rgba(78,59,199,.12);
+                    }
+                    .hd-form-control.is-invalid { border-color: #dc3545; }
+                    .hd-submit-btn {
+                        background: #4e3bc7;
+                        border: none;
+                        border-radius: 22px;
+                        padding: 10px 36px;
+                        font-weight: 600;
+                        transition: background .2s;
+                    }
+                    .hd-submit-btn:hover { background: #3d2ea3; }
+                    .hd-back-link { color: #4e3bc7; }
+                    .hd-back-link:hover { color: #3d2ea3; }
+                </style>
+
+                <div id="wrap" class="oe_structure">
+                    <div class="container my-5">
+                        <div class="row justify-content-center">
+                            <div class="col-lg-8 col-md-10">
+
+                                <!-- Volver a la lista -->
+                                <a href="/helpdesk/teams"
+                                   class="hd-back-link text-decoration-none mb-4 d-inline-block">
+                                    <i class="fa fa-arrow-left me-1"/>
+                                    Volver a Mesa de Ayuda
+                                </a>
+
+                                <div class="card shadow hd-form-card">
+
+                                    <!-- Encabezado del equipo -->
+                                    <div class="hd-form-header">
+                                        <div class="d-flex align-items-center gap-3">
+                                            <i t-attf-class="fa #{team.website_icon or 'fa-users'} fa-2x"/>
+                                            <div>
+                                                <h4 class="mb-0 fw-bold">
+                                                    <t t-esc="team.name"/>
+                                                </h4>
+                                                <small class="opacity-75">
+                                                    <t t-esc="team.company_id.name"/>
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="hd-form-body">
+
+                                        <!-- Mensaje de éxito -->
+                                        <t t-if="success">
+                                            <div class="alert alert-success d-flex align-items-center gap-2 mb-4"
+                                                 role="alert">
+                                                <i class="fa fa-check-circle fa-lg"/>
+                                                <div>
+                                                    <strong>¡Solicitud enviada correctamente!</strong><br/>
+                                                    Recibirá un correo de confirmación con los detalles
+                                                    de su solicitud. Nuestro equipo le contactará a la brevedad.
+                                                </div>
+                                            </div>
+                                            <a href="/helpdesk/teams"
+                                               class="btn hd-submit-btn text-white">
+                                                Volver a Mesa de Ayuda
+                                            </a>
+                                        </t>
+
+                                        <!-- Formulario de creación -->
+                                        <t t-else="">
+
+                                            <!-- Error global (ej: error del ORM) -->
+                                            <t t-if="error and error.get('_global')">
+                                                <div class="alert alert-danger mb-4" role="alert">
+                                                    <i class="fa fa-exclamation-triangle me-2"/>
+                                                    <t t-esc="error['_global']"/>
+                                                </div>
+                                            </t>
+
+                                            <form t-attf-action="/helpdesk/mc/#{team.id}/submit"
+                                                  method="POST"
+                                                  novalidate="novalidate">
+                                                <input type="hidden"
+                                                       name="csrf_token"
+                                                       t-att-value="request.csrf_token()"/>
+
+                                                <!-- Nombre del solicitante -->
+                                                <div class="mb-4">
+                                                    <label for="partner_name"
+                                                           class="form-label hd-form-label">
+                                                        Nombre completo
+                                                        <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text"
+                                                           id="partner_name"
+                                                           name="partner_name"
+                                                           class="form-control hd-form-control"
+                                                           t-attf-class="form-control hd-form-control#{' is-invalid' if error and error.get('partner_name') else ''}"
+                                                           t-att-value="default_values.get('partner_name', '')"
+                                                           placeholder="Su nombre completo"
+                                                           required="required"/>
+                                                    <t t-if="error and error.get('partner_name')">
+                                                        <div class="invalid-feedback d-block">
+                                                            <t t-esc="error['partner_name']"/>
+                                                        </div>
+                                                    </t>
+                                                </div>
+
+                                                <!-- Correo electrónico -->
+                                                <div class="mb-4">
+                                                    <label for="partner_email"
+                                                           class="form-label hd-form-label">
+                                                        Correo electrónico
+                                                        <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="email"
+                                                           id="partner_email"
+                                                           name="partner_email"
+                                                           t-attf-class="form-control hd-form-control#{' is-invalid' if error and error.get('partner_email') else ''}"
+                                                           t-att-value="default_values.get('partner_email', '')"
+                                                           placeholder="correo@ejemplo.com"
+                                                           required="required"/>
+                                                    <t t-if="error and error.get('partner_email')">
+                                                        <div class="invalid-feedback d-block">
+                                                            <t t-esc="error['partner_email']"/>
+                                                        </div>
+                                                    </t>
+                                                </div>
+
+                                                <!-- Asunto del ticket -->
+                                                <div class="mb-4">
+                                                    <label for="name"
+                                                           class="form-label hd-form-label">
+                                                        Asunto
+                                                        <span class="text-danger">*</span>
+                                                    </label>
+                                                    <input type="text"
+                                                           id="name"
+                                                           name="name"
+                                                           t-attf-class="form-control hd-form-control#{' is-invalid' if error and error.get('name') else ''}"
+                                                           t-att-value="default_values.get('name', '')"
+                                                           placeholder="Resumen breve de su solicitud"
+                                                           required="required"/>
+                                                    <t t-if="error and error.get('name')">
+                                                        <div class="invalid-feedback d-block">
+                                                            <t t-esc="error['name']"/>
+                                                        </div>
+                                                    </t>
+                                                </div>
+
+                                                <!-- Tipo de ticket (si existen tipos configurados) -->
+                                                <t t-if="ticket_types">
+                                                    <div class="mb-4">
+                                                        <label for="ticket_type_id"
+                                                               class="form-label hd-form-label">
+                                                            Tipo de solicitud
+                                                        </label>
+                                                        <select id="ticket_type_id"
+                                                                name="ticket_type_id"
+                                                                class="form-select hd-form-control">
+                                                            <option value="">— Seleccionar tipo —</option>
+                                                            <t t-foreach="ticket_types" t-as="ttype">
+                                                                <option t-att-value="ttype.id"
+                                                                        t-att-selected="'selected' if default_values.get('ticket_type_id') == str(ttype.id) else None">
+                                                                    <t t-esc="ttype.name"/>
+                                                                </option>
+                                                            </t>
+                                                        </select>
+                                                    </div>
+                                                </t>
+
+                                                <!-- Descripción -->
+                                                <div class="mb-5">
+                                                    <label for="description"
+                                                           class="form-label hd-form-label">
+                                                        Descripción detallada
+                                                    </label>
+                                                    <textarea id="description"
+                                                              name="description"
+                                                              class="form-control hd-form-control"
+                                                              rows="5"
+                                                              placeholder="Describa su solicitud con el mayor detalle posible..."><t t-esc="default_values.get('description', '')"/></textarea>
+                                                </div>
+
+                                                <!-- Botón enviar -->
+                                                <div class="d-flex gap-3 align-items-center">
+                                                    <button type="submit"
+                                                            class="btn text-white hd-submit-btn">
+                                                        <i class="fa fa-paper-plane me-2"/>
+                                                        Enviar Solicitud
+                                                    </button>
+                                                    <a href="/helpdesk/teams"
+                                                       class="hd-back-link text-decoration-none">
+                                                        Cancelar
+                                                    </a>
+                                                </div>
+
+                                            </form>
+                                        </t>
+
+                                    </div>
+                                    <!-- /hd-form-body -->
+                                </div>
+                                <!-- /card -->
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </t>
         </template>
 
