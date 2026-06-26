@@ -4,6 +4,7 @@ import logging
 from odoo import http, _
 from odoo.http import request
 from odoo.exceptions import ValidationError, AccessError
+import base64
 
 _logger = logging.getLogger(__name__)
 
@@ -188,7 +189,13 @@ class HelpdeskMCController(http.Controller):
 
         # --- Delegar creación al modelo (sin sudo en el controlador) ---
         try:
-            request.env['helpdesk.ticket'].create_portal_mc_ticket(
+            # Fix: Inyectar allowed_company_ids para evitar AccessError en entornos multicompañía
+            user = request.env.user
+            TicketEnv = request.env['helpdesk.ticket']
+            if not user._is_public():
+                TicketEnv = TicketEnv.with_context(allowed_company_ids=user.company_ids.ids)
+
+            ticket = TicketEnv.create_portal_mc_ticket(
                 team_id=team_id,
                 name=name,
                 partner_name=partner_name,
@@ -196,6 +203,19 @@ class HelpdeskMCController(http.Controller):
                 description=description,
                 ticket_type_id=post.get('ticket_type_id'),
             )
+
+            # Adjuntos (feature copiado de helpdesk_equipos)
+            if 'attachment' in request.httprequest.files:
+                attachments = request.httprequest.files.getlist('attachment')
+                for attachment in attachments:
+                    if attachment.filename:
+                        request.env['ir.attachment'].sudo().create({
+                            'name': attachment.filename,
+                            'type': 'binary',
+                            'datas': base64.b64encode(attachment.read()),
+                            'res_model': 'helpdesk.ticket',
+                            'res_id': ticket.id,
+                        })
         except AccessError as e:
             _logger.warning('Portal MC: AccessError al crear ticket: %s', str(e))
             return request.not_found()
