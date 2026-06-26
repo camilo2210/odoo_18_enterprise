@@ -55,10 +55,15 @@ class HelpdeskMCController(http.Controller):
         if not is_public:
             domain.append(('company_id', 'in', user.company_ids.ids))
 
-        # Sin sudo: el ORM aplica ACL + record rules de security/
-        teams = request.env['helpdesk.team'].search(
-            domain, order='company_id, sequence, name'
-        )
+        # Sin sudo: el ORM aplica ACL + record rules.
+        # IMPORTANTE: Para que la regla nativa multi-compañía de Odoo permita ver
+        # los equipos de las otras compañías a las que el usuario tiene acceso,
+        # inyectamos sus company_ids en el contexto (allowed_company_ids).
+        TeamsEnv = request.env['helpdesk.team']
+        if not is_public:
+            TeamsEnv = TeamsEnv.with_context(allowed_company_ids=user.company_ids.ids)
+
+        teams = TeamsEnv.search(domain, order='company_id, sequence, name')
         companies = teams.mapped('company_id')
 
         return request.render(
@@ -94,8 +99,15 @@ class HelpdeskMCController(http.Controller):
         para evitar completamente el enrutador de Odoo que aplica restricciones
         de website_id y causa 404 en entornos multicompañía sin subdominios.
         """
-        # browse() sin sudo: el ORM verificará el acceso vía ACL + record rules
-        team = request.env['helpdesk.team'].browse(team_id)
+        # browse() sin sudo: el ORM verificará el acceso vía ACL + record rules.
+        # Añadimos allowed_company_ids para que el usuario pueda acceder a equipos
+        # de sus otras compañías sin ser bloqueado por la regla multi-compañía nativa.
+        user = request.env.user
+        TeamsEnv = request.env['helpdesk.team']
+        if not user._is_public():
+            TeamsEnv = TeamsEnv.with_context(allowed_company_ids=user.company_ids.ids)
+
+        team = TeamsEnv.browse(team_id)
 
         try:
             # Verificar acceso: si el equipo no es visible (record rule),
