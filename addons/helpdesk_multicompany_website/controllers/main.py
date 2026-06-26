@@ -47,13 +47,13 @@ class HelpdeskMCController(http.Controller):
         """
         user = request.env.user
         is_public = user._is_public()
-        active_company = request.env.company
 
         # Dominio base: las record rules ya filtran por is_published_on_portal=True.
-        # Para usuarios autenticados, añadimos filtro por su compañía activa.
+        # Para usuarios autenticados, mostramos los equipos de TODAS las
+        # compañías a las que tienen acceso (user.company_ids).
         domain = []
         if not is_public:
-            domain.append(('company_id', '=', active_company.id))
+            domain.append(('company_id', 'in', user.company_ids.ids))
 
         # Sin sudo: el ORM aplica ACL + record rules de security/
         teams = request.env['helpdesk.team'].search(
@@ -66,8 +66,8 @@ class HelpdeskMCController(http.Controller):
             {
                 'teams': teams,
                 'companies': companies,
-                'active_company': active_company,
                 'is_public': is_public,
+                'user_companies_count': len(user.company_ids) if not is_public else 0,
             },
         )
 
