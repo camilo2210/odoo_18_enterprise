@@ -29,12 +29,11 @@
                     <div class="alert alert-info mb-0" role="alert"
                          invisible="not is_published_on_portal">
                         <i class="fa fa-info-circle me-2"/>
-                        Este equipo aparecerá en
-                        <strong>/helpdesk/teams</strong>. El formulario de
-                        tickets se abrirá en
-                        <strong>/helpdesk/mc/<t t-esc="id"/></strong>,
-                        ruta propia del módulo que funciona desde
-                        <strong>cualquier sitio web</strong> sin errores 404.
+                        Este equipo aparecerá en <strong>/helpdesk/teams</strong>.
+                        El formulario de tickets se servirá desde
+                        <strong>/helpdesk/mc/[id]</strong>, ruta propia del
+                        módulo accesible desde <strong>cualquier sitio web</strong>
+                        sin errores 404.
                     </div>
                 </xpath>
             </field>
