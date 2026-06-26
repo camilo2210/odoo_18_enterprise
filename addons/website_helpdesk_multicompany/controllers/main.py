@@ -71,3 +71,31 @@ class WebsiteHelpdeskMulticompany(WebsiteHelpdesk):
         )
 
         return response
+
+    @http.route([
+        '/helpdesk/<string:team>',
+        '/helpdesk/<string:team>/submit',
+    ], type='http', auth="public", website=True, sitemap=False)
+    def website_helpdesk_team(self, team, **kwargs):
+        """Override del método nativo para evitar el error 403 (o 404) al acceder
+        a un equipo de otra compañía desde el portal.
+
+        Se reemplaza el convertidor <model("helpdesk.team"):team> por <string:team>
+        para procesar el parámetro manualmente usando sudo() y saltar las
+        reglas de multi-compañía (ir.rule) de helpdesk.team.
+        """
+        if isinstance(team, str):
+            try:
+                # Odoo normalmente pasa el string como "1-nombre-del-equipo" o "1"
+                team_id = int(team.split('-')[0])
+                team_sudo = request.env['helpdesk.team'].sudo().browse(team_id)
+                if not team_sudo.exists():
+                    raise request.not_found()
+                # Reemplazamos el string con el recordset en modo sudo
+                team = team_sudo
+            except ValueError:
+                raise request.not_found()
+                
+        # Llamamos al método original pasando el equipo en sudo().
+        # El método original renderizará el formulario del equipo correctamente.
+        return super().website_helpdesk_team(team, **kwargs)
