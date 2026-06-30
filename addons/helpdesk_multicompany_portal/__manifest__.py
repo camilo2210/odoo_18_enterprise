@@ -23,7 +23,7 @@
     ],
     'assets': {
         'web.assets_frontend': [
-            'helpdesk_multicompany_portal/static/src/css/portal_helpdesk.css',
+            #'helpdesk_multicompany_portal/static/src/css/portal_helpdesk.css',
         ],
     },
     'installable': True,
