@@ -1,40 +1,73 @@
-import werkzeug
-from odoo.exceptions import AccessError
+import logging
 
-    # ... [Tu método website_helpdesk_teams actual se mantiene intacto arriba] ...
+from odoo import http
+from odoo.http import request
+from odoo.addons.website_helpdesk.controllers.main import WebsiteHelpdesk
 
-    @http.route([
-        '/helpdesk/<int:team>',
-        '/helpdesk/<int:team>/submit',
-    ], type='http', auth="public", website=True, sitemap=False)
-    def website_helpdesk_team(self, team, **kwargs):
-        """Override: Intercepta el formulario individual usando <int> en lugar de <model>.
-        Esto evita el 404 nativo, nos permite validar la seguridad manualmente
-        y corregir el contexto multiempresa.
+_logger = logging.getLogger(__name__)
+
+
+class WebsiteHelpdeskMulticompany(WebsiteHelpdesk):
+    """Extiende el controlador de website_helpdesk para mostrar equipos
+    de TODAS las compañías en un solo sitio web /helpdesk.
+
+    Problema original: Odoo filtra los equipos por la compañía activa
+    del website/sesión, mostrando solo los equipos de 1 compañía.
+
+    Solución: Usar sudo() para saltar las reglas ir.rule de
+    multi-compañía y obtener todos los equipos con helpdesk web activo.
+    """
+
+    @http.route()
+    def website_helpdesk_teams(self, **kwargs):
+        """Override: inyecta equipos de todas las compañías en /helpdesk.
+
+        1. Ejecuta la lógica original con super() para mantener
+           toda la preparación nativa del contexto.
+        2. Reemplaza el recordset ``teams`` con uno que incluya
+           equipos de todas las compañías vía sudo().
         """
-        # 1. BYPASS DEL 404: Buscamos el equipo ignorando el contexto del website
-        team_sudo = request.env['helpdesk.team'].sudo().browse(team)
-        
-        if not team_sudo.exists():
-            raise request.not_found()
+        response = super().website_helpdesk_teams(**kwargs)
 
-        # 2. VALIDACIÓN ESTRICTA DE SEGURIDAD (El 403 manual)
-        user = request.env.user
-        
-        # Si es un usuario portal logueado (no el public_user)
-        if user.id != request.env.ref('base.public_user').id:
-            # Verificamos si la compañía del equipo está en las compañías permitidas del usuario
-            if team_sudo.company_id and team_sudo.company_id.id not in user.company_ids.ids:
-                # Lanzamos el Error 403 estándar de Odoo (igual al de tu Imagen 2)
-                raise AccessError(
-                    "Estos registros están restringidos.\n"
-                    f"No tienes acceso a los equipos de soporte de la empresa: {team_sudo.company_id.name}."
-                )
+        # Solo modificar si estamos en la página de listado
+        # y el contexto tiene la variable 'teams'
+        if not hasattr(response, 'qcontext') or not response.qcontext:
+            return response
 
-        # 3. CORRECCIÓN DE CONTEXTO: Inyectamos la compañía correcta en el entorno.
-        # Esto es vital para que al renderizar el formulario (y al enviar el ticket), 
-        # Odoo busque los Tipos de Ticket y cree el registro en la Compañía 2, no en la 1.
-        team_with_context = team_sudo.with_user(user).with_company(team_sudo.company_id)
+        if 'teams' not in response.qcontext:
+            return response
 
-        # 4. Delegamos al controlador nativo pasando el registro con el contexto parcheado
-        return super().website_helpdesk_team(team=team_with_context, **kwargs)
+        # Detectar el campo booleano correcto para filtrar equipos
+        # con helpdesk web activo (varía entre versiones de Odoo 18)
+        HelpdeskTeam = request.env['helpdesk.team'].sudo()
+        team_fields = HelpdeskTeam._fields
+
+        if 'use_website_helpdesk_form' in team_fields:
+            domain = [('use_website_helpdesk_form', '=', True)]
+        elif 'use_website_helpdesk' in team_fields:
+            domain = [('use_website_helpdesk', '=', True)]
+        else:
+            # Fallback: traer todos los equipos si no se encuentra el campo
+            _logger.warning(
+                'website_helpdesk_multicompany: No se encontró el campo '
+                'use_website_helpdesk_form ni use_website_helpdesk. '
+                'Se mostrarán todos los equipos.'
+            )
+            domain = []
+
+        # Buscar equipos de TODAS las compañías, ordenados por compañía
+        all_teams = HelpdeskTeam.search(
+            domain,
+            order='company_id, sequence, id',
+        )
+
+        if all_teams:
+            response.qcontext['teams'] = all_teams
+
+        _logger.info(
+            'website_helpdesk_multicompany: Mostrando %d equipos de %d compañías',
+            len(all_teams),
+            len(all_teams.mapped('company_id')),
+        )
+
+        return response
