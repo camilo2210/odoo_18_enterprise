@@ -1,0 +1,29 @@
+/* helpdesk_multicompany_portal — estilos del portal de selección de equipos */
+
+.o_helpdesk_team_card {
+    transition: box-shadow 0.18s ease, transform 0.18s ease;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.o_helpdesk_team_card:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1) !important;
+    transform: translateY(-2px);
+}
+
+.o_helpdesk_team_avatar {
+    width: 48px;
+    height: 48px;
+    object-fit: cover;
+}
+
+.o_helpdesk_team_icon_placeholder {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+}
+
+.o_helpdesk_company_title {
+    font-size: 1.1rem;
+    color: #495057;
+    font-weight: 600;
+}
