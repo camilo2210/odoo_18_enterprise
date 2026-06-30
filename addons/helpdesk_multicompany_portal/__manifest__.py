@@ -13,7 +13,7 @@
     'license': 'LGPL-3',
     'depends': [
         'helpdesk',
-        'helpdesk_website',
+        'website_helpdesk',
         'website',
         'portal',
     ],
