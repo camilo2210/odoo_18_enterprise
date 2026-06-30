@@ -1,129 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <!--
-        Template: portal_helpdesk_multicompany_index
-        Hereda de: portal.portal_layout  (template raíz del portal, Odoo 18 core)
-        primary="True" → crea un template nuevo, no modifica el padre.
-
-        DECISIONES DE DISEÑO:
-        - NO hereda de ningún template de helpdesk_website para evitar cadenas
-          de herencia inestables en Odoo 18.
-        - El botón "Crear solicitud" apunta a la ruta NATIVA de cada equipo:
-          /helpdesk/<team_id>/new-ticket — el formulario estándar asigna
-          automáticamente company_id del equipo al ticket.
-        - Los campos team.description e team.image_128 existen en helpdesk.team
-          nativo de Odoo 18 Enterprise.
-    -->
     <template
         id="portal_helpdesk_multicompany_index"
-        name="Helpdesk Multicompany — Selección de Equipos"
-        inherit_id="portal.portal_layout"
-        primary="True">
+        name="Helpdesk Multicompany — Selección de Equipos">
 
-        <xpath expr="//div[@id='wrap']" position="replace">
-            <div id="wrap" class="o_portal_wrap">
-                <div class="container py-4">
+        <t t-call="portal.portal_layout">
+            <t t-set="page_name" t-value="'helpdesk'"/>
 
-                    <!-- Cabecera -->
-                    <div class="row mb-4">
+            <div class="container py-4">
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <h2 class="mb-1">Centro de Ayuda</h2>
+                        <p class="text-muted mb-0">
+                            Selecciona el equipo de soporte al que deseas enviar tu solicitud.
+                        </p>
+                    </div>
+                </div>
+
+                <t t-if="not teams">
+                    <div class="row">
                         <div class="col-12">
-                            <h1 class="o_page_header mt-3">
-                                Centro de Ayuda
-                            </h1>
-                            <p class="text-muted">
-                                Selecciona el equipo de soporte al que deseas enviar tu solicitud.
-                            </p>
+                            <div class="alert alert-info" role="alert">
+                                No hay equipos de soporte disponibles en este momento.
+                            </div>
                         </div>
                     </div>
+                </t>
 
-                    <!-- Estado vacío -->
-                    <t t-if="not teams">
-                        <div class="row">
+                <t t-if="teams">
+                    <t t-foreach="teams_by_company.items()" t-as="company_entry">
+                        <t t-set="company" t-value="company_entry[0]"/>
+                        <t t-set="company_teams" t-value="company_entry[1]"/>
+
+                        <div class="row mb-2">
                             <div class="col-12">
-                                <div class="alert alert-info" role="alert">
-                                    <i class="fa fa-info-circle me-2"/>
-                                    No hay equipos de soporte disponibles en este momento.
-                                    Por favor, contacta con el administrador.
-                                </div>
+                                <h5 class="border-bottom pb-2 mb-3">
+                                    <t t-esc="company.name"/>
+                                </h5>
                             </div>
                         </div>
-                    </t>
 
-                    <!-- Equipos agrupados por compañía -->
-                    <t t-if="teams">
-                        <t t-foreach="teams_by_company.items()" t-as="company_entry">
-                            <t t-set="company" t-value="company_entry[0]"/>
-                            <t t-set="company_teams" t-value="company_entry[1]"/>
+                        <div class="row mb-4">
+                            <t t-foreach="company_teams" t-as="team">
+                                <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                                    <div class="card h-100">
+                                        <div class="card-body d-flex flex-column">
+                                            <h6 class="card-title">
+                                                <t t-esc="team.name"/>
+                                            </h6>
 
-                            <div class="row mb-2">
-                                <div class="col-12">
-                                    <h4 class="o_helpdesk_company_title border-bottom pb-2 mb-3">
-                                        <i class="fa fa-building-o me-2 text-muted"/>
-                                        <t t-esc="company.name"/>
-                                    </h4>
-                                </div>
-                            </div>
-
-                            <div class="row mb-4">
-                                <t t-foreach="company_teams" t-as="team">
-                                    <div class="col-12 col-sm-6 col-lg-4 mb-3">
-                                        <div class="card h-100 o_helpdesk_team_card shadow-sm">
-                                            <div class="card-body d-flex flex-column">
-
-                                                <div class="d-flex align-items-center mb-3">
-                                                    <t t-if="team.image_128">
-                                                        <img
-                                                            t-att-src="'/web/image/helpdesk.team/' + str(team.id) + '/image_128'"
-                                                            t-att-alt="team.name"
-                                                            class="rounded me-3 o_helpdesk_team_avatar"
-                                                            width="48"
-                                                            height="48"
-                                                            loading="lazy"
-                                                        />
-                                                    </t>
-                                                    <t t-else="">
-                                                        <div class="o_helpdesk_team_icon_placeholder me-3 rounded d-flex align-items-center justify-content-center bg-light">
-                                                            <i class="fa fa-headphones fa-lg text-muted"/>
-                                                        </div>
-                                                    </t>
-                                                    <h5 class="card-title mb-0">
-                                                        <t t-esc="team.name"/>
-                                                    </h5>
-                                                </div>
-
+                                            <p class="card-text text-muted small flex-grow-1">
                                                 <t t-if="team.description">
-                                                    <p class="card-text text-muted small flex-grow-1">
-                                                        <t t-esc="team.description"/>
-                                                    </p>
+                                                    <t t-esc="team.description"/>
                                                 </t>
                                                 <t t-else="">
-                                                    <p class="card-text text-muted small flex-grow-1">
-                                                        Equipo de soporte de <t t-esc="company.name"/>
-                                                    </p>
+                                                    Equipo de soporte de <t t-esc="company.name"/>
                                                 </t>
+                                            </p>
 
-                                                <div class="mt-auto pt-3">
-                                                    <a
-                                                        t-att-href="'/helpdesk/' + str(team.id) + '/new-ticket'"
-                                                        class="btn btn-primary btn-sm w-100"
-                                                    >
-                                                        <i class="fa fa-plus-circle me-1"/>
-                                                        Crear solicitud
-                                                    </a>
-                                                </div>
-
+                                            <div class="mt-auto pt-3">
+                                                <a
+                                                    t-att-href="'/helpdesk/' + str(team.id) + '/new-ticket'"
+                                                    class="btn btn-primary btn-sm w-100"
+                                                >
+                                                    Crear solicitud
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
-                                </t>
-                            </div>
-
-                        </t>
+                                </div>
+                            </t>
+                        </div>
                     </t>
-
-                </div>
+                </t>
             </div>
-        </xpath>
-
+        </t>
     </template>
 </odoo>
