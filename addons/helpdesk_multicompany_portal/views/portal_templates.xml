@@ -1,79 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template
-        id="portal_helpdesk_multicompany_index"
-        name="Helpdesk Multicompany — Selección de Equipos">
+    <record id="portal_helpdesk_multicompany_index" model="ir.ui.view">
+        <field name="name">helpdesk.multicompany.portal.index</field>
+        <field name="type">qweb</field>
+        <field name="key">helpdesk_multicompany_portal.portal_helpdesk_multicompany_index</field>
+        <field name="arch" type="xml">
+            <t t-name="helpdesk_multicompany_portal.portal_helpdesk_multicompany_index">
+                <t t-call="portal.portal_layout">
+                    <t t-set="page_name" t-value="'helpdesk'"/>
 
-        <t t-call="portal.portal_layout">
-            <t t-set="page_name" t-value="'helpdesk'"/>
-
-            <div class="container py-4">
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <h2 class="mb-1">Centro de Ayuda</h2>
-                        <p class="text-muted mb-0">
-                            Selecciona el equipo de soporte al que deseas enviar tu solicitud.
-                        </p>
-                    </div>
-                </div>
-
-                <t t-if="not teams">
-                    <div class="row">
-                        <div class="col-12">
-                            <div class="alert alert-info" role="alert">
-                                No hay equipos de soporte disponibles en este momento.
-                            </div>
-                        </div>
-                    </div>
-                </t>
-
-                <t t-if="teams">
-                    <t t-foreach="teams_by_company.items()" t-as="company_entry">
-                        <t t-set="company" t-value="company_entry[0]"/>
-                        <t t-set="company_teams" t-value="company_entry[1]"/>
-
-                        <div class="row mb-2">
-                            <div class="col-12">
-                                <h5 class="border-bottom pb-2 mb-3">
-                                    <t t-esc="company.name"/>
-                                </h5>
-                            </div>
-                        </div>
+                    <div class="container py-4">
 
                         <div class="row mb-4">
-                            <t t-foreach="company_teams" t-as="team">
-                                <div class="col-12 col-sm-6 col-lg-4 mb-3">
-                                    <div class="card h-100">
-                                        <div class="card-body d-flex flex-column">
-                                            <h6 class="card-title">
-                                                <t t-esc="team.name"/>
-                                            </h6>
+                            <div class="col-12">
+                                <h2 class="mb-1">Centro de Ayuda</h2>
+                                <p class="text-muted mb-0">
+                                    Selecciona el equipo de soporte al que deseas enviar tu solicitud.
+                                </p>
+                            </div>
+                        </div>
 
-                                            <p class="card-text text-muted small flex-grow-1">
-                                                <t t-if="team.description">
-                                                    <t t-esc="team.description"/>
-                                                </t>
-                                                <t t-else="">
-                                                    Equipo de soporte de <t t-esc="company.name"/>
-                                                </t>
-                                            </p>
-
-                                            <div class="mt-auto pt-3">
-                                                <a
-                                                    t-att-href="'/helpdesk/' + str(team.id) + '/new-ticket'"
-                                                    class="btn btn-primary btn-sm w-100"
-                                                >
-                                                    Crear solicitud
-                                                </a>
-                                            </div>
-                                        </div>
+                        <t t-if="not teams">
+                            <div class="row">
+                                <div class="col-12">
+                                    <div class="alert alert-info d-flex align-items-center gap-2" role="alert">
+                                        <i class="fa fa-info-circle"/>
+                                        <span>
+                                            No hay equipos de soporte disponibles.
+                                            Asegúrate de que los equipos tengan activado
+                                            el <strong>Formulario del sitio web</strong>
+                                            en su configuración.
+                                        </span>
                                     </div>
                                 </div>
+                            </div>
+                        </t>
+
+                        <t t-if="teams">
+                            <t t-foreach="teams_by_company.items()" t-as="company_entry">
+                                <t t-set="company"       t-value="company_entry[0]"/>
+                                <t t-set="company_teams" t-value="company_entry[1]"/>
+
+                                <div class="row mb-2">
+                                    <div class="col-12">
+                                        <h5 class="o_helpdesk_company_title border-bottom pb-2 mb-3">
+                                            <i class="fa fa-building-o me-2 text-muted"/>
+                                            <t t-esc="company.name"/>
+                                        </h5>
+                                    </div>
+                                </div>
+
+                                <div class="row mb-4">
+                                    <t t-foreach="company_teams" t-as="team">
+                                        <div class="col-12 col-sm-6 col-lg-4 mb-3">
+                                            <div class="card h-100 o_helpdesk_team_card">
+                                                <div class="card-body d-flex flex-column">
+
+                                                    <div class="d-flex align-items-center mb-3">
+                                                        <t t-if="team.image_128">
+                                                            <img
+                                                                t-att-src="'/web/image/helpdesk.team/' + str(team.id) + '/image_128'"
+                                                                t-att-alt="team.name"
+                                                                class="rounded me-3 o_helpdesk_team_avatar"
+                                                                width="48"
+                                                                height="48"
+                                                                loading="lazy"
+                                                            />
+                                                        </t>
+                                                        <t t-else="">
+                                                            <div class="o_helpdesk_team_icon_placeholder rounded me-3 d-flex align-items-center justify-content-center bg-light">
+                                                                <i class="fa fa-headphones fa-lg text-muted"/>
+                                                            </div>
+                                                        </t>
+                                                        <h6 class="card-title mb-0 fw-semibold">
+                                                            <t t-esc="team.name"/>
+                                                        </h6>
+                                                    </div>
+
+                                                    <p class="card-text text-muted small flex-grow-1">
+                                                        <t t-if="team.description">
+                                                            <t t-esc="team.description"/>
+                                                        </t>
+                                                        <t t-else="">
+                                                            Equipo de soporte de <t t-esc="company.name"/>
+                                                        </t>
+                                                    </p>
+
+                                                    <div class="mt-auto pt-3">
+                                                        <a
+                                                            t-att-href="'/helpdesk/' + str(team.id) + '/new-ticket'"
+                                                            class="btn btn-primary btn-sm w-100"
+                                                        >
+                                                            <i class="fa fa-plus-circle me-1"/>
+                                                            Crear solicitud
+                                                        </a>
+                                                    </div>
+
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </t>
+                                </div>
+
                             </t>
-                        </div>
-                    </t>
+                        </t>
+
+                    </div>
                 </t>
-            </div>
-        </t>
-    </template>
+            </t>
+        </field>
+    </record>
 </odoo>
