@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Página mostrada al entrar a un equipo de otra compañía. -->
+    <template id="team_access_denied" name="Helpdesk: acceso restringido">
+        <t t-call="website.layout">
+            <div id="wrap" class="oe_structure oe_empty">
+                <div class="container py-5">
+                    <div class="row justify-content-center">
+                        <div class="col-lg-7">
+                            <div class="card border-0 shadow-sm text-center p-5">
+                                <div class="mb-4">
+                                    <span class="d-inline-flex align-items-center justify-content-center rounded-circle text-bg-danger" style="width:72px;height:72px;">
+                                        <i class="fa fa-lock fa-2x" role="presentation"/>
+                                    </span>
+                                </div>
+                                <h1 class="fw-bolder mb-3">Acceso restringido</h1>
+                                <p class="lead text-muted mb-1">
+                                    No tienes permisos para acceder a este equipo de soporte
+                                    porque pertenece a otra compañía.
+                                </p>
+                                <p class="text-muted mb-4" t-if="team_name">
+                                    Equipo solicitado: <strong t-esc="team_name"/>
+                                </p>
+                                <div>
+                                    <a href="/helpdesk" class="btn btn-primary btn-lg px-4">
+                                        <i class="fa fa-arrow-left me-2" role="presentation"/>
+                                        Ver los equipos disponibles
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>

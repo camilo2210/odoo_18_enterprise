@@ -1,0 +1,53 @@
+<section class="oe_container">
+    <div style="background-color: #757575; color: white; padding: 1rem; margin: 0 -20px 2px -20px; display: flex; align-items: center; text-align: center; gap: 1rem;">
+        <img src="icon.png" alt="Ícono del módulo" style="width: 60px; height: 60px; object-fit: contain;">
+        <h1 style="color: white; margin: 0;">Website Helpdesk Multi-Company</h1>
+    </div>
+
+    <div style="padding: 0 20px;">
+        <p style="font-size: 0.9em; color: #666;"><strong>Versión 18.0.1.0.0</strong></p>
+
+        <h2>Descripción General</h2>
+        <p>
+            Publica en <code>/helpdesk</code> los equipos de soporte de
+            <strong>todas las compañías</strong> de la base de datos, en un solo sitio web.
+            El acceso a cada equipo se restringe según las compañías del usuario.
+        </p>
+
+        <hr>
+
+        <h2>Comportamiento</h2>
+        <ul>
+            <li>
+                <code>/helpdesk</code> muestra la lista de equipos con formulario web
+                activo de todas las compañías (usando <code>sudo</code> para saltar la
+                regla <em>Team: multi-company</em>).
+            </li>
+            <li>
+                Al entrar a un equipo se valida que su <code>company_id</code> esté en
+                <code>res.users.company_ids</code>. Si lo está, se amplían las
+                <code>allowed_company_ids</code> del contexto para que la regla de
+                multi-compañía deje leer el equipo y sus campos SEO sin <code>sudo</code>.
+            </li>
+            <li>
+                Si el equipo pertenece a otra compañía, se muestra la página de
+                <strong>acceso restringido</strong> en lugar de un error.
+            </li>
+        </ul>
+
+        <hr>
+
+        <h2>Alcance</h2>
+        <p>
+            Solo sobrescribe el controlador de <code>website_helpdesk</code> y agrega
+            una plantilla de acceso restringido. No modifica modelos ni datos.
+        </p>
+
+        <hr>
+
+        <h2>Dependencias</h2>
+        <ul>
+            <li><code>website_helpdesk</code></li>
+        </ul>
+    </div>
+</section>
